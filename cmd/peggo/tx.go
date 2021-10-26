@@ -1,10 +1,16 @@
 package peggo
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
+	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
+	"github.com/umee-network/peggo/cmd/peggo/client"
+	"github.com/umee-network/peggo/orchestrator/cosmos"
+	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 func getTxCmd() *cobra.Command {
@@ -44,72 +50,63 @@ func getRegisterEthKeyCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Cosmos keyring")
 			}
 
-			// ethKeyFromAddress, _, personalSignFn, err := initEthereumAccountsManager(
-			// 	0,
-			// 	ethKeystoreDir,
-			// 	ethKeyFrom,
-			// 	ethPassphrase,
-			// 	ethPrivKey,
-			// 	ethUseLedger,
-			// )
-			// if err != nil {
-			// 	log.WithError(err).Fatalln("failed to init Ethereum account")
-			// }
+			ethKeyFromAddress, _, personalSignFn, err := initEthereumAccountsManager(0, konfig)
+			if err != nil {
+				return err
+			}
 
-			// log.Infoln("Using Cosmos ValAddress", valAddress.String())
-			// log.Infoln("Using Ethereum address", ethKeyFromAddress.String())
+			fmt.Fprintf(os.Stderr, "Using Cosmos validator address: %s", valAddress)
+			fmt.Fprintf(os.Stderr, "Using Ethereum address: %s", ethKeyFromAddress)
 
-			// actionConfirmed := *alwaysAutoConfirm || stdinConfirm("Confirm UpdatePeggyOrchestratorAddresses transaction? [y/N]: ")
-			// if !actionConfirmed {
-			// 	return
-			// }
+			autoConfirm := konfig.Bool(flagAutoConfirm)
+			actionConfirmed := autoConfirm || stdinConfirm("Confirm UpdatePeggyOrchestratorAddresses transaction? [y/N]: ")
+			if !actionConfirmed {
+				return nil
+			}
 
-			// clientCtx, err := client.NewClientContext(*cosmosChainID, valAddress.String(), cosmosKeyring)
-			// if err != nil {
-			// 	log.WithError(err).Fatalln("failed to initialize cosmos client context")
-			// }
-			// clientCtx = clientCtx.WithNodeURI(*tendermintRPC)
+			cosmosChainID := konfig.String(flagCosmosChainID)
 
-			// tmRPC, err := rpchttp.New(*tendermintRPC, "/websocket")
-			// if err != nil {
-			// 	log.WithError(err)
-			// }
+			clientCtx, err := client.NewClientContext(cosmosChainID, valAddress.String(), cosmosKeyring)
+			if err != nil {
+				return err
+			}
 
-			// clientCtx = clientCtx.WithClient(tmRPC)
-			// daemonClient, err := client.NewCosmosClient(clientCtx, *cosmosGRPC, client.OptionGasPrices(*cosmosGasPrices))
-			// if err != nil {
-			// 	log.WithError(err).WithFields(log.Fields{
-			// 		"endpoint": *cosmosGRPC,
-			// 	}).Fatalln("failed to connect to Cosmos daemon")
-			// }
+			tmRPCEndpoint := konfig.String(flagTendermintRPC)
+			cosmosGRPC := konfig.String(flagCosmosGRPC)
+			cosmosGasPrices := konfig.String(flagCosmosGasPrices)
 
-			// log.Infoln("Waiting for injectived GRPC")
-			// time.Sleep(1 * time.Second)
+			tmRPC, err := rpchttp.New(tmRPCEndpoint, "/websocket")
+			if err != nil {
+				return fmt.Errorf("failed to create Tendermint RPC client: %w", err)
+			}
 
-			// daemonWaitCtx, cancelWait := context.WithTimeout(context.Background(), time.Minute)
-			// grpcConn := daemonClient.QueryClient()
-			// waitForService(daemonWaitCtx, grpcConn)
-			// peggyQuerier := types.NewQueryClient(grpcConn)
-			// peggyBroadcaster := cosmos.NewPeggyBroadcastClient(
-			// 	peggyQuerier,
-			// 	daemonClient,
-			// 	nil,
-			// 	personalSignFn,
-			// )
-			// cancelWait()
+			clientCtx = clientCtx.WithClient(tmRPC).WithNodeURI(tmRPCEndpoint)
 
-			// broadcastCtx, cancelFn := context.WithTimeout(context.Background(), 15*time.Second)
-			// defer cancelFn()
+			daemonClient, err := client.NewCosmosClient(clientCtx, cosmosGRPC, client.OptionGasPrices(cosmosGasPrices))
+			if err != nil {
+				return err
+			}
 
-			// if err = peggyBroadcaster.UpdatePeggyOrchestratorAddresses(broadcastCtx, ethKeyFromAddress, valAddress); err != nil {
-			// 	log.WithError(err).Errorln("failed to broadcast Tx")
-			// 	time.Sleep(time.Second)
-			// 	return
-			// }
+			fmt.Fprint(os.Stderr, "Waiting for cosmos gRPC service...")
+			time.Sleep(time.Second)
 
-			// log.Infof("Registered Ethereum address %s for validator address %s",
-			// 	ethKeyFromAddress, valAddress.String())
+			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+			defer cancel()
 
+			grpcConn := daemonClient.QueryClient()
+			waitForService(ctx, grpcConn)
+
+			peggyQuerier := peggytypes.NewQueryClient(grpcConn)
+			peggyBroadcaster := cosmos.NewPeggyBroadcastClient(peggyQuerier, daemonClient, nil, personalSignFn)
+
+			ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
+			defer cancel()
+
+			if err = peggyBroadcaster.UpdatePeggyOrchestratorAddresses(ctx, ethKeyFromAddress, valAddress); err != nil {
+				return fmt.Errorf("failed to broadcast transaction: %w", err)
+			}
+
+			fmt.Fprintf(os.Stderr, "Registered Ethereum Address %s for validator %s", ethKeyFromAddress, valAddress)
 			return nil
 		},
 	}

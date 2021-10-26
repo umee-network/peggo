@@ -2,49 +2,53 @@ package peggo
 
 import (
 	"bytes"
+	"crypto/rand"
 	"fmt"
 	"io"
+	"math/big"
 	"os"
 	"path/filepath"
+	"strings"
+	"syscall"
 
+	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	sdkcryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/accounts/usbwallet"
+	ethcmn "github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/knadh/koanf"
 	"github.com/pkg/errors"
-	// cosmcrypto "github.com/cosmos/cosmos-sdk/crypto"
-	// "github.com/cosmos/cosmos-sdk/crypto/keyring"
-	// "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	// cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	// sdk "github.com/cosmos/cosmos-sdk/types"
-	// "github.com/ethereum/go-ethereum/accounts"
-	// "github.com/ethereum/go-ethereum/accounts/abi/bind"
-	// "github.com/ethereum/go-ethereum/accounts/usbwallet"
-	// "github.com/ethereum/go-ethereum/common"
-	// ethtypes "github.com/ethereum/go-ethereum/core/types"
-	// "github.com/ethereum/go-ethereum/crypto"
-	// ethcrypto "github.com/ethereum/go-ethereum/crypto"
-	// "github.com/pkg/errors"
-	// "golang.org/x/crypto/ssh/terminal"
-	// "github.com/umee-network/peggo/orchestrator/ethereum/keystore"
+	"github.com/umee-network/peggo/orchestrator/ethereum/keystore"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 const defaultKeyringKeyName = "validator"
 
 var (
 	emptyCosmosAddress = sdk.AccAddress{}
-	emptyEthAddress    = common.Address{}
+	emptyEthAddress    = ethcmn.Address{}
 )
 
 func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, error) {
+	cosmosFrom := konfig.String(flagCosmosFrom)
+	cosmosPK := konfig.String(flagCosmosPK)
+	cosmosPassphrase := konfig.String(flagCosmosFromPassphrase)
+	cosmosKeyringDir := konfig.String(flagCosmosKeyringDir)
+	cosmosUseLedger := konfig.Bool(flagCosmosUseLedger)
+
 	switch {
-	case len(konfig.String(flagCosmosPK)) > 0:
-		if konfig.Bool(flagCosmosUseLedger) {
+	case len(cosmosPK) > 0:
+		if cosmosUseLedger {
 			return emptyCosmosAddress, nil, errors.New("cannot use ledger with raw private key")
 		}
 
-		pkBz, err := hexToBytes(konfig.String(flagCosmosPK))
+		pkBz, err := hexToBytes(cosmosPK)
 		if err != nil {
 			return emptyCosmosAddress, nil, fmt.Errorf("failed to hex decode cosmos private key: %w", err)
 		}
@@ -55,11 +59,10 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 
 		addressFromPk := sdk.AccAddress(cosmosAccPk.PubKey().Address().Bytes())
 
-		var keyName string
-
 		// Check that if cosmos 'From' specified separately, it must match the
 		// provided privkey.
-		cosmosFrom := konfig.String(flagCosmosFrom)
+		var keyName string
+
 		if len(cosmosFrom) > 0 {
 			addressFrom, err := sdk.AccAddressFromBech32(cosmosFrom)
 			if err == nil {
@@ -80,49 +83,57 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 		}
 
 		// wrap a PK into a Keyring
-		kb, err := KeyringForPrivKey(keyName, cosmosAccPk)
+		kb, err := keyringForPrivKey(keyName, cosmosAccPk)
 		return addressFromPk, kb, err
 
-	case len(*cosmosKeyFrom) > 0:
+	case len(cosmosFrom) > 0:
 		var fromIsAddress bool
-		addressFrom, err := cosmtypes.AccAddressFromBech32(*cosmosKeyFrom)
+		addressFrom, err := sdk.AccAddressFromBech32(cosmosFrom)
 		if err == nil {
 			fromIsAddress = true
 		}
 
-		var passReader io.Reader = os.Stdin
-		if len(*cosmosKeyPassphrase) > 0 {
-			passReader = newPassReader(*cosmosKeyPassphrase)
+		var passReader io.Reader
+		if len(cosmosPassphrase) > 0 {
+			passReader = newPassReader(cosmosPassphrase)
+		} else {
+			passReader = os.Stdin
 		}
 
 		var absoluteKeyringDir string
-		if filepath.IsAbs(*cosmosKeyringDir) {
-			absoluteKeyringDir = *cosmosKeyringDir
+		if filepath.IsAbs(cosmosKeyringDir) {
+			absoluteKeyringDir = cosmosKeyringDir
 		} else {
-			absoluteKeyringDir, _ = filepath.Abs(*cosmosKeyringDir)
+			absoluteKeyringDir, err = filepath.Abs(cosmosKeyringDir)
+			if err != nil {
+				return emptyCosmosAddress, nil, err
+			}
 		}
 
 		kb, err := keyring.New(
-			*cosmosKeyringAppName,
-			*cosmosKeyringBackend,
+			konfig.String(flagCosmosKeyringApp),
+			konfig.String(flagCosmosKeyring),
 			absoluteKeyringDir,
 			passReader,
 		)
 		if err != nil {
-			err = errors.Wrap(err, "failed to init keyring")
-			return emptyCosmosAddress, nil, err
+			return emptyCosmosAddress, nil, fmt.Errorf("failed to create keyring: %w", err)
 		}
 
 		var keyInfo keyring.Info
 		if fromIsAddress {
 			if keyInfo, err = kb.KeyByAddress(addressFrom); err != nil {
-				err = errors.Wrapf(err, "couldn't find an entry for the key %s in keybase", addressFrom.String())
-				return emptyCosmosAddress, nil, err
+				return emptyCosmosAddress, nil, fmt.Errorf(
+					"failed to find an entry for the key %s in the keyring: %w",
+					addressFrom.String(), err,
+				)
 			}
 		} else {
-			if keyInfo, err = kb.Key(*cosmosKeyFrom); err != nil {
-				err = errors.Wrapf(err, "could not find an entry for the key '%s' in keybase", *cosmosKeyFrom)
-				return emptyCosmosAddress, nil, err
+			if keyInfo, err = kb.Key(cosmosFrom); err != nil {
+				return emptyCosmosAddress, nil, fmt.Errorf(
+					"failed to find an entry for the key %s in the keyring: %w",
+					cosmosFrom, err,
+				)
 			}
 		}
 
@@ -130,265 +141,253 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 		case keyring.TypeLocal:
 			// kb has a key and it's totally usable
 			return keyInfo.GetAddress(), kb, nil
+
 		case keyring.TypeLedger:
-			// the kb stores references to ledger keys, so we must explicitly
-			// check that. kb doesn't know how to scan HD keys - they must be added manually before
-			if *cosmosUseLedger {
+			// The keyring stores references to ledger keys, so we must explicitly
+			// check that. The keyring doesn't know how to scan HD keys - they must be
+			// added manually before.
+			if cosmosUseLedger {
 				return keyInfo.GetAddress(), kb, nil
 			}
-			err := errors.Errorf("'%s' key is a ledger reference, enable ledger option", keyInfo.GetName())
-			return emptyCosmosAddress, nil, err
+
+			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key is a ledger reference, enable ledger option", keyInfo.GetName())
+
 		case keyring.TypeOffline:
-			err := errors.Errorf("'%s' key is an offline key, not supported yet", keyInfo.GetName())
-			return emptyCosmosAddress, nil, err
+			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key is an offline key, not supported yet", keyInfo.GetName())
+
 		case keyring.TypeMulti:
-			err := errors.Errorf("'%s' key is an multisig key, not supported yet", keyInfo.GetName())
-			return emptyCosmosAddress, nil, err
+			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key is an multisig key, not supported yet", keyInfo.GetName())
+
 		default:
-			err := errors.Errorf("'%s' key  has unsupported type: %s", keyInfo.GetName(), keyType)
-			return emptyCosmosAddress, nil, err
+			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key  has unsupported type: %s", keyInfo.GetName(), keyType)
 		}
 
 	default:
-		err := errors.New("insufficient cosmos key details provided")
-		return emptyCosmosAddress, nil, err
+		return emptyCosmosAddress, nil, errors.New("insufficient cosmos key details provided")
 	}
 }
 
-// func initEthereumAccountsManager() (
-// 	ethKeyFromAddress common.Address,
-// 	signerFn bind.SignerFn,
-// 	personalSignFn keystore.PersonalSignFn,
-// 	err error,
-// ) {
-// 	switch {
-// 	case *ethUseLedger:
-// 		if ethKeyFrom == nil {
-// 			err := errors.New("cannot use Ledger without from address specified")
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+func initEthereumAccountsManager(ethChainID uint64, konfig *koanf.Koanf) (ethcmn.Address, bind.SignerFn, keystore.PersonalSignFn, error) {
+	var (
+		signerFn          bind.SignerFn
+		ethKeyFromAddress ethcmn.Address
+		personalSignFn    keystore.PersonalSignFn
+	)
 
-// 		ethKeyFromAddress = common.HexToAddress(*ethKeyFrom)
-// 		if ethKeyFromAddress == (common.Address{}) {
-// 			err = errors.Wrap(err, "failed to parse Ethereum from address")
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+	ethUseLedger := konfig.Bool(flagEthUseLedger)
+	ethKeyFrom := konfig.String(flagEthFrom)
+	ethPrivKey := konfig.String(flagEthPK)
+	ethKeystoreDir := konfig.String(flagEthKeystoreDir)
+	ethPassphrase := konfig.String(flagEthPassphrase)
 
-// 		ledgerBackend, err := usbwallet.NewLedgerHub()
-// 		if err != nil {
-// 			err = errors.Wrap(err, "failed to connect with Ethereum app on Ledger device")
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+	switch {
+	case ethUseLedger:
+		if len(ethKeyFrom) == 0 {
+			return emptyEthAddress, nil, nil, errors.New("cannot use Ledger without from address specified")
+		}
 
-// 		signerFn = func(from common.Address, tx *ethtypes.Transaction) (*ethtypes.Transaction, error) {
-// 			acc := accounts.Account{
-// 				Address: from,
-// 			}
+		ethKeyFromAddress = ethcmn.HexToAddress(ethKeyFrom)
+		if ethKeyFromAddress == (ethcmn.Address{}) {
+			return emptyEthAddress, nil, nil, fmt.Errorf("failed to parse Ethereum from address %s", ethKeyFrom)
+		}
 
-// 			wallets := ledgerBackend.Wallets()
-// 			for _, w := range wallets {
-// 				if err := w.Open(""); err != nil {
-// 					err = errors.Wrap(err, "failed to connect to wallet on Ledger device")
-// 					return nil, err
-// 				}
+		ledgerBackend, err := usbwallet.NewLedgerHub()
+		if err != nil {
+			return emptyEthAddress, nil, nil, fmt.Errorf("failed to connect with Ethereum app on Ledger device")
+		}
 
-// 				if !w.Contains(acc) {
-// 					if err := w.Close(); err != nil {
-// 						err = errors.Wrap(err, "failed to disconnect the wallet on Ledger device")
-// 						return nil, err
-// 					}
+		signerFn = func(from ethcmn.Address, tx *ethtypes.Transaction) (*ethtypes.Transaction, error) {
+			acc := accounts.Account{
+				Address: from,
+			}
 
-// 					continue
-// 				}
+			wallets := ledgerBackend.Wallets()
+			for _, w := range wallets {
+				if err := w.Open(""); err != nil {
+					return nil, fmt.Errorf("failed to connect to wallet on Ledger device: %w", err)
+				}
 
-// 				tx, err = w.SignTx(acc, tx, new(big.Int).SetUint64(ethChainID))
-// 				_ = w.Close()
-// 				return tx, err
-// 			}
+				if !w.Contains(acc) {
+					if err := w.Close(); err != nil {
+						return nil, fmt.Errorf("failedt to disconnect the wallet on Ledger device: %w", err)
+					}
 
-// 			return nil, errors.Errorf("account %s not found on Ledger", from.String())
-// 		}
+					continue
+				}
 
-// 		personalSignFn = func(from common.Address, data []byte) (sig []byte, err error) {
-// 			acc := accounts.Account{
-// 				Address: from,
-// 			}
+				tx, err = w.SignTx(acc, tx, new(big.Int).SetUint64(ethChainID))
+				_ = w.Close()
+				return tx, err
+			}
 
-// 			wallets := ledgerBackend.Wallets()
-// 			for _, w := range wallets {
-// 				if err := w.Open(""); err != nil {
-// 					err = errors.Wrap(err, "failed to connect to wallet on Ledger device")
-// 					return nil, err
-// 				}
+			return nil, errors.Errorf("account %s not found on Ledger", from.String())
+		}
 
-// 				if !w.Contains(acc) {
-// 					if err := w.Close(); err != nil {
-// 						err = errors.Wrap(err, "failed to disconnect the wallet on Ledger device")
-// 						return nil, err
-// 					}
+		personalSignFn = func(from ethcmn.Address, data []byte) (sig []byte, err error) {
+			acc := accounts.Account{
+				Address: from,
+			}
 
-// 					continue
-// 				}
+			wallets := ledgerBackend.Wallets()
+			for _, w := range wallets {
+				if err := w.Open(""); err != nil {
+					return nil, fmt.Errorf("failed to connect to wallet on Ledger device: %w", err)
+				}
 
-// 				sig, err = w.SignText(acc, data)
-// 				_ = w.Close()
-// 				return sig, err
-// 			}
+				if !w.Contains(acc) {
+					if err := w.Close(); err != nil {
+						return nil, fmt.Errorf("failedt to disconnect the wallet on Ledger device: %w", err)
+					}
 
-// 			return nil, errors.Errorf("account %s not found on Ledger", from.String())
-// 		}
+					continue
+				}
 
-// 		return ethKeyFromAddress, signerFn, personalSignFn, nil
+				sig, err = w.SignText(acc, data)
+				_ = w.Close()
+				return sig, err
+			}
 
-// 	case len(*ethPrivKey) > 0:
-// 		ethPk, err := crypto.HexToECDSA(*ethPrivKey)
-// 		if err != nil {
-// 			err = errors.Wrap(err, "failed to hex-decode Ethereum ECDSA Private Key")
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+			return nil, errors.Errorf("account %s not found on Ledger", from.String())
+		}
 
-// 		ethAddressFromPk := ethcrypto.PubkeyToAddress(ethPk.PublicKey)
+		return ethKeyFromAddress, signerFn, personalSignFn, nil
 
-// 		if len(*ethKeyFrom) > 0 {
-// 			addr := common.HexToAddress(*ethKeyFrom)
-// 			if addr == (common.Address{}) {
-// 				err = errors.Wrap(err, "failed to parse Ethereum from address")
-// 				return emptyEthAddress, nil, nil, err
-// 			} else if addr != ethAddressFromPk {
-// 				err = errors.Wrap(err, "Ethereum from address does not match address from ECDSA Private Key")
-// 				return emptyEthAddress, nil, nil, err
-// 			}
-// 		}
+	case len(ethPrivKey) > 0:
+		ethPk, err := ethcrypto.HexToECDSA(ethPrivKey)
+		if err != nil {
+			return emptyEthAddress, nil, nil, fmt.Errorf("failed to hex-decode Ethereum ECDSA Private Key: %w", err)
+		}
 
-// 		txOpts, err := bind.NewKeyedTransactorWithChainID(ethPk, new(big.Int).SetUint64(ethChainID))
-// 		if err != nil {
-// 			err = errors.New("failed to init NewKeyedTransactorWithChainID")
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+		ethAddressFromPk := ethcrypto.PubkeyToAddress(ethPk.PublicKey)
 
-// 		personalSignFn, err := keystore.PrivateKeyPersonalSignFn(ethPk)
-// 		if err != nil {
-// 			err = errors.New("failed to init PrivateKeyPersonalSignFn")
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+		if len(ethKeyFrom) > 0 {
+			addr := ethcmn.HexToAddress(ethKeyFrom)
+			if addr == (ethcmn.Address{}) {
+				return emptyEthAddress, nil, nil, fmt.Errorf("failed to parse Ethereum from address: %s", ethKeyFrom)
+			} else if addr != ethAddressFromPk {
+				return emptyEthAddress, nil, nil, errors.New("from address does not match address from Ethereum ECDSA private key")
+			}
+		}
 
-// 		return txOpts.From, txOpts.Signer, personalSignFn, nil
+		txOpts, err := bind.NewKeyedTransactorWithChainID(ethPk, new(big.Int).SetUint64(ethChainID))
+		if err != nil {
+			return emptyEthAddress, nil, nil, fmt.Errorf("failed to init NewKeyedTransactorWithChainID: %w", err)
+		}
 
-// 	case len(*ethKeystoreDir) > 0:
-// 		if ethKeyFrom == nil {
-// 			err := errors.New("cannot use Ethereum keystore without from address specified")
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+		personalSignFn, err := keystore.PrivateKeyPersonalSignFn(ethPk)
+		if err != nil {
+			return emptyEthAddress, nil, nil, fmt.Errorf("failed to init PrivateKeyPersonalSignFn: %w", err)
+		}
 
-// 		ethKeyFromAddress = common.HexToAddress(*ethKeyFrom)
-// 		if ethKeyFromAddress == (common.Address{}) {
-// 			err = errors.Wrap(err, "failed to parse Ethereum from address")
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+		return txOpts.From, txOpts.Signer, personalSignFn, nil
 
-// 		if info, err := os.Stat(*ethKeystoreDir); err != nil || !info.IsDir() {
-// 			err = errors.New("failed to locate keystore dir")
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+	case len(ethKeystoreDir) > 0:
+		if len(ethKeyFrom) == 0 {
+			return emptyEthAddress, nil, nil, errors.New("cannot use Ethereum keystore without from address specified")
+		}
 
-// 		ks, err := keystore.New(*ethKeystoreDir)
-// 		if err != nil {
-// 			err = errors.Wrap(err, "failed to load keystore")
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+		ethKeyFromAddress = ethcmn.HexToAddress(ethKeyFrom)
+		if ethKeyFromAddress == (ethcmn.Address{}) {
+			return emptyEthAddress, nil, nil, fmt.Errorf("failed to parse Ethereum from address: %s", ethKeyFrom)
+		}
 
-// 		var pass string
-// 		if len(*ethPassphrase) > 0 {
-// 			pass = *ethPassphrase
-// 		} else {
-// 			pass, err = ethPassFromStdin()
-// 			if err != nil {
-// 				return emptyEthAddress, nil, nil, err
-// 			}
-// 		}
+		if info, err := os.Stat(ethKeystoreDir); err != nil || !info.IsDir() {
+			return emptyEthAddress, nil, nil, fmt.Errorf("failed to locate Ethereum keystore dir: %w", err)
+		}
 
-// 		signerFn, err := ks.SignerFn(ethChainID, ethKeyFromAddress, pass)
-// 		if err != nil {
-// 			err = errors.Wrapf(err, "failed to load key for %s", ethKeyFromAddress)
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+		ks, err := keystore.New(ethKeystoreDir)
+		if err != nil {
+			return emptyEthAddress, nil, nil, fmt.Errorf("failed to load Ethereum keystore: %w", err)
+		}
 
-// 		personalSignFn, err := ks.PersonalSignFn(ethKeyFromAddress, pass)
-// 		if err != nil {
-// 			err = errors.Wrapf(err, "failed to load key for %s", ethKeyFromAddress)
-// 			return emptyEthAddress, nil, nil, err
-// 		}
+		var pass string
+		if len(ethPassphrase) > 0 {
+			pass = ethPassphrase
+		} else {
+			pass, err = ethPassFromStdin()
+			if err != nil {
+				return emptyEthAddress, nil, nil, err
+			}
+		}
 
-// 		return ethKeyFromAddress, signerFn, personalSignFn, nil
+		signerFn, err := ks.SignerFn(ethChainID, ethKeyFromAddress, pass)
+		if err != nil {
+			return emptyEthAddress, nil, nil, fmt.Errorf("failed to load key for %s: %w", ethKeyFromAddress, err)
+		}
 
-// 	default:
-// 		err := errors.New("insufficient ethereum key details provided")
-// 		return emptyEthAddress, nil, nil, err
-// 	}
-// }
+		personalSignFn, err := ks.PersonalSignFn(ethKeyFromAddress, pass)
+		if err != nil {
+			return emptyEthAddress, nil, nil, fmt.Errorf("failed to load key for %s: %w", ethKeyFromAddress, err)
+		}
 
-// func ethPassFromStdin() (string, error) {
-// 	fmt.Print("Passphrase for Ethereum account: ")
-// 	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
-// 	if err != nil {
-// 		err := errors.Wrap(err, "failed to read password from stdin")
-// 		return "", err
-// 	}
+		return ethKeyFromAddress, signerFn, personalSignFn, nil
 
-// 	password := string(bytePassword)
-// 	return strings.TrimSpace(password), nil
-// }
+	default:
+		return emptyEthAddress, nil, nil, errors.New("insufficient ethereum key details provided")
+	}
+}
 
-// func newPassReader(pass string) io.Reader {
-// 	return &passReader{
-// 		pass: pass,
-// 		buf:  new(bytes.Buffer),
-// 	}
-// }
+func ethPassFromStdin() (string, error) {
+	fmt.Fprint(os.Stderr, "Passphrase for Ethereum account: ")
+	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return "", fmt.Errorf("failed to read password from STDIN: %w", err)
+	}
 
-// type passReader struct {
-// 	pass string
-// 	buf  *bytes.Buffer
-// }
+	password := string(bytePassword)
+	return strings.TrimSpace(password), nil
+}
 
-// var _ io.Reader = &passReader{}
+var _ io.Reader = (*passReader)(nil)
 
-// func (r *passReader) Read(p []byte) (n int, err error) {
-// 	n, err = r.buf.Read(p)
-// 	if err == io.EOF || n == 0 {
-// 		r.buf.WriteString(r.pass + "\n")
+type passReader struct {
+	pass string
+	buf  *bytes.Buffer
+}
 
-// 		n, err = r.buf.Read(p)
-// 	}
+func newPassReader(pass string) io.Reader {
+	return &passReader{
+		pass: pass,
+		buf:  new(bytes.Buffer),
+	}
+}
 
-// 	return
-// }
+func (r *passReader) Read(p []byte) (n int, err error) {
+	n, err = r.buf.Read(p)
+	if err == io.EOF || n == 0 {
+		r.buf.WriteString(r.pass + "\n")
 
-// // KeyringForPrivKey creates a temporary in-mem keyring for a PrivKey.
-// // Allows to init Context when the key has been provided in plaintext and parsed.
-// func KeyringForPrivKey(name string, privKey cryptotypes.PrivKey) (keyring.Keyring, error) {
-// 	kb := keyring.NewInMemory()
-// 	tmpPhrase := randPhrase(64)
-// 	armored := cosmcrypto.EncryptArmorPrivKey(privKey, tmpPhrase, privKey.Type())
-// 	err := kb.ImportPrivKey(name, armored, tmpPhrase)
-// 	if err != nil {
-// 		err = errors.Wrap(err, "failed to import privkey")
-// 		return nil, err
-// 	}
+		n, err = r.buf.Read(p)
+	}
 
-// 	return kb, nil
-// }
+	return
+}
 
-// func randPhrase(size int) string {
-// 	buf := make([]byte, size)
-// 	_, err := rand.Read(buf)
-// 	orPanic(err)
+// keyringForPrivKey creates a temporary in-mem keyring for a PrivKey.
+// Allows to init Context when the key has been provided in plaintext and parsed.
+func keyringForPrivKey(name string, privKey sdkcryptotypes.PrivKey) (keyring.Keyring, error) {
+	tmpPhrase, err := randPhrase(64)
+	if err != nil {
+		return nil, err
+	}
 
-// 	return string(buf)
-// }
+	armored := sdkcrypto.EncryptArmorPrivKey(privKey, tmpPhrase, privKey.Type())
 
-// func orPanic(err error) {
-// 	if err != nil {
-// 		log.Panicln()
-// 	}
-// }
+	kb := keyring.NewInMemory()
+	if err := kb.ImportPrivKey(name, armored, tmpPhrase); err != nil {
+		err = errors.Wrap(err, "failed to import privkey")
+		return nil, err
+	}
+
+	return kb, nil
+}
+
+func randPhrase(size int) (string, error) {
+	buf := make([]byte, size)
+	_, err := rand.Read(buf)
+	if err != nil {
+		return "", err
+	}
+
+	return string(buf), nil
+}

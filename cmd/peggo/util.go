@@ -89,10 +89,7 @@ func waitForService(ctx context.Context, clientconn *grpc.ClientConn) {
 			state := clientconn.GetState()
 
 			if state != connectivity.Ready {
-				// TODO: ...
-
-				// fmt.Fprintf(os.Stderr, "")
-				// log.WithField("state", state.String()).Warningln("state of gRPC connection not ready")
+				fmt.Fprintf(os.Stderr, "state of gRPC connection not ready: %s", state)
 				time.Sleep(5 * time.Second)
 				continue
 			}
