@@ -54,38 +54,38 @@ func registerEthKeyCmd(cmd *cli.Cmd) {
 		alwaysAutoConfirm *bool
 	)
 
-	initCosmosOptions(
-		cmd,
-		&cosmosChainID,
-		&cosmosGRPC,
-		&tendermintRPC,
-		&cosmosGasPrices,
-	)
+	// initCosmosOptions(
+	// 	cmd,
+	// 	&cosmosChainID,
+	// 	&cosmosGRPC,
+	// 	&tendermintRPC,
+	// 	&cosmosGasPrices,
+	// )
 
-	initCosmosKeyOptions(
-		cmd,
-		&cosmosKeyringDir,
-		&cosmosKeyringAppName,
-		&cosmosKeyringBackend,
-		&cosmosKeyFrom,
-		&cosmosKeyPassphrase,
-		&cosmosPrivKey,
-		&cosmosUseLedger,
-	)
+	// initCosmosKeyOptions(
+	// 	cmd,
+	// 	&cosmosKeyringDir,
+	// 	&cosmosKeyringAppName,
+	// 	&cosmosKeyringBackend,
+	// 	&cosmosKeyFrom,
+	// 	&cosmosKeyPassphrase,
+	// 	&cosmosPrivKey,
+	// 	&cosmosUseLedger,
+	// )
 
-	initEthereumKeyOptions(
-		cmd,
-		&ethKeystoreDir,
-		&ethKeyFrom,
-		&ethPassphrase,
-		&ethPrivKey,
-		&ethUseLedger,
-	)
+	// initEthereumKeyOptions(
+	// 	cmd,
+	// 	&ethKeystoreDir,
+	// 	&ethKeyFrom,
+	// 	&ethPassphrase,
+	// 	&ethPrivKey,
+	// 	&ethUseLedger,
+	// )
 
-	initInteractiveOptions(
-		cmd,
-		&alwaysAutoConfirm,
-	)
+	// initInteractiveOptions(
+	// 	cmd,
+	// 	&alwaysAutoConfirm,
+	// )
 
 	cmd.Action = func() {
 		// ensure a clean exit

@@ -1,18 +1,12 @@
 package foo
 
-import (
-	"os"
+// var app = cli.App("peggo", "Peggo is a companion executable for orchestrating a Peggy validator.")
 
-	cli "github.com/jawher/mow.cli"
-)
-
-var app = cli.App("peggo", "Peggo is a companion executable for orchestrating a Peggy validator.")
-
-var (
-	envName        *string
-	appLogLevel    *string
-	svcWaitTimeout *string
-)
+// var (
+// 	envName        *string
+// 	appLogLevel    *string
+// 	svcWaitTimeout *string
+// )
 
 func main() {
 	// readEnv()
@@ -28,10 +22,10 @@ func main() {
 
 	app.Command("orchestrator", "Starts the orchestrator main loop.", orchestratorCmd)
 	app.Command("q query", "Query commands that can get state info from Peggy.", queryCmdSubset)
-	app.Command("tx", "Transactions for Peggy governance and maintenance.", txCmdSubset)
+	// app.Command("tx", "Transactions for Peggy governance and maintenance.", txCmdSubset)
 	// app.Command("version", "Print the version information and exit.", versionCmd)
 
-	_ = app.Run(os.Args)
+	// _ = app.Run(os.Args)
 }
 
 // func versionCmd(c *cli.Cmd) {
