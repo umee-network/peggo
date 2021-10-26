@@ -24,6 +24,7 @@ func NewRootCmd() *cobra.Command {
 	cmd.PersistentFlags().String(flagSvcWaitTimeout, "1m", "Standard wait timeout for external services (e.g. Cosmos daemon gRPC connection)")
 
 	cmd.AddCommand(
+		getQueryCmd(),
 		getTxCmd(),
 		getVersionCmd(),
 	)

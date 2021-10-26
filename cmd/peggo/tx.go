@@ -111,7 +111,7 @@ func getRegisterEthKeyCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolP(flagAutoConfirm, "y", false, "Always auto-confirm actions, such as transaction sending")
+	cmd.Flags().BoolP(flagAutoConfirm, "y", false, "Auto-confirm actions (e.g. transaction sending)")
 	cmd.Flags().AddFlagSet(cosmosFlagSet())
 	cmd.Flags().AddFlagSet(cosmosKeyringFlagSet())
 	cmd.Flags().AddFlagSet(ethereumKeyOptsFlagSet())
