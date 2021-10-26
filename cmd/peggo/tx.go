@@ -47,12 +47,12 @@ func getRegisterEthKeyCmd() *cobra.Command {
 
 			valAddress, cosmosKeyring, err := initCosmosKeyring(konfig)
 			if err != nil {
-				return fmt.Errorf("failed to initialize Cosmos keyring")
+				return fmt.Errorf("failed to initialize Cosmos keyring: %w", err)
 			}
 
 			ethKeyFromAddress, _, personalSignFn, err := initEthereumAccountsManager(0, konfig)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
 
 			fmt.Fprintf(os.Stderr, "Using Cosmos validator address: %s", valAddress)
@@ -65,7 +65,6 @@ func getRegisterEthKeyCmd() *cobra.Command {
 			}
 
 			cosmosChainID := konfig.String(flagCosmosChainID)
-
 			clientCtx, err := client.NewClientContext(cosmosChainID, valAddress.String(), cosmosKeyring)
 			if err != nil {
 				return err
@@ -80,6 +79,7 @@ func getRegisterEthKeyCmd() *cobra.Command {
 				return fmt.Errorf("failed to create Tendermint RPC client: %w", err)
 			}
 
+			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s", tmRPCEndpoint)
 			clientCtx = clientCtx.WithClient(tmRPC).WithNodeURI(tmRPCEndpoint)
 
 			daemonClient, err := client.NewCosmosClient(clientCtx, cosmosGRPC, client.OptionGasPrices(cosmosGasPrices))
@@ -92,17 +92,16 @@ func getRegisterEthKeyCmd() *cobra.Command {
 			// checks for the gRPC status/health.
 			//
 			// Ref: https://github.com/umee-network/peggo/issues/2
-
 			fmt.Fprint(os.Stderr, "Waiting for cosmos gRPC service...")
 			time.Sleep(time.Second)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 			defer cancel()
 
-			grpcConn := daemonClient.QueryClient()
-			waitForService(ctx, grpcConn)
+			gRPCConn := daemonClient.QueryClient()
+			waitForService(ctx, gRPCConn)
 
-			peggyQuerier := peggytypes.NewQueryClient(grpcConn)
+			peggyQuerier := peggytypes.NewQueryClient(gRPCConn)
 			peggyBroadcaster := cosmos.NewPeggyBroadcastClient(peggyQuerier, daemonClient, nil, personalSignFn)
 
 			ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)

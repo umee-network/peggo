@@ -16,7 +16,6 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/jawher/mow.cli v1.2.0
 	github.com/knadh/koanf v1.3.0
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mimoo/StrobeGo v0.0.0-20210601165009-122bf33a46e0 // indirect
@@ -33,13 +32,15 @@ require (
 	github.com/tendermint/tendermint v0.34.14
 	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
 	github.com/umee-network/umee v0.0.0-20211023233917-5816260c0998
-	github.com/xlab/closer v0.0.0-20190328110542-03326addb7c2
+	github.com/xlab/closer v0.0.0-20190328110542-03326addb7c2 // indirect
 	github.com/xlab/suplog v1.3.0
 	go.etcd.io/bbolt v1.3.6 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	google.golang.org/grpc v1.41.0
 	gopkg.in/yaml.v2 v2.4.0
 )
+
+require golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 
 require (
 	filippo.io/edwards25519 v1.0.0-beta.2 // indirect
