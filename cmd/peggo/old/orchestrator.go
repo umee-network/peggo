@@ -68,56 +68,56 @@ func orchestratorCmd(cmd *cli.Cmd) {
 		coingeckoApi *string
 	)
 
-	initCosmosOptions(
-		cmd,
-		&cosmosChainID,
-		&cosmosGRPC,
-		&tendermintRPC,
-		&cosmosGasPrices,
-	)
+	// initCosmosOptions(
+	// 	cmd,
+	// 	&cosmosChainID,
+	// 	&cosmosGRPC,
+	// 	&tendermintRPC,
+	// 	&cosmosGasPrices,
+	// )
 
-	initCosmosKeyOptions(
-		cmd,
-		&cosmosKeyringDir,
-		&cosmosKeyringAppName,
-		&cosmosKeyringBackend,
-		&cosmosKeyFrom,
-		&cosmosKeyPassphrase,
-		&cosmosPrivKey,
-		&cosmosUseLedger,
-	)
+	// initCosmosKeyOptions(
+	// 	cmd,
+	// 	&cosmosKeyringDir,
+	// 	&cosmosKeyringAppName,
+	// 	&cosmosKeyringBackend,
+	// 	&cosmosKeyFrom,
+	// 	&cosmosKeyPassphrase,
+	// 	&cosmosPrivKey,
+	// 	&cosmosUseLedger,
+	// )
 
-	initEthereumOptions(
-		cmd,
-		&ethChainID,
-		&ethNodeRPC,
-		&ethGasPriceAdjustment,
-	)
+	// initEthereumOptions(
+	// 	cmd,
+	// 	&ethChainID,
+	// 	&ethNodeRPC,
+	// 	&ethGasPriceAdjustment,
+	// )
 
-	initEthereumKeyOptions(
-		cmd,
-		&ethKeystoreDir,
-		&ethKeyFrom,
-		&ethPassphrase,
-		&ethPrivKey,
-		&ethUseLedger,
-	)
+	// initEthereumKeyOptions(
+	// 	cmd,
+	// 	&ethKeystoreDir,
+	// 	&ethKeyFrom,
+	// 	&ethPassphrase,
+	// 	&ethPrivKey,
+	// 	&ethUseLedger,
+	// )
 
-	initRelayerOptions(
-		cmd,
-		&relayValsets,
-		&relayBatches,
-	)
+	// initRelayerOptions(
+	// 	cmd,
+	// 	&relayValsets,
+	// 	&relayBatches,
+	// )
 
-	initBatchRequesterOptions(
-		cmd,
-		&minBatchFeeUSD,
-	)
+	// initBatchRequesterOptions(
+	// 	cmd,
+	// 	&minBatchFeeUSD,
+	// )
 
-	initCoingeckoOptions(
-		cmd,
-		&coingeckoApi,
-	)
+	// initCoingeckoOptions(
+	// 	cmd,
+	// 	&coingeckoApi,
+	// )
 
 	cmd.Action = func() {
 		// ensure a clean exit

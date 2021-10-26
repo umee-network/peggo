@@ -31,6 +31,8 @@ const (
 	flagEthChainID           = "eth-chain-id"
 	flagEthRPC               = "eth-rpc"
 	flagEthGasAdjustment     = "eth-gas-price-adjustment"
+	flagRelayValsets         = "relay-valsets"
+	flagRelayBatches         = "relay-batches"
 )
 
 func cosmosFlagSet() *pflag.FlagSet {

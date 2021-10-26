@@ -87,6 +87,12 @@ func getRegisterEthKeyCmd() *cobra.Command {
 				return err
 			}
 
+			// TODO: Clean this up to be more ergonomic and clean. We can probably
+			// encapsulate all of this into a single utility function that gracefully
+			// checks for the gRPC status/health.
+			//
+			// Ref: https://github.com/umee-network/peggo/issues/2
+
 			fmt.Fprint(os.Stderr, "Waiting for cosmos gRPC service...")
 			time.Sleep(time.Second)
 
