@@ -16,6 +16,7 @@ using the later, prefix the environment variable with PEGGO_ and the named of th
 flag (e.g. PEGGO_COSMOS_PK).`,
 	}
 
+	// TODO: Add commands. Injective's Peggo doesn't have any at the moment.
 	cmd.AddCommand()
 
 	return cmd
