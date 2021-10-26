@@ -42,7 +42,7 @@ func getRegisterEthKeyCmd() *cobra.Command {
 			}
 
 			if konfig.Bool(flagEthUseLedger) {
-				fmt.Fprintf(os.Stderr, "WARNING: Uou cannot use Ledger for orchestrator, so make sure the Ethereum key is accessible outside of it")
+				fmt.Fprintln(os.Stderr, "WARNING: Cannot use Ledger for orchestrator, so make sure the Ethereum key is accessible outside of it")
 			}
 
 			valAddress, cosmosKeyring, err := initCosmosKeyring(konfig)
@@ -55,8 +55,8 @@ func getRegisterEthKeyCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
 
-			fmt.Fprintf(os.Stderr, "Using Cosmos validator address: %s", valAddress)
-			fmt.Fprintf(os.Stderr, "Using Ethereum address: %s", ethKeyFromAddress)
+			fmt.Fprintf(os.Stderr, "Using Cosmos validator address: %s\n", valAddress)
+			fmt.Fprintf(os.Stderr, "Using Ethereum address: %s\n", ethKeyFromAddress)
 
 			autoConfirm := konfig.Bool(flagAutoConfirm)
 			actionConfirmed := autoConfirm || stdinConfirm("Confirm UpdatePeggyOrchestratorAddresses transaction? [y/N]: ")
@@ -79,7 +79,7 @@ func getRegisterEthKeyCmd() *cobra.Command {
 				return fmt.Errorf("failed to create Tendermint RPC client: %w", err)
 			}
 
-			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s", tmRPCEndpoint)
+			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s\n", tmRPCEndpoint)
 			clientCtx = clientCtx.WithClient(tmRPC).WithNodeURI(tmRPCEndpoint)
 
 			daemonClient, err := client.NewCosmosClient(clientCtx, cosmosGRPC, client.OptionGasPrices(cosmosGasPrices))
@@ -92,7 +92,7 @@ func getRegisterEthKeyCmd() *cobra.Command {
 			// checks for the gRPC status/health.
 			//
 			// Ref: https://github.com/umee-network/peggo/issues/2
-			fmt.Fprint(os.Stderr, "Waiting for cosmos gRPC service...")
+			fmt.Fprintln(os.Stderr, "Waiting for cosmos gRPC service...")
 			time.Sleep(time.Second)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -111,7 +111,7 @@ func getRegisterEthKeyCmd() *cobra.Command {
 				return fmt.Errorf("failed to broadcast transaction: %w", err)
 			}
 
-			fmt.Fprintf(os.Stderr, "Registered Ethereum Address %s for validator %s", ethKeyFromAddress, valAddress)
+			fmt.Fprintf(os.Stderr, "Registered Ethereum Address %s for validator %s\n", ethKeyFromAddress, valAddress)
 			return nil
 		},
 	}

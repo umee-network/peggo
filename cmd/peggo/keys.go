@@ -328,7 +328,7 @@ func initEthereumAccountsManager(ethChainID uint64, konfig *koanf.Koanf) (ethcmn
 }
 
 func ethPassFromStdin() (string, error) {
-	fmt.Fprint(os.Stderr, "Passphrase for Ethereum account: ")
+	fmt.Fprintln(os.Stderr, "Passphrase for Ethereum account: ")
 	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err != nil {
 		return "", fmt.Errorf("failed to read password from STDIN: %w", err)

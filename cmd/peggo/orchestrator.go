@@ -60,8 +60,8 @@ flag (e.g. PEGGO_COSMOS_PK).`,
 				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
 
-			fmt.Fprintf(os.Stderr, "Using Cosmos validator address: %s", valAddress)
-			fmt.Fprintf(os.Stderr, "Using Ethereum address: %s", ethKeyFromAddress)
+			fmt.Fprintf(os.Stderr, "Using Cosmos validator address: %s\n", valAddress)
+			fmt.Fprintf(os.Stderr, "Using Ethereum address: %s\n", ethKeyFromAddress)
 
 			cosmosChainID := konfig.String(flagCosmosChainID)
 			clientCtx, err := client.NewClientContext(cosmosChainID, valAddress.String(), cosmosKeyring)
@@ -78,7 +78,7 @@ flag (e.g. PEGGO_COSMOS_PK).`,
 				return fmt.Errorf("failed to create Tendermint RPC client: %w", err)
 			}
 
-			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s", tmRPCEndpoint)
+			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s\n", tmRPCEndpoint)
 			clientCtx = clientCtx.WithClient(tmRPC).WithNodeURI(tmRPCEndpoint)
 
 			daemonClient, err := client.NewCosmosClient(clientCtx, cosmosGRPC, client.OptionGasPrices(cosmosGasPrices))
@@ -91,7 +91,7 @@ flag (e.g. PEGGO_COSMOS_PK).`,
 			// checks for the gRPC status/health.
 			//
 			// Ref: https://github.com/umee-network/peggo/issues/2
-			fmt.Fprint(os.Stderr, "Waiting for cosmos gRPC service...")
+			fmt.Fprintln(os.Stderr, "Waiting for cosmos gRPC service...")
 			time.Sleep(time.Second)
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -129,7 +129,7 @@ flag (e.g. PEGGO_COSMOS_PK).`,
 				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
 			}
 
-			fmt.Fprintf(os.Stderr, "Connected to Ethereum RPC: %s", ethRPCEndpoint)
+			fmt.Fprintf(os.Stderr, "Connected to Ethereum RPC: %s\n", ethRPCEndpoint)
 			ethProvider := provider.NewEVMProvider(ethRPC)
 
 			ethGasPriceAdjustment := konfig.Float64(flagEthGasAdjustment)
@@ -178,7 +178,7 @@ flag (e.g. PEGGO_COSMOS_PK).`,
 			// listen for and trap any OS signal to gracefully shutdown and exit
 			trapSignal(cancel)
 
-			return nil
+			return g.Wait()
 		},
 	}
 
@@ -202,7 +202,7 @@ func trapSignal(cancel context.CancelFunc) {
 
 	go func() {
 		sig := <-sigCh
-		fmt.Fprintf(os.Stderr, "caught signal (%s); shutting down...", sig)
+		fmt.Fprintf(os.Stderr, "Caught signal (%s); shutting down...\n", sig)
 		cancel()
 	}()
 }
@@ -210,7 +210,7 @@ func trapSignal(cancel context.CancelFunc) {
 func startOrchestrator(ctx context.Context, orch orchestrator.PeggyOrchestrator) error {
 	srvErrCh := make(chan error, 1)
 	go func() {
-		fmt.Fprint(os.Stderr, "starting orchestrator...")
+		fmt.Fprintln(os.Stderr, "Starting orchestrator...")
 		srvErrCh <- orch.Start(ctx)
 	}()
 
@@ -220,7 +220,7 @@ func startOrchestrator(ctx context.Context, orch orchestrator.PeggyOrchestrator)
 			return nil
 
 		case err := <-srvErrCh:
-			fmt.Fprint(os.Stderr, "failed to start orchestrator")
+			fmt.Fprintln(os.Stderr, "Failed to start orchestrator")
 			return err
 		}
 	}

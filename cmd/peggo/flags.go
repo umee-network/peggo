@@ -1,6 +1,7 @@
 package peggo
 
 import (
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/spf13/pflag"
 )
 
@@ -51,7 +52,7 @@ func cosmosFlagSet() *pflag.FlagSet {
 func cosmosKeyringFlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("", pflag.ContinueOnError)
 
-	fs.String(flagCosmosKeyring, "file", "Specify Cosmos keyring backend (os|file|kwallet|pass|test)")
+	fs.String(flagCosmosKeyring, keyring.BackendFile, "Specify Cosmos keyring backend (os|file|kwallet|pass|test)")
 	fs.String(flagCosmosKeyringDir, "", "Specify Cosmos keyring directory, if using file keyring")
 	fs.String(flagCosmosKeyringApp, "peggo", "Specify Cosmos keyring app name")
 	fs.String(flagCosmosFrom, "", "Specify the Cosmos validator key name or address. If specified, must exist in keyring, ledger or match the privkey")
