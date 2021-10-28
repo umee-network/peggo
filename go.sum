@@ -1873,8 +1873,8 @@ github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q
 github.com/xlab/closer v0.0.0-20190328110542-03326addb7c2 h1:LPYwXwwHigHHFX3SFa9W9zBIa5reyaLJos2e95eHh68=
 github.com/xlab/closer v0.0.0-20190328110542-03326addb7c2/go.mod h1:Y8IYP9aVODN3Vnw1FCqygCG5IWyYBeBlZqQ5aX+fHFw=
 github.com/xlab/suplog v1.1.0/go.mod h1:dCFSSLRDeIlY5jsrcfzKj5Nq/8Cc1MAjQMK9APCccBo=
-github.com/xlab/suplog v1.3.0 h1:bbnKR8R8gSs2Q4Y25u2xH6shNNV/4r+bNspqViJQTLY=
-github.com/xlab/suplog v1.3.0/go.mod h1:Fq+wOrO0v1DZhfHxgCFB/MlFMzost3Mf/xLuJlfyUA0=
+github.com/xlab/suplog v1.3.1 h1:IIrqB9hc3FC5mzs5V9QL4iKNqaXSX4BiUFVEjKZz17A=
+github.com/xlab/suplog v1.3.1/go.mod h1:YGRpHijNXLSzFXhYBrmso8E5SwjU3TUK4NTbnLO0f2E=
 github.com/xlab/treeprint v0.0.0-20180616005107-d6fb6747feb6/go.mod h1:ce1O1j6UtZfjr22oyGxGLbauSBp2YVXpARAosm7dHBg=
 github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778/go.mod h1:2MuV+tbUrU1zIOPMxZ5EncGwgmMJsa+9ucAQZXxsObs=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
