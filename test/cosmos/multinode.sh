@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Based Cosmos 3-node bootstrap script by PeggyJV:
 # https://github.com/PeggyJV/sommelier/blob/main/scripts/three-node.sh
