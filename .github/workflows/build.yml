@@ -9,7 +9,7 @@ jobs:
       matrix:
         arch: [amd64, arm64]
         targetos: [darwin, linux]
-    name: umee ${{ matrix.arch }} for ${{ matrix.targetos }}
+    name: peggo ${{ matrix.arch }} for ${{ matrix.targetos }}
     steps:
       - uses: actions/checkout@v2
 
