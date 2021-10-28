@@ -7,7 +7,7 @@ on:
       - synchronize
 
 jobs:
-  main:
+  lint-pr:
     name: Run PR Title Linter
     runs-on: ubuntu-latest
     steps:
