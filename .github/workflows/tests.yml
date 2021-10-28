@@ -47,6 +47,7 @@ jobs:
             go.sum
       - name: Test Integration
         run: |
-          make test-integration
+          make build-docker-test
+          make docker-test
         if: env.GIT_DIFF
 # TODO: Add job for unit and coverage testing!

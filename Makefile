@@ -40,7 +40,7 @@ build-docker-test:
 	@echo "--> Building docker image..."
 	@docker build -t testing .
 
-test:
+docker-test:
 	@echo "--> Running tests in docker..."
 	@docker run testing
 
