@@ -431,7 +431,7 @@ var _ = Describe("Contract Tests", func() {
 						currentValsetArgs := peggy.ValsetArgs{
 							Validators:   validators,
 							Powers:       powers,
-							ValsetNonce:  state_lastValsetNonce,
+							ValsetNonce:  nextValsetNonce,
 							RewardAmount: &big.Int{},
 							RewardToken:  common.Address{},
 						}
@@ -439,7 +439,7 @@ var _ = Describe("Contract Tests", func() {
 						newValsetArgs := peggy.ValsetArgs{
 							Validators:   newValidators,
 							Powers:       newPowers,
-							ValsetNonce:  nextValsetNonce,
+							ValsetNonce:  state_lastValsetNonce,
 							RewardAmount: &big.Int{},
 							RewardToken:  common.Address{},
 						}
@@ -448,9 +448,9 @@ var _ = Describe("Contract Tests", func() {
 						rollbackValsetTxHash, _, rollbackValsetErr = ContractDeployer.Tx(context.Background(), peggyTxOpts,
 							"updateValset", withArgsFn(
 								// The new version of the validator set
-								newValsetArgs,
-								// The current validators that approve the change
 								currentValsetArgs,
+								// The current validators that approve the change
+								newValsetArgs,
 								// These are arrays of the parts of the current validator's signatures
 								sigsV, // uint8[] memory _v,
 								sigsR, // bytes32[] memory _r,
@@ -551,7 +551,7 @@ var _ = Describe("Contract Tests", func() {
 					}
 
 					erc20DeployTxHash, _, erc20DeployErr = ContractDeployer.Tx(context.Background(), peggyTxOpts,
-						"deployERC20", withArgsFn("inj", "INJ", "INJ", byte(18)),
+						"deployERC20", withArgsFn("uumee", "UMEE", "UMEE", byte(18)),
 					)
 					orFail(erc20DeployErr)
 				})
@@ -587,9 +587,9 @@ var _ = Describe("Contract Tests", func() {
 
 					_ = Describe("ERC20DeployedEvent", func() {
 						It("Should have valid token params", func() {
-							Ω(erc20DeployedEvent.CosmosDenom).Should(Equal("inj"))
-							Ω(erc20DeployedEvent.Symbol).Should(Equal("INJ"))
-							Ω(erc20DeployedEvent.Name).Should(Equal("INJ"))
+							Ω(erc20DeployedEvent.CosmosDenom).Should(Equal("uumee"))
+							Ω(erc20DeployedEvent.Symbol).Should(Equal("UMEE"))
+							Ω(erc20DeployedEvent.Name).Should(Equal("UMEE"))
 							Ω(erc20DeployedEvent.Decimals).Should(BeEquivalentTo(18))
 						})
 
