@@ -1,0 +1,20 @@
+#install packages for build layer
+FROM golang:1.15-alpine as builder
+RUN apk add --no-cache git gcc make perl jq libc-dev linux-headers python3 py3-pip nodejs npm
+
+# Download deps
+WORKDIR /src
+COPY . .
+
+# Install umee
+RUN cd .. && git clone --depth 1 --branch v0.4.0-rc1 https://github.com/umee-network/umee.git
+RUN cd umee && make install & cd /src/
+
+# install solc
+RUN pip3 install solc-select && solc-select install 0.8.2 && solc-select use 0.8.2
+
+# Install ganache-cli globally
+RUN npm install -g ganache-cli
+
+RUN go mod download
+CMD CHAIN_ID=umee-local STAKE_DENOM=uumee DENOM=uumee CLEANUP=1 ./test/cosmos/multinode.sh umeed && ganache-cli -h "0.0.0.0" -p 8545 -m "concert load couple harbor equip island argue ramp clarify fence smart topic" -l 999999999999999 & PEGGO_TEST_EVM_RPC="http://0.0.0.0:8545" go test ./...
