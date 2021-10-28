@@ -36,6 +36,14 @@ install: go.sum
 ##                              Tests & Linting                              ##
 ###############################################################################
 
+build-docker-test:
+	@echo "--> Building docker image..."
+	@docker build -t testing .
+
+test:
+	@echo "--> Running tests in docker..."
+	@docker run testing
+
 test-integration:
 	@echo "--> Running tests"
 	@go test -mod=readonly -race ./test/... -v
