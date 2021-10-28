@@ -38,11 +38,11 @@ install: go.sum
 
 build-docker-test:
 	@echo "--> Building docker image..."
-	@docker build -t testing .
+	@docker build -f Dockerfile.test -t peggo-test .
 
 docker-test:
 	@echo "--> Running tests in docker..."
-	@docker run testing
+	@docker run peggo-test
 
 test-integration:
 	@echo "--> Running tests"
