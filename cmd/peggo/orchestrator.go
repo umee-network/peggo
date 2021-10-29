@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -135,6 +136,11 @@ func getOrchestratorCmd() *cobra.Command {
 			relayBatches := konfig.Bool(flagRelayBatches)
 			relayer := relayer.NewPeggyRelayer(peggyQueryClient, peggyContract, relayValSets, relayBatches)
 
+			erc20mapping, err := parseERC20Mapping(konfig.String(flagERC20Mapping))
+			if err != nil {
+				return fmt.Errorf("failed to parse ERC20 mapping: %w", err)
+			}
+
 			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
 			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(100, &coingecko.Config{
 				BaseURL: coingeckoAPI,
@@ -162,6 +168,7 @@ func getOrchestratorCmd() *cobra.Command {
 				relayer,
 				orchestrator.SetMinBatchFee(konfig.Float64(flagMinBatchFeeUSD)),
 				orchestrator.SetPriceFeeder(coingeckoFeed),
+				orchestrator.SetERC20ContractMapping(erc20mapping),
 			)
 
 			ctx, cancel = context.WithCancel(context.Background())
@@ -180,6 +187,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
+	cmd.Flags().String(flagERC20Mapping, "", "Specify the ERC20 mapping for the bridge")
 	cmd.Flags().Float64(flagMinBatchFeeUSD, float64(0.0), "If non-zero, batch requests will only be made if fee threshold criteria is met")
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
 	cmd.Flags().AddFlagSet(cosmosFlagSet())
@@ -220,4 +228,26 @@ func startOrchestrator(ctx context.Context, logger zerolog.Logger, orch orchestr
 			return err
 		}
 	}
+}
+
+func parseERC20Mapping(input string) (map[ethcmn.Address]string, error) {
+	// <denom>:<addr>,<denom2>:<addr2>
+	mappings := map[ethcmn.Address]string{}
+	denoms := strings.Split(input, ",")
+	for _, denom := range denoms {
+		parts := strings.Split(denom, ":")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid ERC20 mapping: %s", denom)
+		}
+
+		denom := strings.TrimSpace(parts[0])
+		addr := strings.TrimSpace(parts[1])
+		if len(denom) == 0 || len(addr) == 0 {
+			return nil, fmt.Errorf("invalid ERC20 mapping: %s", denom)
+		}
+
+		mappings[ethcmn.HexToAddress(addr)] = denom
+	}
+
+	return mappings, nil
 }
