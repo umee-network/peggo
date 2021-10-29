@@ -187,7 +187,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
-	cmd.Flags().String(flagERC20Mapping, "", "Specify the ERC20 mapping for the bridge")
+	cmd.Flags().String(flagERC20Mapping, "", "Specify the ERC20 mapping for the bridge (<denom>:<addr>,...)")
 	cmd.Flags().Float64(flagMinBatchFeeUSD, float64(0.0), "If non-zero, batch requests will only be made if fee threshold criteria is met")
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
 	cmd.Flags().AddFlagSet(cosmosFlagSet())
