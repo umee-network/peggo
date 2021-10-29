@@ -39,6 +39,7 @@ const (
 	flagEthGasPrice          = "eth-gas-price"
 	flagEthGasLimit          = "eth-gas-limit"
 	flagPowerThreshold       = "power-threshold"
+	flagERC20Mapping         = "erc20-mapping"
 )
 
 func cosmosFlagSet() *pflag.FlagSet {
