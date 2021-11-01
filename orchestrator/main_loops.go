@@ -298,6 +298,11 @@ func (s *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 						// request with cosmosDenom.
 						tokenAddr := ethcmn.HexToAddress(unbatchedToken.Token)
 
+						resp, err := s.cosmosQueryClient.ERC20ToDenom(ctx, tokenAddr)
+						if err != nil {
+							return err
+						}
+
 						// TODO: Use cosmosQueryClient to query for on-chain mapping.
 						// var denom string
 						// if cosmosDenom, ok := s.erc20ContractMapping[tokenAddr]; ok {

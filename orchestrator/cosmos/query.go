@@ -18,11 +18,10 @@ type PeggyQueryClient interface {
 	OldestUnsignedTransactionBatch(ctx context.Context, valAccountAddress sdk.AccAddress) (*types.OutgoingTxBatch, error)
 	LatestTransactionBatches(ctx context.Context) ([]*types.OutgoingTxBatch, error)
 	UnbatchedTokensWithFees(ctx context.Context) ([]*types.BatchFees, error)
-
 	TransactionBatchSignatures(ctx context.Context, nonce uint64, tokenContract ethcmn.Address) ([]*types.MsgConfirmBatch, error)
 	LastClaimEventByAddr(ctx context.Context, validatorAccountAddress sdk.AccAddress) (*types.LastClaimEvent, error)
-
 	PeggyParams(ctx context.Context) (*types.Params, error)
+	ERC20ToDenom(ctx context.Context, contractAddr ethcmn.Address) (*types.QueryDenomToERC20Response, error)
 }
 
 func NewPeggyQueryClient(client types.QueryClient) PeggyQueryClient {
