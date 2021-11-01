@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Based Cosmos 3-node bootstrap script by PeggyJV:
 # https://github.com/PeggyJV/sommelier/blob/main/scripts/three-node.sh
@@ -155,7 +155,6 @@ if [[ ! -d "$hdir" ]]; then
 		cat $n0cfgDir/genesis.json | jq '.app_state["peggy"]["params"]["bridge_ethereum_address"]="0x93b5122922F9dCd5458Af42Ba69Bd7baEc546B3c"' > $n0cfgDir/tmp_genesis.json && mv $n0cfgDir/tmp_genesis.json $n0cfgDir/genesis.json
 		cat $n0cfgDir/genesis.json | jq '.app_state["peggy"]["params"]["bridge_chain_id"]="5"' > $n0cfgDir/tmp_genesis.json && mv $n0cfgDir/tmp_genesis.json $n0cfgDir/genesis.json
 		cat $n0cfgDir/genesis.json | jq '.app_state["peggy"]["params"]["bridge_contract_start_height"]="5763150"' > $n0cfgDir/tmp_genesis.json && mv $n0cfgDir/tmp_genesis.json $n0cfgDir/genesis.json
-		cat $n0cfgDir/genesis.json | jq '.app_state["peggy"]["params"]["cosmos_coin_denom"]=""' > $n0cfgDir/tmp_genesis.json && mv $n0cfgDir/tmp_genesis.json $n0cfgDir/genesis.json
 	fi
 
 	echo "NOTE: Setting Governance Voting Period to 10 seconds for rapid testing"

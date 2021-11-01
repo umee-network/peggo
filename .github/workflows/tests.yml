@@ -46,8 +46,6 @@ jobs:
             go.mod
             go.sum
       - name: Test Integration
-        run: |
-          make build-docker-test
-          make docker-test
+        run: ./test/setup-gh-test.sh
         if: env.GIT_DIFF
 # TODO: Add job for unit and coverage testing!

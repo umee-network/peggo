@@ -266,7 +266,7 @@ func (p *peggyOrchestrator) ValsetRequesterLoop(ctx context.Context) (err error)
 **/
 
 func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) {
-	logger := s.logger.With().Str("loop", "BatchRequesterLoop").Logger()
+	logger := p.logger.With().Str("loop", "BatchRequesterLoop").Logger()
 
 	return loops.RunLoop(ctx, defaultLoopDur, func() error {
 		// Each loop performs the following:
