@@ -21,7 +21,7 @@ type PeggyQueryClient interface {
 	TransactionBatchSignatures(ctx context.Context, nonce uint64, tokenContract ethcmn.Address) ([]*types.MsgConfirmBatch, error)
 	LastClaimEventByAddr(ctx context.Context, validatorAccountAddress sdk.AccAddress) (*types.LastClaimEvent, error)
 	PeggyParams(ctx context.Context) (*types.Params, error)
-	ERC20ToDenom(ctx context.Context, contractAddr ethcmn.Address) (*types.QueryDenomToERC20Response, error)
+	ERC20ToDenom(ctx context.Context, contractAddr ethcmn.Address) (*types.QueryERC20ToDenomResponse, error)
 }
 
 func NewPeggyQueryClient(client types.QueryClient) PeggyQueryClient {
@@ -179,4 +179,17 @@ func (s *peggyQueryClient) PeggyParams(ctx context.Context) (*types.Params, erro
 	}
 
 	return &daemonResp.Params, nil
+}
+
+func (s *peggyQueryClient) ERC20ToDenom(ctx context.Context, contractAddr ethcmn.Address) (*types.QueryERC20ToDenomResponse, error) {
+	daemonResp, err := s.daemonQueryClient.ERC20ToDenom(ctx, &types.QueryERC20ToDenomRequest{
+		Erc20: contractAddr.Hex(),
+	})
+	if err != nil {
+		err = errors.Wrap(err, "failed to query ERC20ToDenom from daemon")
+		return nil, err
+	} else if daemonResp == nil {
+		return nil, ErrNotFound
+	}
+	return daemonResp, nil
 }

@@ -298,20 +298,15 @@ func (s *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 						// request with cosmosDenom.
 						tokenAddr := ethcmn.HexToAddress(unbatchedToken.Token)
 
+						var denom string
 						resp, err := s.cosmosQueryClient.ERC20ToDenom(ctx, tokenAddr)
 						if err != nil {
-							return err
+							logger.Err(err).Str("token_contract", tokenAddr.String()).Msg("failed to get denom, won't request for a batch")
+							// do not return error, just continue with the next unbatched tx.
+							return nil
 						}
 
-						// TODO: Use cosmosQueryClient to query for on-chain mapping.
-						// var denom string
-						// if cosmosDenom, ok := s.erc20ContractMapping[tokenAddr]; ok {
-						// 	// cosmos denom
-						// 	denom = cosmosDenom
-						// } else {
-						// 	// peggy denom
-						// 	denom = types.PeggyDenomString(tokenAddr)
-						// }
+						denom = resp.GetDenom()
 
 						// send batch request only if fee threshold is met
 						if s.CheckFeeThreshold(tokenAddr, unbatchedToken.TotalFees, s.minBatchFeeUSD) {
