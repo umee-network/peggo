@@ -307,9 +307,9 @@ func (s *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 							denom = types.PeggyDenomString(tokenAddr)
 						}
 
-						// send batch request only if fee threshold is met.
+						// send batch request only if fee threshold is met
 						if s.CheckFeeThreshold(tokenAddr, unbatchedToken.TotalFees, s.minBatchFeeUSD) {
-							logger.WithFields(log.Fields{"tokenContract": tokenAddr, "denom": denom}).Infoln("sending batch request")
+							logger.Info().Str("token_contract", tokenAddr.String()).Str("denom", denom).Msg("sending batch request")
 							_ = s.peggyBroadcastClient.SendRequestBatch(ctx, denom)
 						}
 
