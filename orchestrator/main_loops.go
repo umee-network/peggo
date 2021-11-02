@@ -112,19 +112,19 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 // since these are provided directly by a trusted Cosmsos node they can simply be assumed to be
 // valid and signed off on.
 func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
-	logger := log.WithField("loop", "EthSignerMainLoop")
+	logger := p.logger.With().Str("loop", "EthSignerMainLoop").Logger()
 
 	var peggyID common.Hash
 	if err := retry.Do(func() (err error) {
 		peggyID, err = p.peggyContract.GetPeggyID(ctx, p.peggyContract.FromAddress())
 		return
 	}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-		logger.WithError(err).Warningf("failed to get PeggyID from Ethereum contract, will retry (%d)", n)
+		logger.Err(err).Uint("retry", n).Msg("failed to get PeggyID from Ethereum contract; retrying...")
 	})); err != nil {
-		logger.WithError(err).Errorln("got error, loop exits")
+		logger.Err(err).Msg("got error, loop exits")
 		return err
 	}
-	logger.Debugf("received peggyID %s", peggyID.Hex())
+	logger.Debug().Hex("peggyID", peggyID[:]).Msg("received peggyID")
 
 	return loops.RunLoop(ctx, defaultLoopDur, func() error {
 		var oldestUnsignedValsets []*types.Valset
@@ -132,7 +132,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 			oldestValsets, err := p.cosmosQueryClient.OldestUnsignedValsets(ctx, p.peggyBroadcastClient.AccFromAddress())
 			if err != nil {
 				if err == cosmos.ErrNotFound || oldestValsets == nil {
-					logger.Debugln("no Valset waiting to be signed")
+					logger.Debug().Msg("no Valset waiting to be signed")
 					return nil
 				}
 
@@ -141,20 +141,22 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 			oldestUnsignedValsets = oldestValsets
 			return nil
 		}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-			logger.WithError(err).Warningf("failed to get unsigned Valset for signing, will retry (%d)", n)
+			logger.Err(err).Uint("retry", n).Msg("failed to get unsigned Valset for signing; retrying...")
 		})); err != nil {
-			logger.WithError(err).Errorln("got error, loop exits")
+			logger.Err(err).Msg("got error, loop exits")
 			return err
 		}
 
 		for _, oldestValset := range oldestUnsignedValsets {
-			logger.Infoln("Sending Valset confirm for %d", oldestValset.Nonce)
+			logger.Info().Uint64("oldestValset.Nonce", oldestValset.Nonce).Msg("Sending Valset confirm for nonce")
 			if err := retry.Do(func() error {
 				return p.peggyBroadcastClient.SendValsetConfirm(ctx, p.ethFrom, peggyID, oldestValset)
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-				logger.WithError(err).Warningf("failed to sign and send Valset confirmation to Cosmos, will retry (%d)", n)
+				logger.Err(err).
+					Uint("retry", n).
+					Msg("failed to sign and send Valset confirmation to Cosmos; retrying...")
 			})); err != nil {
-				logger.WithError(err).Errorln("got error, loop exits")
+				logger.Err(err).Msg("got error, loop exits")
 				return err
 			}
 		}
@@ -165,7 +167,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 			txBatch, err := p.cosmosQueryClient.OldestUnsignedTransactionBatch(ctx, p.peggyBroadcastClient.AccFromAddress())
 			if err != nil {
 				if err == cosmos.ErrNotFound || txBatch == nil {
-					logger.Debugln("no TransactionBatch waiting to be signed")
+					logger.Debug().Msg("no TransactionBatch waiting to be signed")
 					return nil
 				}
 				return err
@@ -173,22 +175,26 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 			oldestUnsignedTransactionBatch = txBatch
 			return nil
 		}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-			logger.WithError(err).Warningf("failed to get unsigned TransactionBatch for signing, will retry (%d)", n)
+			logger.Err(err).
+				Uint("retry", n).
+				Msg("failed to get unsigned TransactionBatch for signing; retrying...")
 		})); err != nil {
-			logger.WithError(err).Errorln("got error, loop exits")
+			logger.Err(err).Msg("got error, loop exits")
 			return err
 		}
 
 		if oldestUnsignedTransactionBatch != nil {
-			logger.Infoln("Sending TransactionBatch confirm for BatchNonce %d", oldestUnsignedTransactionBatch.BatchNonce)
+			logger.Info().
+				Uint64("batchNonce", oldestUnsignedTransactionBatch.BatchNonce).
+				Msg("Sending TransactionBatch confirm for BatchNonce")
 			if err := retry.Do(func() error {
 				return p.peggyBroadcastClient.SendBatchConfirm(ctx, p.ethFrom, peggyID, oldestUnsignedTransactionBatch)
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-				logger.
-					WithError(err).
-					Warningf("failed to sign and send TransactionBatch confirmation to Cosmos, will retry (%d)", n)
+				logger.Err(err).
+					Uint("retry", n).
+					Msg("failed to sign and send TransactionBatch confirmation to Cosmos; retrying...")
 			})); err != nil {
-				logger.WithError(err).Errorln("got error, loop exits")
+				logger.Err(err).Msg("got error, loop exits")
 				return err
 			}
 		}
