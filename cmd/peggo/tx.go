@@ -106,7 +106,7 @@ func getRegisterEthKeyCmd() *cobra.Command {
 			waitForService(ctx, gRPCConn)
 
 			peggyQuerier := peggytypes.NewQueryClient(gRPCConn)
-			peggyBroadcaster := cosmos.NewPeggyBroadcastClient(peggyQuerier, daemonClient, nil, personalSignFn)
+			peggyBroadcaster := cosmos.NewPeggyBroadcastClient(logger, peggyQuerier, daemonClient, nil, personalSignFn)
 
 			ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()

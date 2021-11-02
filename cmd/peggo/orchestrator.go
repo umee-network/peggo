@@ -99,6 +99,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 			peggyQuerier := peggytypes.NewQueryClient(gRPCConn)
 			peggyBroadcaster := cosmos.NewPeggyBroadcastClient(
+				logger,
 				peggyQuerier,
 				daemonClient,
 				signerFn,
@@ -154,7 +155,7 @@ func getOrchestratorCmd() *cobra.Command {
 				logger,
 				peggyQueryClient,
 				peggyBroadcaster,
-				tmclient.NewRPCClient(tmRPCEndpoint),
+				tmclient.NewRPCClient(logger, tmRPCEndpoint),
 				peggyContract,
 				ethKeyFromAddress,
 				signerFn,
