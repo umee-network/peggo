@@ -14,8 +14,8 @@ import (
 	cosmtypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 	"github.com/shopspring/decimal"
-	log "github.com/xlab/suplog"
 )
 
 const (
@@ -32,7 +32,7 @@ type PriceFeed struct {
 
 	interval time.Duration
 
-	logger log.Logger
+	logger zerolog.Logger
 }
 
 type Config struct {
@@ -53,7 +53,7 @@ func (cp *PriceFeed) QueryUSDPrice(erc20Contract common.Address) (float64, error
 
 	u, err := url.ParseRequestURI(urlJoin(cp.config.BaseURL, "simple", "token_price", "ethereum"))
 	if err != nil {
-		cp.logger.WithError(err).Fatalln("failed to parse URL")
+		cp.logger.Fatal().Err(err).Msg("failed to parse URL")
 	}
 
 	q := make(url.Values)
@@ -65,7 +65,7 @@ func (cp *PriceFeed) QueryUSDPrice(erc20Contract common.Address) (float64, error
 	reqURL := u.String()
 	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
-		cp.logger.WithError(err).Fatalln("failed to create HTTP request")
+		cp.logger.Fatal().Err(err).Msg("failed to create HTTP request")
 	}
 
 	resp, err := cp.client.Do(req)
@@ -99,7 +99,7 @@ func (cp *PriceFeed) QueryUSDPrice(erc20Contract common.Address) (float64, error
 
 // NewCoingeckoPriceFeed returns price puller for given symbol. The price will be pulled
 // from endpoint and divided by scaleFactor. Symbol name (if reported by endpoint) must match.
-func NewCoingeckoPriceFeed(interval time.Duration, endpointConfig *Config) *PriceFeed {
+func NewCoingeckoPriceFeed(logger zerolog.Logger, interval time.Duration, endpointConfig *Config) *PriceFeed {
 	return &PriceFeed{
 		client: &http.Client{
 			Transport: &http.Transport{
@@ -111,10 +111,7 @@ func NewCoingeckoPriceFeed(interval time.Duration, endpointConfig *Config) *Pric
 
 		interval: interval,
 
-		logger: log.WithFields(log.Fields{
-			"svc":      "oracle",
-			"provider": "coingeckgo",
-		}),
+		logger: logger.With().Str("module", "coingecko_pricefeed").Logger(),
 	}
 }
 

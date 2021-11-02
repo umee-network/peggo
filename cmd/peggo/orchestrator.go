@@ -141,7 +141,7 @@ func getOrchestratorCmd() *cobra.Command {
 			relayer := relayer.NewPeggyRelayer(peggyQueryClient, peggyContract, relayValSets, relayBatches)
 
 			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
-			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(100, &coingecko.Config{
+			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, &coingecko.Config{
 				BaseURL: coingeckoAPI,
 			})
 
