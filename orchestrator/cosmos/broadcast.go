@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sort"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -381,45 +382,87 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 	valsetUpdates []*wrappers.PeggyValsetUpdatedEvent,
 	erc20Deployed []*wrappers.PeggyERC20DeployedEvent,
 ) error {
-	totalClaimEvents := len(deposits) + len(withdraws) + len(valsetUpdates) + len(erc20Deployed)
-	var count, i, j, k, l int
+	// SortableEvent exists with the only purpose to make a nicer sortable slice
+	type SortableEvent struct {
+		EventNonce         uint64
+		DepositEvent       *wrappers.PeggySendToCosmosEvent
+		WithdrawEvent      *wrappers.PeggyTransactionBatchExecutedEvent
+		ValsetUpdateEvent  *wrappers.PeggyValsetUpdatedEvent
+		ERC20DeployedEvent *wrappers.PeggyERC20DeployedEvent
+	}
+	allevents := []SortableEvent{}
 
-	// Individual arrays (deposits, withdraws, valsetUpdates) are sorted.
-	// Broadcast claim events sequentially starting with eventNonce = lastClaimEvent + 1.
-	for count < totalClaimEvents {
-		if i < len(deposits) && deposits[i].EventNonce.Uint64() == lastClaimEvent+1 {
-			// send deposit
-			if err := s.sendDepositClaims(ctx, deposits[i]); err != nil {
+	// We add all the events to the same list to be sorted.
+	// Only events that have a nonce higher than the last claim event will be appended.
+	for _, ev := range deposits {
+		if ev.EventNonce.Uint64() > lastClaimEvent {
+			allevents = append(allevents, SortableEvent{
+				EventNonce:   ev.EventNonce.Uint64(),
+				DepositEvent: ev,
+			})
+		}
+	}
+
+	for _, ev := range withdraws {
+		if ev.EventNonce.Uint64() > lastClaimEvent {
+			allevents = append(allevents, SortableEvent{
+				EventNonce:    ev.EventNonce.Uint64(),
+				WithdrawEvent: ev,
+			})
+		}
+	}
+
+	for _, ev := range valsetUpdates {
+		if ev.EventNonce.Uint64() > lastClaimEvent {
+			allevents = append(allevents, SortableEvent{
+				EventNonce:        ev.EventNonce.Uint64(),
+				ValsetUpdateEvent: ev,
+			})
+		}
+	}
+
+	for _, ev := range erc20Deployed {
+		if ev.EventNonce.Uint64() > lastClaimEvent {
+			allevents = append(allevents, SortableEvent{
+				EventNonce:         ev.EventNonce.Uint64(),
+				ERC20DeployedEvent: ev,
+			})
+		}
+	}
+
+	// Use SliceStable so we always get the same order
+	sort.SliceStable(allevents, func(i, j int) bool {
+		return allevents[i].EventNonce < allevents[j].EventNonce
+	})
+
+	// iterate through events and send them sequentially
+	for _, ev := range allevents {
+		switch {
+		case ev.DepositEvent != nil:
+			err := s.sendDepositClaims(ctx, ev.DepositEvent)
+			if err != nil {
 				log.WithError(err).Errorln("broadcasting MsgDepositClaim failed")
 				return err
 			}
-			i++
-		} else if j < len(withdraws) && withdraws[j].EventNonce.Uint64() == lastClaimEvent+1 {
-			// send withdraw claim
-			if err := s.sendWithdrawClaims(ctx, withdraws[j]); err != nil {
+		case ev.WithdrawEvent != nil:
+			err := s.sendWithdrawClaims(ctx, ev.WithdrawEvent)
+			if err != nil {
 				log.WithError(err).Errorln("broadcasting MsgWithdrawClaim failed")
 				return err
 			}
-			j++
-		} else if k < len(valsetUpdates) && valsetUpdates[k].EventNonce.Uint64() == lastClaimEvent+1 {
-			// send valset update claim
-			if err := s.sendValsetUpdateClaims(ctx, valsetUpdates[k]); err != nil {
+		case ev.ValsetUpdateEvent != nil:
+			err := s.sendValsetUpdateClaims(ctx, ev.ValsetUpdateEvent)
+			if err != nil {
 				log.WithError(err).Errorln("broadcasting MsgValsetUpdateClaim failed")
 				return err
 			}
-			k++
-		} else if l < len(erc20Deployed) && erc20Deployed[k].EventNonce.Uint64() == lastClaimEvent+1 {
-			// send erc20 deployed claim
-			if err := s.sendERC20DeployedClaims(ctx, erc20Deployed[k]); err != nil {
+		case ev.ERC20DeployedEvent != nil:
+			err := s.sendERC20DeployedClaims(ctx, ev.ERC20DeployedEvent)
+			if err != nil {
 				log.WithError(err).Errorln("broadcasting MsgERC20DeployedClaim failed")
 				return err
 			}
-			l++
 		}
-
-		count++
-		lastClaimEvent++
-
 		// TODO: Evaluate this condition and if it needs to be configurable. For
 		// Umee, our block times will average around 6s.
 		//
@@ -431,7 +474,6 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 		// time.Sleep(3 * time.Second)
 		time.Sleep(6 * time.Second)
 	}
-
 	return nil
 }
 
