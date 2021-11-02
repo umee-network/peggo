@@ -6,7 +6,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/pkg/errors"
-	log "github.com/xlab/suplog"
 
 	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
 )
@@ -62,10 +61,10 @@ func (p *peggyOrchestrator) CheckForEvents(
 			End:   &currentBlock,
 		}, nil)
 		if err != nil {
-			log.WithFields(log.Fields{
-				"start": startingBlock,
-				"end":   currentBlock,
-			}).Errorln("failed to scan past ERC20Deployed events from Ethereum")
+			p.logger.Err(err).
+				Uint64("start", startingBlock).
+				Uint64("end", currentBlock).
+				Msg("failed to scan past ERC20Deployed events from Ethereum")
 
 			if !isUnknownBlockErr(err) {
 				err = errors.Wrap(err, "failed to scan past ERC20Deployed events from Ethereum")
@@ -82,11 +81,14 @@ func (p *peggyOrchestrator) CheckForEvents(
 		iter.Close()
 	}
 
-	log.WithFields(log.Fields{
-		"start":     startingBlock,
-		"end":       currentBlock,
-		"Contracts": erc20DeployedEvents,
-	}).Debugln("Scanned ERC20Deployed events from Ethereum")
+	p.logger.Debug().
+		Uint64("start", startingBlock).
+		Uint64("end", currentBlock).
+		// TODO: fix log. print the list of events? Or the length of it?
+		// we are only seeing the pointer address of the objects in the slice
+		// Object("erc20DeployedEvents", erc20DeployedEvents)).
+		Int("events", len(erc20DeployedEvents)).
+		Msg("Scanned ERC20Deployed events from Ethereum")
 
 	var sendToCosmosEvents []*wrappers.PeggySendToCosmosEvent
 	{
@@ -96,10 +98,10 @@ func (p *peggyOrchestrator) CheckForEvents(
 			End:   &currentBlock,
 		}, nil, nil, nil)
 		if err != nil {
-			log.WithFields(log.Fields{
-				"start": startingBlock,
-				"end":   currentBlock,
-			}).Errorln("failed to scan past SendToCosmos events from Ethereum")
+			p.logger.Err(err).
+				Uint64("start", startingBlock).
+				Uint64("end", currentBlock).
+				Msg("failed to scan past SendToCosmos events from Ethereum")
 
 			if !isUnknownBlockErr(err) {
 				err = errors.Wrap(err, "failed to scan past SendToCosmos events from Ethereum")
@@ -116,11 +118,12 @@ func (p *peggyOrchestrator) CheckForEvents(
 		iter.Close()
 	}
 
-	log.WithFields(log.Fields{
-		"start":    startingBlock,
-		"end":      currentBlock,
-		"Deposits": sendToCosmosEvents,
-	}).Debugln("Scanned SendToCosmos events from Ethereum")
+	p.logger.Debug().
+		Uint64("start", startingBlock).
+		Uint64("end", currentBlock).
+		// TODO: fix log. print the list of events? Or the length of it?
+		Int("events", len(sendToCosmosEvents)).
+		Msg("Scanned SendToCosmos events from Ethereum")
 
 	var transactionBatchExecutedEvents []*wrappers.PeggyTransactionBatchExecutedEvent
 	{
@@ -129,10 +132,10 @@ func (p *peggyOrchestrator) CheckForEvents(
 			End:   &currentBlock,
 		}, nil, nil)
 		if err != nil {
-			log.WithFields(log.Fields{
-				"start": startingBlock,
-				"end":   currentBlock,
-			}).Errorln("failed to scan past TransactionBatchExecuted events from Ethereum")
+			p.logger.Err(err).
+				Uint64("start", startingBlock).
+				Uint64("end", currentBlock).
+				Msg("failed to scan past TransactionBatchExecuted events from Ethereum")
 
 			if !isUnknownBlockErr(err) {
 				err = errors.Wrap(err, "failed to scan past TransactionBatchExecuted events from Ethereum")
@@ -148,11 +151,13 @@ func (p *peggyOrchestrator) CheckForEvents(
 
 		iter.Close()
 	}
-	log.WithFields(log.Fields{
-		"start":     startingBlock,
-		"end":       currentBlock,
-		"Withdraws": transactionBatchExecutedEvents,
-	}).Debugln("Scanned TransactionBatchExecuted events from Ethereum")
+
+	p.logger.Debug().
+		Uint64("start", startingBlock).
+		Uint64("end", currentBlock).
+		// TODO: fix log. print the list of events? Or the length of it?
+		Int("events", len(transactionBatchExecutedEvents)).
+		Msg("Scanned TransactionBatchExecuted events from Ethereum")
 
 	var valsetUpdatedEvents []*wrappers.PeggyValsetUpdatedEvent
 	{
@@ -161,10 +166,10 @@ func (p *peggyOrchestrator) CheckForEvents(
 			End:   &currentBlock,
 		}, nil)
 		if err != nil {
-			log.WithFields(log.Fields{
-				"start": startingBlock,
-				"end":   currentBlock,
-			}).Errorln("failed to scan past ValsetUpdatedEvent events from Ethereum")
+			p.logger.Err(err).
+				Uint64("start", startingBlock).
+				Uint64("end", currentBlock).
+				Msg("failed to scan past ValsetUpdatedEvent events from Ethereum")
 
 			if !isUnknownBlockErr(err) {
 				err = errors.Wrap(err, "failed to scan past ValsetUpdatedEvent events from Ethereum")
@@ -181,11 +186,12 @@ func (p *peggyOrchestrator) CheckForEvents(
 		iter.Close()
 	}
 
-	log.WithFields(log.Fields{
-		"start":         startingBlock,
-		"end":           currentBlock,
-		"valsetUpdates": valsetUpdatedEvents,
-	}).Debugln("Scanned ValsetUpdatedEvents events from Ethereum")
+	p.logger.Debug().
+		Uint64("start", startingBlock).
+		Uint64("end", currentBlock).
+		// TODO: fix log. print the list of events? Or the length of it?
+		Int("events", len(valsetUpdatedEvents)).
+		Msg("Scanned ValsetUpdatedEvents events from Ethereum")
 
 	// note that starting block overlaps with our last che	cked block, because we have to deal with
 	// the possibility that the relayer was killed after relaying only one of multiple events in a single

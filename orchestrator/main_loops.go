@@ -12,7 +12,6 @@ import (
 	"github.com/umee-network/peggo/orchestrator/cosmos"
 	"github.com/umee-network/peggo/orchestrator/loops"
 	"github.com/umee-network/umee/x/peggy/types"
-	log "github.com/xlab/suplog"
 )
 
 const defaultLoopDur = 60 * time.Second
@@ -52,7 +51,7 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 		if lastCheckedBlock == 0 {
 			peggyParams, err := p.cosmosQueryClient.PeggyParams(ctx)
 			if err != nil {
-				log.WithError(err).Fatalln("failed to query peggy params, is injectived running?")
+				logger.Fatal().Err(err).Msg("failed to query peggy params, is injectived running?")
 			}
 			lastCheckedBlock = peggyParams.BridgeContractStartHeight
 		}

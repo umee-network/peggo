@@ -73,7 +73,12 @@ func getOrchestratorCmd() *cobra.Command {
 			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s\n", tmRPCEndpoint)
 			clientCtx = clientCtx.WithClient(tmRPC).WithNodeURI(tmRPCEndpoint)
 
-			daemonClient, err := client.NewCosmosClient(clientCtx, cosmosGRPC, client.OptionGasPrices(cosmosGasPrices))
+			logger, err := getLogger(cmd)
+			if err != nil {
+				return err
+			}
+
+			daemonClient, err := client.NewCosmosClient(clientCtx, logger, cosmosGRPC, client.OptionGasPrices(cosmosGasPrices))
 			if err != nil {
 				return err
 			}
@@ -139,11 +144,6 @@ func getOrchestratorCmd() *cobra.Command {
 			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(100, &coingecko.Config{
 				BaseURL: coingeckoAPI,
 			})
-
-			logger, err := getLogger(cmd)
-			if err != nil {
-				return err
-			}
 
 			logger = logger.With().
 				Str("relayer_validator_addr", sdk.ValAddress(valAddress).String()).
