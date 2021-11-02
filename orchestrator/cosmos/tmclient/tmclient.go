@@ -8,14 +8,13 @@ import (
 
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 type TendermintClient interface {
 	GetBlock(ctx context.Context, height int64) (*tmctypes.ResultBlock, error)
 	GetLatestBlockHeight(ctx context.Context) (int64, error)
-	GetTxs(ctx context.Context, block *tmctypes.ResultBlock) ([]*ctypes.ResultTx, error)
+	GetTxs(ctx context.Context, block *tmctypes.ResultBlock) ([]*tmctypes.ResultTx, error)
 	GetValidatorSet(ctx context.Context, height int64) (*tmctypes.ResultValidators, error)
 }
 
@@ -53,8 +52,8 @@ func (c *tmClient) GetLatestBlockHeight(ctx context.Context) (int64, error) {
 
 // GetTxs queries for all the transactions in a block height.
 // It uses `Tx` RPC method to query for the transaction.
-func (c *tmClient) GetTxs(ctx context.Context, block *tmctypes.ResultBlock) ([]*ctypes.ResultTx, error) {
-	txs := make([]*ctypes.ResultTx, 0, len(block.Block.Txs))
+func (c *tmClient) GetTxs(ctx context.Context, block *tmctypes.ResultBlock) ([]*tmctypes.ResultTx, error) {
+	txs := make([]*tmctypes.ResultTx, 0, len(block.Block.Txs))
 	for _, tmTx := range block.Block.Txs {
 		tx, err := c.rpcClient.Tx(ctx, tmTx.Hash(), true)
 		if err != nil {

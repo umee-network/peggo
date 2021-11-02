@@ -38,7 +38,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 		return 0, err
 	}
 
-	// add delay to ensure minimum confirmations are received and block is finalised
+	// add delay to ensure minimum confirmations are received and block is finalized
 	currentBlock = latestHeader.Number.Uint64() - uint64(ethBlockConfirmationDelay)
 
 	if currentBlock < startingBlock {

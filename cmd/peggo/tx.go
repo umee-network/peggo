@@ -38,7 +38,10 @@ func getRegisterEthKeyCmd() *cobra.Command {
 			}
 
 			if konfig.Bool(flagEthUseLedger) {
-				fmt.Fprintln(os.Stderr, "WARNING: Cannot use Ledger for orchestrator, so make sure the Ethereum key is accessible outside of it")
+				fmt.Fprintln(
+					os.Stderr,
+					"WARNING: Cannot use Ledger for orchestrator, so make sure the Ethereum key is accessible outside of it",
+				)
 			}
 
 			valAddress, cosmosKeyring, err := initCosmosKeyring(konfig)
@@ -107,7 +110,11 @@ func getRegisterEthKeyCmd() *cobra.Command {
 				return fmt.Errorf("failed to broadcast transaction: %w", err)
 			}
 
-			fmt.Fprintf(os.Stderr, "Registered Ethereum Address %s for validator %s\n", ethKeyFromAddress, sdk.ValAddress(valAddress))
+			fmt.Fprintf(
+				os.Stderr, "Registered Ethereum Address %s for validator %s\n",
+				ethKeyFromAddress,
+				sdk.ValAddress(valAddress),
+			)
 			return nil
 		},
 	}

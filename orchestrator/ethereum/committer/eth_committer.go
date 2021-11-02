@@ -84,7 +84,10 @@ func (e *ethCommitter) SendTx(
 	}
 
 	// Suggested gas price is not accurate. Increment by multiplying with gasprice adjustment factor
-	incrementedPrice := big.NewFloat(0).Mul(new(big.Float).SetInt(suggestedGasPrice), big.NewFloat(e.ethGasPriceAdjustment))
+	incrementedPrice := big.NewFloat(0).Mul(
+		new(big.Float).SetInt(suggestedGasPrice),
+		big.NewFloat(e.ethGasPriceAdjustment),
+	)
 
 	// set gasprice to incremented gas price.
 	gasPrice := new(big.Int)

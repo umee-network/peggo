@@ -26,7 +26,7 @@ const (
 
 var zeroPrice = float64(0)
 
-type CoingeckoPriceFeed struct {
+type PriceFeed struct {
 	client *http.Client
 	config *Config
 
@@ -49,7 +49,7 @@ func urlJoin(baseURL string, segments ...string) string {
 
 }
 
-func (cp *CoingeckoPriceFeed) QueryUSDPrice(erc20Contract common.Address) (float64, error) {
+func (cp *PriceFeed) QueryUSDPrice(erc20Contract common.Address) (float64, error) {
 
 	u, err := url.ParseRequestURI(urlJoin(cp.config.BaseURL, "simple", "token_price", "ethereum"))
 	if err != nil {
@@ -84,6 +84,10 @@ func (cp *CoingeckoPriceFeed) QueryUSDPrice(erc20Contract common.Address) (float
 
 	var f interface{}
 	err = json.Unmarshal(respBody, &f)
+	if err != nil {
+		return zeroPrice, errors.Wrapf(err, "failed to parse response body from %s", reqURL)
+	}
+
 	m := f.(map[string]interface{})
 
 	v := m[strings.ToLower(erc20Contract.String())]
@@ -95,8 +99,8 @@ func (cp *CoingeckoPriceFeed) QueryUSDPrice(erc20Contract common.Address) (float
 
 // NewCoingeckoPriceFeed returns price puller for given symbol. The price will be pulled
 // from endpoint and divided by scaleFactor. Symbol name (if reported by endpoint) must match.
-func NewCoingeckoPriceFeed(interval time.Duration, endpointConfig *Config) *CoingeckoPriceFeed {
-	return &CoingeckoPriceFeed{
+func NewCoingeckoPriceFeed(interval time.Duration, endpointConfig *Config) *PriceFeed {
+	return &PriceFeed{
 		client: &http.Client{
 			Transport: &http.Transport{
 				ResponseHeaderTimeout: maxRespHeadersTime,
@@ -126,7 +130,7 @@ func checkCoingeckoConfig(cfg *Config) *Config {
 	return cfg
 }
 
-func (cp *CoingeckoPriceFeed) CheckFeeThreshold(erc20Contract common.Address, totalFee cosmtypes.Int, minFeeInUSD float64) bool {
+func (cp *PriceFeed) CheckFeeThreshold(erc20Contract common.Address, totalFee cosmtypes.Int, minFeeInUSD float64) bool {
 	tokenPriceInUSD, err := cp.QueryUSDPrice(erc20Contract)
 	if err != nil {
 		return false
@@ -136,8 +140,6 @@ func (cp *CoingeckoPriceFeed) CheckFeeThreshold(erc20Contract common.Address, to
 	totalFeeInUSDDec := decimal.NewFromBigInt(totalFee.BigInt(), -18).Mul(tokenPriceInUSDDec)
 	minFeeInUSDDec := decimal.NewFromFloat(minFeeInUSD)
 
-	if totalFeeInUSDDec.GreaterThan(minFeeInUSDDec) {
-		return true
-	}
-	return false
+	return totalFeeInUSDDec.GreaterThan(minFeeInUSDDec)
+
 }

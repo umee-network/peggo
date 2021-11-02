@@ -22,8 +22,8 @@ type PeggyBroadcastClient interface {
 	ValFromAddress() sdk.ValAddress
 	AccFromAddress() sdk.AccAddress
 
-	/// Send a transaction updating the eth address for the sending
-	/// Cosmos address. The sending Cosmos address should be a validator
+	// Send a transaction updating the eth address for the sending
+	// Cosmos address. The sending Cosmos address should be a validator
 	UpdatePeggyOrchestratorAddresses(
 		ctx context.Context,
 		ethFrom ethcmn.Address,
@@ -251,7 +251,7 @@ func (s *peggyBroadcastClient) sendDepositClaims(
 	log.WithFields(log.Fields{
 		"event_nonce": deposit.EventNonce.String(),
 		"txHash":      txResponse.TxHash,
-	}).Infoln("Oracle sent deposit event succesfully")
+	}).Infoln("Oracle sent deposit event successfully")
 
 	return nil
 }
@@ -286,7 +286,7 @@ func (s *peggyBroadcastClient) sendWithdrawClaims(
 	log.WithFields(log.Fields{
 		"event_nonce": withdraw.EventNonce.String(),
 		"txHash":      txResponse.TxHash,
-	}).Infoln("Oracle sent Withdraw event succesfully")
+	}).Infoln("Oracle sent Withdraw event successfully")
 
 	return nil
 }
@@ -332,7 +332,7 @@ func (s *peggyBroadcastClient) sendValsetUpdateClaims(
 	log.WithFields(log.Fields{
 		"event_nonce": valsetUpdate.EventNonce.String(),
 		"txHash":      txResponse.TxHash,
-	}).Infoln("Oracle sent ValsetUpdate event succesfully")
+	}).Infoln("Oracle sent ValsetUpdate event successfully")
 
 	return nil
 }
@@ -368,7 +368,7 @@ func (s *peggyBroadcastClient) sendERC20DeployedClaims(
 	log.WithFields(log.Fields{
 		"event_nonce": event.EventNonce.String(),
 		"txHash":      txResponse.TxHash,
-	}).Infoln("Oracle sent ERC20Deployed event succesfully")
+	}).Infoln("Oracle sent ERC20Deployed event successfully")
 
 	return nil
 }

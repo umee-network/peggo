@@ -10,7 +10,6 @@ import (
 	"github.com/avast/retry-go"
 	cosmtypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
-	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/shopspring/decimal"
 	"github.com/umee-network/peggo/orchestrator/cosmos"
 	"github.com/umee-network/peggo/orchestrator/loops"
@@ -296,7 +295,7 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 					return retry.Do(func() (err error) {
 						// Check if the token is present in cosmos denom. If so, send batch
 						// request with cosmosDenom.
-						tokenAddr := ethcmn.HexToAddress(unbatchedToken.Token)
+						tokenAddr := common.HexToAddress(unbatchedToken.Token)
 
 						var denom string
 						resp, err := p.cosmosQueryClient.ERC20ToDenom(ctx, tokenAddr)
@@ -344,18 +343,14 @@ func (p *peggyOrchestrator) CheckFeeThreshold(erc20Contract common.Address, tota
 	totalFeeInUSDDec := decimal.NewFromBigInt(totalFee.BigInt(), -18).Mul(tokenPriceInUSDDec)
 	minFeeInUSDDec := decimal.NewFromFloat(minFeeInUSD)
 
-	if totalFeeInUSDDec.GreaterThan(minFeeInUSDDec) {
-		return true
-	}
-	return false
+	return totalFeeInUSDDec.GreaterThan(minFeeInUSDDec)
 }
 
 func (p *peggyOrchestrator) RelayerMainLoop(ctx context.Context) (err error) {
 	if p.relayer != nil {
 		return p.relayer.Start(ctx)
-	} else {
-		return errors.New("relayer is nil")
 	}
+	return errors.New("relayer is nil")
 }
 
 // valPowerDiff returns the difference in power between two bridge validator sets

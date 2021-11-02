@@ -140,10 +140,9 @@ type cosmosClient struct {
 	conn      *grpc.ClientConn
 	txFactory tx.Factory
 
-	fromAddress sdk.AccAddress
-	doneC       chan bool
-	msgC        chan sdk.Msg
-	syncMux     *sync.Mutex
+	doneC   chan bool
+	msgC    chan sdk.Msg
+	syncMux *sync.Mutex
 
 	accNum uint64
 	accSeq uint64

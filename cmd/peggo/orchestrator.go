@@ -180,7 +180,11 @@ func getOrchestratorCmd() *cobra.Command {
 
 	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
-	cmd.Flags().Float64(flagMinBatchFeeUSD, float64(0.0), "If non-zero, batch requests will only be made if fee threshold criteria is met")
+	cmd.Flags().Float64(
+		flagMinBatchFeeUSD,
+		float64(0.0),
+		"If non-zero, batch requests will only be made if fee threshold criteria is met",
+	)
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
 	cmd.Flags().AddFlagSet(cosmosFlagSet())
 	cmd.Flags().AddFlagSet(cosmosKeyringFlagSet())
@@ -191,7 +195,7 @@ func getOrchestratorCmd() *cobra.Command {
 }
 
 func trapSignal(cancel context.CancelFunc) {
-	var sigCh = make(chan os.Signal)
+	var sigCh = make(chan os.Signal, 1)
 
 	signal.Notify(sigCh, syscall.SIGTERM)
 	signal.Notify(sigCh, syscall.SIGINT)

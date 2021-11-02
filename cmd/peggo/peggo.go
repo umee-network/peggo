@@ -26,7 +26,11 @@ flag (e.g. PEGGO_COSMOS_PK).`,
 
 	cmd.PersistentFlags().String(flagLogLevel, zerolog.InfoLevel.String(), "logging level")
 	cmd.PersistentFlags().String(flagLogFormat, logLevelJSON, "logging format (text|json)")
-	cmd.PersistentFlags().String(flagSvcWaitTimeout, "1m", "Standard wait timeout for external services (e.g. Cosmos daemon gRPC connection)")
+	cmd.PersistentFlags().String(
+		flagSvcWaitTimeout,
+		"1m",
+		"Standard wait timeout for external services (e.g. Cosmos daemon gRPC connection)",
+	)
 
 	cmd.AddCommand(
 		getOrchestratorCmd(),
@@ -89,7 +93,7 @@ func parseServerConfig(cmd *cobra.Command) (*koanf.Koanf, error) {
 
 	// load from environment variables
 	if err := konfig.Load(env.Provider("PEGGO_", ".", func(s string) string {
-		return strings.Replace(strings.ToLower(strings.TrimPrefix(s, "PEGGO_")), "_", "-", -1)
+		return strings.ReplaceAll(strings.ToLower(strings.TrimPrefix(s, "PEGGO_")), "_", "-")
 	}), nil); err != nil {
 		return nil, err
 	}
