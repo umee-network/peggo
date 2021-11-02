@@ -43,7 +43,7 @@ func (p *peggyOrchestrator) Start(ctx context.Context) error {
 //
 // TODO this loop requires a method to bootstrap back to the correct event nonce when restarted
 func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
-	logger := log.WithField("loop", "EthOracleMainLoop")
+	logger := p.logger.With().Str("loop", "EthOracleMainLoop").Logger()
 	lastResync := time.Now()
 	var lastCheckedBlock uint64
 
@@ -58,13 +58,13 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 		}
 		return
 	}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-		logger.WithError(err).Warningf("failed to get last checked block, will retry (%d)", n)
+		logger.Err(err).Uint("retry", n).Msg("failed to get last checked block; retrying...")
 	})); err != nil {
-		logger.WithError(err).Errorln("got error, loop exits")
+		logger.Err(err).Msg("got error, loop exits")
 		return err
 	}
 
-	logger.WithField("lastCheckedBlock", lastCheckedBlock).Infoln("Start scanning for events")
+	logger.Info().Uint64("lastCheckedBlock", lastCheckedBlock).Msg("Start scanning for events")
 
 	return loops.RunLoop(ctx, defaultLoopDur, func() error {
 		// Relays events from Ethereum -> Cosmos
@@ -73,9 +73,10 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 			currentBlock, err = p.CheckForEvents(ctx, lastCheckedBlock)
 			return
 		}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-			logger.WithError(err).Warningf("error during Eth event checking, will retry (%d)", n)
+			logger.Err(err).Uint("retry", n).Msg("error during Eth event checking; retrying...")
+
 		})); err != nil {
-			logger.WithError(err).Errorln("got error, loop exits")
+			logger.Err(err).Msg("got error, loop exits")
 			return err
 		}
 
@@ -95,13 +96,16 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 				lastCheckedBlock, err = p.GetLastCheckedBlock(ctx)
 				return
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-				logger.WithError(err).Warningf("failed to get last checked block, will retry (%d)", n)
+				logger.Err(err).Uint("retry", n).Msg("failed to get last checked block; retrying...")
 			})); err != nil {
-				logger.WithError(err).Errorln("got error, loop exits")
+				logger.Err(err).Msg("got error, loop exits")
 				return err
 			}
 			lastResync = time.Now()
-			logger.WithFields(log.Fields{"lastResync": lastResync, "lastCheckedBlock": lastCheckedBlock}).Infoln("Auto resync")
+			logger.Info().
+				Time("lastResync", lastResync).
+				Uint64("lastCheckedBlock", lastCheckedBlock).
+				Msg("Auto resync")
 		}
 
 		return nil
