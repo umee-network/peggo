@@ -86,8 +86,6 @@ func (ks *keyStore) Accounts() []common.Address {
 	return accounts
 }
 
-var errRangeStop = errors.New("stop")
-
 func (ks *keyStore) forEachWallet(keystorePath string, fn func(spec *WalletSpec) error) error {
 	return filepath.Walk(keystorePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -156,7 +154,7 @@ func (ks *keyStore) Paths() []string {
 		paths = append(paths, p)
 	}
 	ks.pathsMux.RUnlock()
-	sort.Sort(sort.StringSlice(paths))
+	sort.Strings(paths)
 	return paths
 }
 

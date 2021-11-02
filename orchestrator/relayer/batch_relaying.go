@@ -20,7 +20,11 @@ func (s *peggyRelayer) RelayBatches(ctx context.Context) error {
 	var oldestSignedBatch *types.OutgoingTxBatch
 	var oldestSigs []*types.MsgConfirmBatch
 	for _, batch := range latestBatches {
-		sigs, err := s.cosmosQueryClient.TransactionBatchSignatures(ctx, batch.BatchNonce, common.HexToAddress(batch.TokenContract))
+		sigs, err := s.cosmosQueryClient.TransactionBatchSignatures(
+			ctx,
+			batch.BatchNonce,
+			common.HexToAddress(batch.TokenContract),
+		)
 		if err != nil {
 			return err
 		} else if len(sigs) == 0 {
@@ -51,7 +55,11 @@ func (s *peggyRelayer) RelayBatches(ctx context.Context) error {
 		return errors.New("latest valset not found")
 	}
 
-	log.WithFields(log.Fields{"oldestSignedBatchNonce": oldestSignedBatch.BatchNonce, "latestEthereumBatchNonce": latestEthereumBatch.Uint64()}).Debugln("Found Latest valsets")
+	log.WithFields(
+		log.Fields{
+			"oldestSignedBatchNonce":   oldestSignedBatch.BatchNonce,
+			"latestEthereumBatchNonce": latestEthereumBatch.Uint64(),
+		}).Debugln("Found Latest valsets")
 
 	if oldestSignedBatch.BatchNonce > latestEthereumBatch.Uint64() {
 
@@ -65,7 +73,11 @@ func (s *peggyRelayer) RelayBatches(ctx context.Context) error {
 		}
 		// Check if oldestSignedBatch already submitted by other validators in mean time
 		if oldestSignedBatch.BatchNonce > latestEthereumBatch.Uint64() {
-			log.Infof("We have detected latest batch %d but latest on Ethereum is %d sending an update!", oldestSignedBatch.BatchNonce, latestEthereumBatch)
+			log.Infof(
+				"We have detected latest batch %d but latest on Ethereum is %d sending an update!",
+				oldestSignedBatch.BatchNonce,
+				latestEthereumBatch,
+			)
 
 			// Send SendTransactionBatch to Ethereum
 			txHash, err := s.peggyContract.SendTransactionBatch(ctx, currentValset, oldestSignedBatch, oldestSigs)

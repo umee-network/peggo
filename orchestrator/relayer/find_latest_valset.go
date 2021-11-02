@@ -62,16 +62,17 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 			Start: endSearchBlock,
 			End:   &currentBlock,
 		}, nil)
+
 		if err != nil {
 			err = errors.Wrap(err, "failed to filter past ValsetUpdated events from Ethereum")
 			return nil, err
-		} else {
-			for iter.Next() {
-				valsetUpdatedEvents = append(valsetUpdatedEvents, iter.Event)
-			}
-
-			iter.Close()
 		}
+
+		for iter.Next() {
+			valsetUpdatedEvents = append(valsetUpdatedEvents, iter.Event)
+		}
+
+		iter.Close()
 
 		// by default the lowest found valset goes first, we want the highest
 		//

@@ -129,12 +129,12 @@ func (e *ethCommitter) SendTx(
 				txHash = txHashRet
 				e.nonceCache.Incr(e.fromAddress)
 				return nil
-			} else {
-				log.WithFields(log.Fields{
-					"txHash":    txHash.Hex(),
-					"txHashRet": txHashRet.Hex(),
-				}).WithError(err).Warningln("SendTransaction failed with error")
 			}
+
+			log.WithFields(log.Fields{
+				"txHash":    txHash.Hex(),
+				"txHashRet": txHashRet.Hex(),
+			}).WithError(err).Warningln("SendTransaction failed with error")
 
 			switch {
 			case strings.Contains(err.Error(), "invalid sender"):

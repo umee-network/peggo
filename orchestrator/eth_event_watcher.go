@@ -199,14 +199,23 @@ func (p *peggyOrchestrator) CheckForEvents(
 	}
 
 	deposits := filterSendToCosmosEventsByNonce(sendToCosmosEvents, lastClaimEvent.EthereumEventNonce)
-	withdraws := filterTransactionBatchExecutedEventsByNonce(transactionBatchExecutedEvents, lastClaimEvent.EthereumEventNonce)
+	withdraws := filterTransactionBatchExecutedEventsByNonce(
+		transactionBatchExecutedEvents,
+		lastClaimEvent.EthereumEventNonce,
+	)
 	valsetUpdates := filterValsetUpdateEventsByNonce(valsetUpdatedEvents, lastClaimEvent.EthereumEventNonce)
 	deployedERC20Updates := filterERC20DeployedEventsByNonce(erc20DeployedEvents, lastClaimEvent.EthereumEventNonce)
 
 	if len(deposits) > 0 || len(withdraws) > 0 || len(valsetUpdates) > 0 || len(deployedERC20Updates) > 0 {
 		// todo get eth chain id from the chain
-		if err := p.peggyBroadcastClient.SendEthereumClaims(ctx, lastClaimEvent.EthereumEventNonce, deposits, withdraws, valsetUpdates, deployedERC20Updates); err != nil {
-
+		if err := p.peggyBroadcastClient.SendEthereumClaims(
+			ctx,
+			lastClaimEvent.EthereumEventNonce,
+			deposits,
+			withdraws,
+			valsetUpdates,
+			deployedERC20Updates,
+		); err != nil {
 			err = errors.Wrap(err, "failed to send ethereum claims to Cosmos chain")
 			return 0, err
 		}

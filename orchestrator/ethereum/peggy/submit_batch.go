@@ -138,7 +138,11 @@ func (s *peggyContract) SendTransactionBatch(
 	return &txHash, nil
 }
 
-func getBatchCheckpointValues(batch *types.OutgoingTxBatch) (amounts []*big.Int, destinations []common.Address, fees []*big.Int) {
+func getBatchCheckpointValues(batch *types.OutgoingTxBatch) (
+	amounts []*big.Int,
+	destinations []common.Address,
+	fees []*big.Int,
+) {
 	amounts = make([]*big.Int, len(batch.Transactions))
 	destinations = make([]common.Address, len(batch.Transactions))
 	fees = make([]*big.Int, len(batch.Transactions))

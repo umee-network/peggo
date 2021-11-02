@@ -27,7 +27,7 @@ const (
 
 // EthAddrLessThan migrates the Ethereum address less than function
 func EthAddrLessThan(e, o string) bool {
-	return bytes.Compare([]byte(e)[:], []byte(o)[:]) == -1
+	return bytes.Compare([]byte(e), []byte(o)) == -1
 }
 
 var hexRx = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
