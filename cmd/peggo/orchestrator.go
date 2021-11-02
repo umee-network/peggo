@@ -126,7 +126,7 @@ func getOrchestratorCmd() *cobra.Command {
 			ethProvider := provider.NewEVMProvider(ethRPC)
 
 			ethGasPriceAdjustment := konfig.Float64(flagEthGasAdjustment)
-			ethCommitter, err := committer.NewEthCommitter(ethKeyFromAddress, ethGasPriceAdjustment, signerFn, ethProvider)
+			ethCommitter, err := committer.NewEthCommitter(logger, ethKeyFromAddress, ethGasPriceAdjustment, signerFn, ethProvider)
 			if err != nil && err != grpc.ErrServerStopped {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}

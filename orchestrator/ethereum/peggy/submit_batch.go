@@ -7,7 +7,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/umee-network/umee/x/peggy/types"
-	log "github.com/xlab/suplog"
 )
 
 func (s *peggyContract) SendTransactionBatch(
@@ -16,11 +15,12 @@ func (s *peggyContract) SendTransactionBatch(
 	batch *types.OutgoingTxBatch,
 	confirms []*types.MsgConfirmBatch,
 ) (*common.Hash, error) {
-	log.WithFields(log.Fields{
-		"token_contract": batch.TokenContract,
-		"new_nonce":      batch.BatchNonce,
-	}).Infoln("Checking signatures and submitting TransactionBatch to Ethereum")
-	log.Debugf("Batch %#v", batch)
+	s.logger.Info().
+		Str("tokenContract", batch.TokenContract).
+		Uint64("newNonce", batch.BatchNonce).
+		Msg("Checking signatures and submitting TransactionBatch to Ethereum")
+
+	s.logger.Debug().Interface("batch", batch).Msg("Batch")
 
 	validators, powers, sigV, sigR, sigS, err := checkBatchSigsAndRepack(currentValset, confirms)
 	if err != nil {
@@ -72,17 +72,17 @@ func (s *peggyContract) SendTransactionBatch(
 		batchTimeout,
 	)
 	if err != nil {
-		log.WithError(err).Errorln("ABI Pack (Peggy submitBatch) method")
+		s.logger.Err(err).Msg("ABI Pack (Peggy submitBatch) method")
 		return nil, err
 	}
 
 	txHash, err := s.SendTx(ctx, s.peggyAddress, txData)
 	if err != nil {
-		log.WithError(err).WithField("tx_hash", txHash.Hex()).Errorln("Failed to sign and submit (Peggy submitBatch) to EVM")
+		s.logger.Err(err).Str("txHash", txHash.Hex()).Msg("Failed to sign and submit (Peggy submitBatch) to EVM")
 		return nil, err
 	}
 
-	log.Infoln("Sent Tx (Peggy submitBatch):", txHash.Hex())
+	s.logger.Info().Str("txHash", txHash.Hex()).Msg("Sent Tx (Peggy submitBatch)")
 
 	//     let before_nonce = get_tx_batch_nonce(
 	//         peggy_contract_address,

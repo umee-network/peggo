@@ -7,7 +7,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/umee-network/umee/x/peggy/types"
-	log "github.com/xlab/suplog"
 )
 
 type ValsetArgs struct {
@@ -31,10 +30,10 @@ func (s *peggyContract) SendEthValsetUpdate(
 		return nil, err
 	}
 
-	log.WithFields(log.Fields{
-		"old_nonce": oldValset.Nonce,
-		"new_nonce": newValset.Nonce,
-	}).Infoln("Checking signatures and submitting validator set update to Ethereum")
+	s.logger.Info().
+		Uint64("oldValsetNonce", oldValset.Nonce).
+		Uint64("newValsetNonce", newValset.Nonce).
+		Msg("Checking signatures and submitting validator set update to Ethereum")
 
 	newValidators, newPowers := validatorsAndPowers(newValset)
 	newValsetNonce := new(big.Int).SetUint64(newValset.Nonce)
@@ -79,12 +78,12 @@ func (s *peggyContract) SendEthValsetUpdate(
 	// 		bytes32[] memory _r,
 	// 		bytes32[] memory _s
 	// )
-	log.Debugln(
-		"Sending updateValset Ethereum tx",
-		"currentValidators", currentValidators,
-		"currentPowers", currentPowers,
-		"currentValsetNonce", currentValsetNonce,
-	)
+	s.logger.Debug().
+		Interface("currentValidators", currentValidators).
+		Interface("currentPowers", currentPowers).
+		Interface("currentValsetNonce", currentValsetNonce).
+		Msg("Sending updateValset Ethereum TX")
+
 	txData, err := peggyABI.Pack("updateValset",
 		newValsetArgs,
 		currentValsetArgs,
@@ -93,17 +92,20 @@ func (s *peggyContract) SendEthValsetUpdate(
 		sigS,
 	)
 	if err != nil {
-		log.WithError(err).Errorln("ABI Pack (Peggy updateValset) method")
+		s.logger.Err(err).Msg("ABI Pack (Peggy updateValset) method")
 		return nil, err
 	}
 
 	txHash, err := s.SendTx(ctx, s.peggyAddress, txData)
 	if err != nil {
-		log.WithError(err).WithField("tx_hash", txHash.Hex()).Errorln("Failed to sign and submit (Peggy updateValset) to EVM")
+		s.logger.Err(err).
+			Str("txHash", txHash.String()).
+			Msg("Failed to sign and submit (Peggy updateValset) to EVM")
+
 		return nil, err
 	}
 
-	log.Infoln("Sent Tx (Peggy updateValset):", txHash.Hex())
+	s.logger.Info().Str("txHash", txHash.Hex()).Msg("Sent Tx (Peggy updateValset)")
 
 	//     let before_nonce = get_valset_nonce(peggy_contract_address, eth_address, web3).await?;
 	//     if before_nonce != old_nonce {

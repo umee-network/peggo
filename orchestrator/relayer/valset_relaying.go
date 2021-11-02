@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/umee-network/umee/x/peggy/types"
-	log "github.com/xlab/suplog"
+	"google.golang.org/appengine/log"
 )
 
 // RelayValsets checks the last validator set on Ethereum, if it's lower than our latest validator
@@ -36,7 +36,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 	}
 
 	if latestCosmosConfirmed == nil {
-		log.Debugln("no confirmed valsets found, nothing to relay")
+		s.logger.Debug().Msg("no confirmed valsets found, nothing to relay")
 		return nil
 	}
 
@@ -45,11 +45,11 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 		err = errors.Wrap(err, "couldn't find latest confirmed valset on Ethereum")
 		return err
 	}
-	log.WithFields(
-		log.Fields{
-			"currentEthValset":      currentEthValset,
-			"latestCosmosConfirmed": latestCosmosConfirmed,
-		}).Debugln("Found Latest valsets")
+
+	s.logger.Debug().
+		Interface("currentEthValset", currentEthValset).
+		Interface("latestCosmosConfirmed", latestCosmosConfirmed).
+		Msg("Found latest valsets")
 
 	if latestCosmosConfirmed.Nonce > currentEthValset.Nonce {
 		latestEthereumValsetNonce, err := s.peggyContract.GetValsetNonce(ctx, s.peggyContract.FromAddress())
@@ -74,7 +74,8 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 				return err
 			}
 
-			log.WithField("tx_hash", txHash.Hex()).Infoln("Sent Ethereum Tx (EthValsetUpdate)")
+			s.logger.Info().Str("txHash", txHash.Hex()).Msg("Sent Ethereum Tx (EthValsetUpdate)")
+
 		}
 
 	}

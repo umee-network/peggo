@@ -302,7 +302,7 @@ func (s *peggyBroadcastClient) sendValsetUpdateClaims(
 	s.logger.Info().
 		Str("eventNonce", valsetUpdate.EventNonce.String()).
 		Uint64("valsetNonce", valsetUpdate.NewValsetNonce.Uint64()).
-		Interface("validators", valsetUpdate.Validators).
+		Int("validators", len(valsetUpdate.Validators)).
 		Interface("powers", valsetUpdate.Powers).
 		Uint64("rewardAmount", valsetUpdate.RewardAmount.Uint64()).
 		Str("rewardToken", valsetUpdate.RewardToken.Hex()).

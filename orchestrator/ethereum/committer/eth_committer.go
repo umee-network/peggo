@@ -9,14 +9,15 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	"github.com/umee-network/peggo/orchestrator/ethereum/util"
-	log "github.com/xlab/suplog"
 )
 
 // NewEthCommitter returns an instance of EVMCommitter, which
 // can be used to submit txns into Ethereum, Matic, and other EVM-compatible networks.
 func NewEthCommitter(
+	logger zerolog.Logger,
 	fromAddress common.Address,
 	ethGasPriceAdjustment float64,
 	fromSigner bind.SignerFn,
@@ -24,6 +25,7 @@ func NewEthCommitter(
 	committerOpts ...EVMCommitterOption,
 ) (EVMCommitter, error) {
 	committer := &ethCommitter{
+		logger:                logger.With().Str("module", "ethCommiter").Logger(),
 		committerOpts:         defaultOptions(),
 		ethGasPriceAdjustment: ethGasPriceAdjustment,
 		fromAddress:           fromAddress,
@@ -45,6 +47,7 @@ func NewEthCommitter(
 }
 
 type ethCommitter struct {
+	logger        zerolog.Logger
 	committerOpts *options
 
 	fromAddress common.Address
@@ -99,7 +102,7 @@ func (e *ethCommitter) SendTx(
 		e.nonceCache.Sync(from, func() (uint64, error) {
 			nonce, err := e.evmProvider.PendingNonceAt(context.TODO(), from)
 			if err != nil {
-				log.WithError(err).Warningln("unable to acquire nonce")
+				e.logger.Err(err).Msg("unable to acquire nonce")
 			}
 
 			return nonce, err
@@ -131,10 +134,10 @@ func (e *ethCommitter) SendTx(
 				return nil
 			}
 
-			log.WithFields(log.Fields{
-				"txHash":    txHash.Hex(),
-				"txHashRet": txHashRet.Hex(),
-			}).WithError(err).Warningln("SendTransaction failed with error")
+			e.logger.Err(err).
+				Str("txHash", txHash.Hex()).
+				Str("txHashRet", txHashRet.Hex()).
+				Msg("SendTransaction failed")
 
 			switch {
 			case strings.Contains(err.Error(), "invalid sender"):
@@ -146,7 +149,10 @@ func (e *ethCommitter) SendTx(
 				strings.Contains(err.Error(), "the tx doesn't have the correct nonce"):
 
 				if resyncUsed {
-					log.Errorf("nonces synced, but still wrong nonce for %s: %d", e.fromAddress, nonce)
+					e.logger.Error().
+						Str("fromAddress", e.fromAddress.Hex()).
+						Int64("nonce", nonce).
+						Msg("nonces synced, but still wrong nonce for address")
 					err = errors.Wrapf(err, "nonce %d mismatch", nonce)
 					return err
 				}

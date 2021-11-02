@@ -15,7 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	log "github.com/xlab/suplog"
+	"github.com/rs/zerolog"
 )
 
 type PersonalSignFn func(account common.Address, data []byte) (sig []byte, err error)
@@ -33,8 +33,9 @@ type EthKeyStore interface {
 	Paths() []string
 }
 
-func New(paths ...string) (EthKeyStore, error) {
+func New(logger zerolog.Logger, paths ...string) (EthKeyStore, error) {
 	ks := &keyStore{
+		logger:   logger.With().Str("module", "ethKeyStore").Logger(),
 		cache:    NewKeyCache(),
 		paths:    make(map[string]struct{}),
 		pathsMux: new(sync.RWMutex),
@@ -49,6 +50,7 @@ func New(paths ...string) (EthKeyStore, error) {
 }
 
 type keyStore struct {
+	logger   zerolog.Logger
 	cache    KeyCache
 	paths    map[string]struct{}
 	pathsMux *sync.RWMutex
@@ -79,7 +81,9 @@ func (ks *keyStore) Accounts() []common.Address {
 			accounts = append(accounts, spec.AddressFromHex())
 			return nil
 		}); err != nil {
-			log.WithField("keystore", keystorePath).WithError(err).Warningln("failed to read keystore files")
+			ks.logger.Err(err).
+				Str("keystorePath", keystorePath).
+				Msg("failed to read keystore files")
 		}
 	}
 
@@ -136,7 +140,9 @@ func (ks *keyStore) reloadPathsCache() {
 			return nil
 		})
 		if err != nil {
-			log.WithField("keystore", keystorePath).WithError(err).Warningln("failed to read keystore files")
+			ks.logger.Err(err).
+				Str("keystorePath", keystorePath).
+				Msg("failed to read keystore files")
 		}
 	}
 }
