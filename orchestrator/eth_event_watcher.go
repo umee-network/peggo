@@ -3,6 +3,7 @@ package orchestrator
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/pkg/errors"
@@ -205,7 +206,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 
 	if len(deposits) > 0 || len(withdraws) > 0 || len(valsetUpdates) > 0 || len(deployedERC20Updates) > 0 {
 		// todo get eth chain id from the chain
-		if err := p.peggyBroadcastClient.SendEthereumClaims(ctx, lastClaimEvent.EthereumEventNonce, deposits, withdraws, valsetUpdates, deployedERC20Updates); err != nil {
+		if err := p.peggyBroadcastClient.SendEthereumClaims(ctx, lastClaimEvent.EthereumEventNonce, deposits, withdraws, valsetUpdates, deployedERC20Updates, 6*time.Second); err != nil {
 
 			err = errors.Wrap(err, "failed to send ethereum claims to Cosmos chain")
 			return 0, err

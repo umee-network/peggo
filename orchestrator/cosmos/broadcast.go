@@ -55,6 +55,7 @@ type PeggyBroadcastClient interface {
 		withdraws []*wrappers.PeggyTransactionBatchExecutedEvent,
 		valsetUpdates []*wrappers.PeggyValsetUpdatedEvent,
 		erc20Deployed []*wrappers.PeggyERC20DeployedEvent,
+		loopDuration time.Duration,
 	) error
 
 	// SendToEth broadcasts a Tx that tokens from Cosmos to Ethereum.
@@ -381,6 +382,7 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 	withdraws []*wrappers.PeggyTransactionBatchExecutedEvent,
 	valsetUpdates []*wrappers.PeggyValsetUpdatedEvent,
 	erc20Deployed []*wrappers.PeggyERC20DeployedEvent,
+	loopDuration time.Duration,
 ) error {
 	// SortableEvent exists with the only purpose to make a nicer sortable slice
 	type SortableEvent struct {
@@ -472,7 +474,7 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 		// Otherwise it will through `non contiguous event nonce` failing CheckTx.
 		//
 		// time.Sleep(3 * time.Second)
-		time.Sleep(6 * time.Second)
+		time.Sleep(loopDuration)
 	}
 	return nil
 }
