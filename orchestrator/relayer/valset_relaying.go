@@ -5,7 +5,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/umee-network/umee/x/peggy/types"
-	"google.golang.org/appengine/log"
 )
 
 // RelayValsets checks the last validator set on Ethereum, if it's lower than our latest validator
@@ -60,8 +59,10 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 
 		// Check if latestCosmosConfirmed already submitted by other validators in mean time
 		if latestCosmosConfirmed.Nonce > latestEthereumValsetNonce.Uint64() {
-			log.Infof("Detected latest cosmos valset nonce %d, but latest valset on Ethereum is %d. Sending update to Ethereum\n",
-				latestCosmosConfirmed.Nonce, latestEthereumValsetNonce.Uint64())
+			s.logger.Info().
+				Uint64("latestCosmosConfirmedNonce", latestCosmosConfirmed.Nonce).
+				Uint64("latestEthereumValsetNonce", latestEthereumValsetNonce.Uint64()).
+				Msg("Detected latest cosmos valset nonce, but latest valset on Ethereum is different. Sending update to Ethereum")
 
 			// Send Valset Update to Ethereum
 			txHash, err := s.peggyContract.SendEthValsetUpdate(

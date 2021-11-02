@@ -303,7 +303,7 @@ func initEthereumAccountsManager(
 			return emptyEthAddress, nil, nil, fmt.Errorf("failed to locate Ethereum keystore dir: %w", err)
 		}
 
-		ks, err := keystore.New(ethKeystoreDir)
+		ks, err := keystore.New(logger, ethKeystoreDir)
 		if err != nil {
 			return emptyEthAddress, nil, nil, fmt.Errorf("failed to load Ethereum keystore: %w", err)
 		}

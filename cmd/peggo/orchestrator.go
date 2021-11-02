@@ -132,14 +132,14 @@ func getOrchestratorCmd() *cobra.Command {
 			}
 
 			peggyAddress := ethcmn.HexToAddress(peggyParams.BridgeEthereumAddress)
-			peggyContract, err := peggy.NewPeggyContract(ethCommitter, peggyAddress)
+			peggyContract, err := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress)
 			if err != nil {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
 
 			relayValSets := konfig.Bool(flagRelayValsets)
 			relayBatches := konfig.Bool(flagRelayBatches)
-			relayer := relayer.NewPeggyRelayer(peggyQueryClient, peggyContract, relayValSets, relayBatches)
+			relayer := relayer.NewPeggyRelayer(logger, peggyQueryClient, peggyContract, relayValSets, relayBatches)
 
 			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
 			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, &coingecko.Config{
