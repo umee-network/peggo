@@ -68,7 +68,7 @@ func NewCosmosClient(
 		ctx:  ctx,
 		opts: opts,
 
-		logger: logger.With().Str("module", "cosmosClient").Logger(),
+		logger: logger.With().Str("module", "cosmos_client").Logger(),
 
 		conn:      conn,
 		txFactory: txFactory,
@@ -193,7 +193,7 @@ func (c *cosmosClient) SyncBroadcastMsg(msgs ...sdk.Msg) (*sdk.TxResponse, error
 		}
 		if err != nil {
 			resJSON, _ := json.MarshalIndent(res, "", "\t")
-			c.logger.Err(err).Int("size", len(msgs)).RawJSON("resJSON", resJSON).Msg("failed to commit msg batch")
+			c.logger.Err(err).Int("size", len(msgs)).RawJSON("tx_response", resJSON).Msg("failed to (sync) broadcast tx")
 			return nil, err
 		}
 	}
@@ -223,7 +223,7 @@ func (c *cosmosClient) AsyncBroadcastMsg(msgs ...sdk.Msg) (*sdk.TxResponse, erro
 		}
 		if err != nil {
 			resJSON, _ := json.MarshalIndent(res, "", "\t")
-			c.logger.Err(err).Int("size", len(msgs)).RawJSON("resJSON", resJSON).Msg("failed to commit msg batch")
+			c.logger.Err(err).Int("size", len(msgs)).RawJSON("tx_response", resJSON).Msg("failed to (async) broadcast tx")
 			return nil, err
 		}
 	}
@@ -417,16 +417,16 @@ func (c *cosmosClient) runBatchBroadcast() {
 			}
 			if err != nil {
 				resJSON, _ := json.MarshalIndent(res, "", "\t")
-				c.logger.Err(err).Int("size", len(toSubmit)).RawJSON("resJSON", resJSON).Msg("failed to commit msg batch")
+				c.logger.Err(err).Int("size", len(toSubmit)).RawJSON("tx_response", resJSON).Msg("failed to (sync) broadcast batch tx")
 				return
 			}
 		}
 
 		if res.Code != 0 {
 			err = errors.Errorf("error %d (%s): %s", res.Code, res.Codespace, res.RawLog)
-			c.logger.Err(err).Str("txHash", res.TxHash).Msg("failed to commit msg batch")
+			c.logger.Err(err).Str("txHash", res.TxHash).Msg("failed to (sync) broadcast batch tx")
 		} else {
-			c.logger.Debug().Str("txHash", res.TxHash).Msg("msg batch committed successfully")
+			c.logger.Debug().Str("txHash", res.TxHash).Msg("batch tx committed successfully")
 		}
 
 		c.accSeq++

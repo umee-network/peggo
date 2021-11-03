@@ -87,7 +87,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 		// TODO: fix log. print the list of events? Or the length of it?
 		// we are only seeing the pointer address of the objects in the slice
 		// Object("erc20DeployedEvents", erc20DeployedEvents)).
-		Int("events", len(erc20DeployedEvents)).
+		Int("num_events", len(erc20DeployedEvents)).
 		Msg("Scanned ERC20Deployed events from Ethereum")
 
 	var sendToCosmosEvents []*wrappers.PeggySendToCosmosEvent
@@ -122,7 +122,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 		Uint64("start", startingBlock).
 		Uint64("end", currentBlock).
 		// TODO: fix log. print the list of events? Or the length of it?
-		Int("events", len(sendToCosmosEvents)).
+		Int("num_events", len(sendToCosmosEvents)).
 		Msg("Scanned SendToCosmos events from Ethereum")
 
 	var transactionBatchExecutedEvents []*wrappers.PeggyTransactionBatchExecutedEvent
@@ -156,7 +156,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 		Uint64("start", startingBlock).
 		Uint64("end", currentBlock).
 		// TODO: fix log. print the list of events? Or the length of it?
-		Int("events", len(transactionBatchExecutedEvents)).
+		Int("num_events", len(transactionBatchExecutedEvents)).
 		Msg("Scanned TransactionBatchExecuted events from Ethereum")
 
 	var valsetUpdatedEvents []*wrappers.PeggyValsetUpdatedEvent
