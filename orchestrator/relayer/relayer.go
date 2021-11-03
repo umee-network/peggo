@@ -35,7 +35,7 @@ func NewPeggyRelayer(
 	batchRelayEnabled bool,
 ) PeggyRelayer {
 	return &peggyRelayer{
-		logger:             logger.With().Str("module", "peggyRelayer").Logger(),
+		logger:             logger.With().Str("module", "peggy_relayer").Logger(),
 		cosmosQueryClient:  cosmosQueryClient,
 		peggyContract:      peggyContract,
 		ethProvider:        peggyContract.Provider(),
