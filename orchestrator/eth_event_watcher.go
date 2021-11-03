@@ -84,9 +84,6 @@ func (p *peggyOrchestrator) CheckForEvents(
 	p.logger.Debug().
 		Uint64("start", startingBlock).
 		Uint64("end", currentBlock).
-		// TODO: fix log. print the list of events? Or the length of it?
-		// we are only seeing the pointer address of the objects in the slice
-		// Object("erc20DeployedEvents", erc20DeployedEvents)).
 		Int("num_events", len(erc20DeployedEvents)).
 		Msg("Scanned ERC20Deployed events from Ethereum")
 
@@ -121,7 +118,6 @@ func (p *peggyOrchestrator) CheckForEvents(
 	p.logger.Debug().
 		Uint64("start", startingBlock).
 		Uint64("end", currentBlock).
-		// TODO: fix log. print the list of events? Or the length of it?
 		Int("num_events", len(sendToCosmosEvents)).
 		Msg("Scanned SendToCosmos events from Ethereum")
 
@@ -155,7 +151,6 @@ func (p *peggyOrchestrator) CheckForEvents(
 	p.logger.Debug().
 		Uint64("start", startingBlock).
 		Uint64("end", currentBlock).
-		// TODO: fix log. print the list of events? Or the length of it?
 		Int("num_events", len(transactionBatchExecutedEvents)).
 		Msg("Scanned TransactionBatchExecuted events from Ethereum")
 
@@ -189,8 +184,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 	p.logger.Debug().
 		Uint64("start", startingBlock).
 		Uint64("end", currentBlock).
-		// TODO: fix log. print the list of events? Or the length of it?
-		Int("events", len(valsetUpdatedEvents)).
+		Int("num_events", len(valsetUpdatedEvents)).
 		Msg("Scanned ValsetUpdatedEvents events from Ethereum")
 
 	// note that starting block overlaps with our last che	cked block, because we have to deal with

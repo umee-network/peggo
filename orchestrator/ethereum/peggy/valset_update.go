@@ -100,13 +100,13 @@ func (s *peggyContract) SendEthValsetUpdate(
 	txHash, err := s.SendTx(ctx, s.peggyAddress, txData)
 	if err != nil {
 		s.logger.Err(err).
-			Str("txHash", txHash.String()).
+			Str("tx_hash", txHash.String()).
 			Msg("Failed to sign and submit (Peggy updateValset) to EVM")
 
 		return nil, err
 	}
 
-	s.logger.Info().Str("txHash", txHash.Hex()).Msg("Sent Tx (Peggy updateValset)")
+	s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("Sent Tx (Peggy updateValset)")
 
 	//     let before_nonce = get_valset_nonce(peggy_contract_address, eth_address, web3).await?;
 	//     if before_nonce != old_nonce {

@@ -80,7 +80,7 @@ func NewPeggyBroadcastClient(
 	ethPersonalSignFn keystore.PersonalSignFn,
 ) PeggyBroadcastClient {
 	return &peggyBroadcastClient{
-		logger:            logger.With().Str("module", "peggyBroadcastClient").Logger(),
+		logger:            logger.With().Str("module", "peggy_broadcast_client").Logger(),
 		daemonQueryClient: queryClient,
 		broadcastClient:   broadcastClient,
 		ethSignerFn:       ethSignerFn,
@@ -230,7 +230,7 @@ func (s *peggyBroadcastClient) sendDepositClaims(deposit *wrappers.PeggySendToCo
 		Str("recipient", sdk.AccAddress(recipientBz).String()).
 		Str("amount", deposit.Amount.String()).
 		Str("event_nonce", deposit.EventNonce.String()).
-		Msg("Oracle observed a deposit event. Sending MsgDepositClaim")
+		Msg("oracle observed a deposit event. Sending MsgDepositClaim")
 
 	msg := &types.MsgDepositClaim{
 		EventNonce:     deposit.EventNonce.Uint64(),
@@ -249,9 +249,9 @@ func (s *peggyBroadcastClient) sendDepositClaims(deposit *wrappers.PeggySendToCo
 	}
 
 	s.logger.Info().
-		Str("txHash", txResponse.TxHash).
-		Str("eventNonce", deposit.EventNonce.String()).
-		Msg("Oracle sent deposit event successfully")
+		Str("tx_hash", txResponse.TxHash).
+		Str("event_nonce", deposit.EventNonce.String()).
+		Msg("oracle sent deposit event successfully")
 
 	return nil
 }
@@ -260,9 +260,9 @@ func (s *peggyBroadcastClient) sendWithdrawClaims(withdraw *wrappers.PeggyTransa
 
 	s.logger.Info().
 		Str("nonce", withdraw.BatchNonce.String()).
-		Str("tokenContract", withdraw.Token.Hex()).
-		Str("eventNonce", withdraw.EventNonce.String()).
-		Msg("Oracle observed a withdraw event. Sending MsgWithdrawClaim")
+		Str("token_contract", withdraw.Token.Hex()).
+		Str("event_nonce", withdraw.EventNonce.String()).
+		Msg("oracle observed a withdraw event. Sending MsgWithdrawClaim")
 
 	// WithdrawClaim claims that a batch of withdrawal
 	// operations on the bridge contract was executed.
@@ -281,9 +281,9 @@ func (s *peggyBroadcastClient) sendWithdrawClaims(withdraw *wrappers.PeggyTransa
 	}
 
 	s.logger.Info().
-		Str("txHash", txResponse.TxHash).
-		Str("eventNonce", withdraw.EventNonce.String()).
-		Msg("Oracle sent Withdraw event successfully")
+		Str("tx_hash", txResponse.TxHash).
+		Str("event_nonce", withdraw.EventNonce.String()).
+		Msg("oracle sent Withdraw event successfully")
 
 	return nil
 }
@@ -291,12 +291,12 @@ func (s *peggyBroadcastClient) sendWithdrawClaims(withdraw *wrappers.PeggyTransa
 func (s *peggyBroadcastClient) sendValsetUpdateClaims(valsetUpdate *wrappers.PeggyValsetUpdatedEvent) error {
 
 	s.logger.Info().
-		Str("eventNonce", valsetUpdate.EventNonce.String()).
-		Uint64("valsetNonce", valsetUpdate.NewValsetNonce.Uint64()).
+		Str("event_nonce", valsetUpdate.EventNonce.String()).
+		Uint64("valset_nonce", valsetUpdate.NewValsetNonce.Uint64()).
 		Int("validators", len(valsetUpdate.Validators)).
 		Interface("powers", valsetUpdate.Powers).
-		Uint64("rewardAmount", valsetUpdate.RewardAmount.Uint64()).
-		Str("rewardToken", valsetUpdate.RewardToken.Hex()).
+		Uint64("reward_amount", valsetUpdate.RewardAmount.Uint64()).
+		Str("reward_token", valsetUpdate.RewardToken.Hex()).
 		Msg("oracle observed a valset update event. Sending MsgValsetUpdateClaim")
 
 	members := make([]*types.BridgeValidator, len(valsetUpdate.Validators))
@@ -324,8 +324,8 @@ func (s *peggyBroadcastClient) sendValsetUpdateClaims(valsetUpdate *wrappers.Peg
 	}
 
 	s.logger.Info().
-		Str("txHash", txResponse.TxHash).
-		Str("eventNonce", valsetUpdate.EventNonce.String()).
+		Str("tx_hash", txResponse.TxHash).
+		Str("event_nonce", valsetUpdate.EventNonce.String()).
 		Msg("oracle sent ValsetUpdate event successfully")
 
 	return nil
@@ -334,9 +334,9 @@ func (s *peggyBroadcastClient) sendValsetUpdateClaims(valsetUpdate *wrappers.Peg
 func (s *peggyBroadcastClient) sendERC20DeployedClaims(event *wrappers.PeggyERC20DeployedEvent) error {
 
 	s.logger.Info().
-		Str("eventNonce", event.EventNonce.String()).
-		Str("tokenContract", event.TokenContract.Hex()).
-		Str("cosmosDenom", event.CosmosDenom).
+		Str("event_nonce", event.EventNonce.String()).
+		Str("token_contract", event.TokenContract.Hex()).
+		Str("cosmos_denom", event.CosmosDenom).
 		Msg("oracle observed an ERC20 deployed event. Sending MsgERC20DeployedClaim")
 
 	msg := &types.MsgERC20DeployedClaim{
@@ -357,8 +357,8 @@ func (s *peggyBroadcastClient) sendERC20DeployedClaims(event *wrappers.PeggyERC2
 	}
 
 	s.logger.Info().
-		Str("txHash", txResponse.TxHash).
-		Str("eventNonce", event.EventNonce.String()).
+		Str("tx_hash", txResponse.TxHash).
+		Str("event_nonce", event.EventNonce.String()).
 		Msg("oracle sent ERC20Deployed event successfully")
 
 	return nil

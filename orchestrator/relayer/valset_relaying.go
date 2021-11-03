@@ -75,7 +75,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 				return err
 			}
 
-			s.logger.Info().Str("txHash", txHash.Hex()).Msg("Sent Ethereum Tx (EthValsetUpdate)")
+			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("Sent Ethereum Tx (EthValsetUpdate)")
 
 		}
 

@@ -35,7 +35,7 @@ type EthKeyStore interface {
 
 func New(logger zerolog.Logger, paths ...string) (EthKeyStore, error) {
 	ks := &keyStore{
-		logger:   logger.With().Str("module", "ethKeyStore").Logger(),
+		logger:   logger.With().Str("module", "eth_key_store").Logger(),
 		cache:    NewKeyCache(),
 		paths:    make(map[string]struct{}),
 		pathsMux: new(sync.RWMutex),
@@ -82,7 +82,7 @@ func (ks *keyStore) Accounts() []common.Address {
 			return nil
 		}); err != nil {
 			ks.logger.Err(err).
-				Str("keystorePath", keystorePath).
+				Str("keystore_path", keystorePath).
 				Msg("failed to read keystore files")
 		}
 	}
@@ -150,7 +150,7 @@ func (ks *keyStore) reloadPathsCache() {
 		})
 		if err != nil {
 			ks.logger.Err(err).
-				Str("keystorePath", keystorePath).
+				Str("keystore_path", keystorePath).
 				Msg("failed to read keystore files")
 		}
 	}

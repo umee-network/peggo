@@ -135,8 +135,8 @@ func (e *ethCommitter) SendTx(
 			}
 
 			e.logger.Err(err).
-				Str("txHash", txHash.Hex()).
-				Str("txHashRet", txHashRet.Hex()).
+				Str("tx_hash", txHash.Hex()).
+				Str("tx_hash_ret", txHashRet.Hex()).
 				Msg("SendTransaction failed")
 
 			switch {
@@ -150,7 +150,7 @@ func (e *ethCommitter) SendTx(
 
 				if resyncUsed {
 					e.logger.Error().
-						Str("fromAddress", e.fromAddress.Hex()).
+						Str("from_address", e.fromAddress.Hex()).
 						Int64("nonce", nonce).
 						Msg("nonces synced, but still wrong nonce for address")
 					err = errors.Wrapf(err, "nonce %d mismatch", nonce)

@@ -42,12 +42,12 @@ func (s *peggyContract) SendToCosmos(
 		txHash, err := s.SendTx(ctx, erc20, txData)
 		if err != nil {
 			s.logger.Err(err).
-				Str("txHash", txHash.Hex()).
+				Str("tx_hash", txHash.Hex()).
 				Msg("Failed to sign and submit (ERC20 approve) to EVM")
 			return nil, err
 		}
 
-		s.logger.Info().Str("txHash", txHash.Hex()).Msg("Sent Tx (ERC20 approve)")
+		s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("Sent Tx (ERC20 approve)")
 	}
 
 	// This code deals with some specifics of Ethereum byte encoding, Ethereum is BigEndian
@@ -68,13 +68,13 @@ func (s *peggyContract) SendToCosmos(
 	txHash, err := s.SendTx(ctx, s.peggyAddress, txData)
 	if err != nil {
 		s.logger.Err(err).
-			Str("txHash", txHash.Hex()).
+			Str("tx_hash", txHash.Hex()).
 			Msg("Failed to sign and submit (Peggy sendToCosmos) to EVM")
 
 		return nil, err
 	}
 
-	s.logger.Info().Str("txHash", txHash.Hex()).Msg("Sent Tx (Peggy sendToCosmos)")
+	s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("Sent Tx (Peggy sendToCosmos)")
 
 	return &txHash, nil
 }

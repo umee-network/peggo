@@ -81,7 +81,7 @@ func (s *peggyRelayer) RelayBatches(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			s.logger.Info().Str("txHash", txHash.Hex()).Msg("Sent Ethereum Tx (TransactionBatch)")
+			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("Sent Ethereum Tx (TransactionBatch)")
 		}
 	}
 

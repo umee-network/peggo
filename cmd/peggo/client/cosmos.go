@@ -417,16 +417,19 @@ func (c *cosmosClient) runBatchBroadcast() {
 			}
 			if err != nil {
 				resJSON, _ := json.MarshalIndent(res, "", "\t")
-				c.logger.Err(err).Int("size", len(toSubmit)).RawJSON("tx_response", resJSON).Msg("failed to (sync) broadcast batch tx")
+				c.logger.Err(err).
+					Int("size", len(toSubmit)).
+					RawJSON("tx_response", resJSON).
+					Msg("failed to (sync) broadcast batch tx")
 				return
 			}
 		}
 
 		if res.Code != 0 {
 			err = errors.Errorf("error %d (%s): %s", res.Code, res.Codespace, res.RawLog)
-			c.logger.Err(err).Str("txHash", res.TxHash).Msg("failed to (sync) broadcast batch tx")
+			c.logger.Err(err).Str("tx_hash", res.TxHash).Msg("failed to (sync) broadcast batch tx")
 		} else {
-			c.logger.Debug().Str("txHash", res.TxHash).Msg("batch tx committed successfully")
+			c.logger.Debug().Str("tx_hash", res.TxHash).Msg("batch tx committed successfully")
 		}
 
 		c.accSeq++

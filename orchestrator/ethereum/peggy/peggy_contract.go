@@ -79,7 +79,7 @@ func NewPeggyContract(
 	}
 
 	svc := &peggyContract{
-		logger:       logger.With().Str("module", "peggyContract").Logger(),
+		logger:       logger.With().Str("module", "peggy_contract").Logger(),
 		EVMCommitter: ethCommitter,
 		peggyAddress: peggyAddress,
 		ethPeggy:     ethPeggy,
