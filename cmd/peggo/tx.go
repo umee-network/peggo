@@ -49,7 +49,12 @@ func getRegisterEthKeyCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Cosmos keyring: %w", err)
 			}
 
-			ethKeyFromAddress, _, personalSignFn, err := initEthereumAccountsManager(0, konfig)
+			logger, err := getLogger(cmd)
+			if err != nil {
+				return err
+			}
+
+			ethKeyFromAddress, _, personalSignFn, err := initEthereumAccountsManager(logger, 0, konfig)
 			if err != nil {
 				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
@@ -80,11 +85,6 @@ func getRegisterEthKeyCmd() *cobra.Command {
 
 			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s\n", tmRPCEndpoint)
 			clientCtx = clientCtx.WithClient(tmRPC).WithNodeURI(tmRPCEndpoint)
-
-			logger, err := getLogger(cmd)
-			if err != nil {
-				return err
-			}
 
 			daemonClient, err := client.NewCosmosClient(clientCtx, logger, cosmosGRPC, client.OptionGasPrices(cosmosGasPrices))
 			if err != nil {

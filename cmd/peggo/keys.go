@@ -24,6 +24,7 @@ import (
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/knadh/koanf"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/orchestrator/ethereum/keystore"
 	"golang.org/x/term"
 )
@@ -168,6 +169,7 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 }
 
 func initEthereumAccountsManager(
+	logger zerolog.Logger,
 	ethChainID uint64,
 	konfig *koanf.Koanf,
 ) (

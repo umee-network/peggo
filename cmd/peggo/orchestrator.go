@@ -38,6 +38,11 @@ func getOrchestratorCmd() *cobra.Command {
 				return err
 			}
 
+			logger, err := getLogger(cmd)
+			if err != nil {
+				return err
+			}
+
 			cosmosUseLedger := konfig.Bool(flagCosmosUseLedger)
 			ethUseLedger := konfig.Bool(flagEthUseLedger)
 			if cosmosUseLedger || ethUseLedger {
@@ -50,7 +55,7 @@ func getOrchestratorCmd() *cobra.Command {
 			}
 
 			ethChainID := konfig.Int64(flagEthChainID)
-			ethKeyFromAddress, signerFn, personalSignFn, err := initEthereumAccountsManager(uint64(ethChainID), konfig)
+			ethKeyFromAddress, signerFn, personalSignFn, err := initEthereumAccountsManager(logger, uint64(ethChainID), konfig)
 			if err != nil {
 				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
@@ -72,11 +77,6 @@ func getOrchestratorCmd() *cobra.Command {
 
 			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s\n", tmRPCEndpoint)
 			clientCtx = clientCtx.WithClient(tmRPC).WithNodeURI(tmRPCEndpoint)
-
-			logger, err := getLogger(cmd)
-			if err != nil {
-				return err
-			}
 
 			daemonClient, err := client.NewCosmosClient(clientCtx, logger, cosmosGRPC, client.OptionGasPrices(cosmosGasPrices))
 			if err != nil {
