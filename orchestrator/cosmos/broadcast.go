@@ -439,6 +439,12 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 
 	// iterate through events and send them sequentially
 	for _, ev := range allevents {
+		// if the event nonce isn't sequential, we break from this loop
+		// given that the events are sorted, this should never happen
+		if ev.EventNonce != lastClaimEvent+1 {
+			break
+		}
+
 		switch {
 		case ev.DepositEvent != nil:
 			err := s.sendDepositClaims(ctx, ev.DepositEvent)
@@ -465,6 +471,8 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 				return err
 			}
 		}
+
+		lastClaimEvent++
 		// TODO: Evaluate this condition and if it needs to be configurable. For
 		// Umee, our block times will average around 6s.
 		//
