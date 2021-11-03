@@ -21,7 +21,7 @@ type PeggyRelayer interface {
 type peggyRelayer struct {
 	logger             zerolog.Logger
 	cosmosQueryClient  cosmos.PeggyQueryClient
-	peggyContract      peggy.PeggyContract
+	peggyContract      peggy.Contract
 	ethProvider        provider.EVMProvider
 	valsetRelayEnabled bool
 	batchRelayEnabled  bool
@@ -30,7 +30,7 @@ type peggyRelayer struct {
 func NewPeggyRelayer(
 	logger zerolog.Logger,
 	cosmosQueryClient cosmos.PeggyQueryClient,
-	peggyContract peggy.PeggyContract,
+	peggyContract peggy.Contract,
 	valsetRelayEnabled bool,
 	batchRelayEnabled bool,
 ) PeggyRelayer {

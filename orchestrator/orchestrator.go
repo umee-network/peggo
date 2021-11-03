@@ -34,7 +34,7 @@ type peggyOrchestrator struct {
 	tmClient             tmclient.TendermintClient
 	cosmosQueryClient    sidechain.PeggyQueryClient
 	peggyBroadcastClient sidechain.PeggyBroadcastClient
-	peggyContract        peggy.PeggyContract
+	peggyContract        peggy.Contract
 	ethProvider          provider.EVMProvider
 	ethFrom              ethcmn.Address
 	ethSignerFn          keystore.SignerFn
@@ -51,7 +51,7 @@ func NewPeggyOrchestrator(
 	cosmosQueryClient sidechain.PeggyQueryClient,
 	peggyBroadcastClient sidechain.PeggyBroadcastClient,
 	tmClient tmclient.TendermintClient,
-	peggyContract peggy.PeggyContract,
+	peggyContract peggy.Contract,
 	ethFrom ethcmn.Address,
 	ethSignerFn keystore.SignerFn,
 	ethPersonalSignFn keystore.PersonalSignFn,

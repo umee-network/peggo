@@ -270,7 +270,11 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 	})
 }
 
-func (p *peggyOrchestrator) CheckFeeThreshold(erc20Contract common.Address, totalFee cosmtypes.Int, minFeeInUSD float64) bool {
+func (p *peggyOrchestrator) CheckFeeThreshold(
+	erc20Contract common.Address,
+	totalFee cosmtypes.Int,
+	minFeeInUSD float64,
+) bool {
 	if minFeeInUSD == 0 || p.priceFeeder == nil {
 		return true
 	}

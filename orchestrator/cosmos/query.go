@@ -217,7 +217,13 @@ func (s *peggyQueryClient) PeggyParams(ctx context.Context) (*types.Params, erro
 	return &daemonResp.Params, nil
 }
 
-func (s *peggyQueryClient) ERC20ToDenom(ctx context.Context, contractAddr ethcmn.Address) (*types.QueryERC20ToDenomResponse, error) {
+func (s *peggyQueryClient) ERC20ToDenom(
+	ctx context.Context,
+	contractAddr ethcmn.Address,
+) (
+	*types.QueryERC20ToDenomResponse,
+	error,
+) {
 	daemonResp, err := s.daemonQueryClient.ERC20ToDenom(ctx, &types.QueryERC20ToDenomRequest{
 		Erc20: contractAddr.Hex(),
 	})

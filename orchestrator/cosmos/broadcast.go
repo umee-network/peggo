@@ -216,10 +216,7 @@ func (s *peggyBroadcastClient) SendBatchConfirm(
 	return nil
 }
 
-func (s *peggyBroadcastClient) sendDepositClaims(
-	ctx context.Context,
-	deposit *wrappers.PeggySendToCosmosEvent,
-) error {
+func (s *peggyBroadcastClient) sendDepositClaims(deposit *wrappers.PeggySendToCosmosEvent) error {
 	// EthereumBridgeDepositClaim
 	// When more than 66% of the active validator set has
 	// claimed to have seen the deposit enter the ethereum blockchain coins are
@@ -259,10 +256,7 @@ func (s *peggyBroadcastClient) sendDepositClaims(
 	return nil
 }
 
-func (s *peggyBroadcastClient) sendWithdrawClaims(
-	ctx context.Context,
-	withdraw *wrappers.PeggyTransactionBatchExecutedEvent,
-) error {
+func (s *peggyBroadcastClient) sendWithdrawClaims(withdraw *wrappers.PeggyTransactionBatchExecutedEvent) error {
 
 	s.logger.Info().
 		Str("nonce", withdraw.BatchNonce.String()).
@@ -294,10 +288,7 @@ func (s *peggyBroadcastClient) sendWithdrawClaims(
 	return nil
 }
 
-func (s *peggyBroadcastClient) sendValsetUpdateClaims(
-	ctx context.Context,
-	valsetUpdate *wrappers.PeggyValsetUpdatedEvent,
-) error {
+func (s *peggyBroadcastClient) sendValsetUpdateClaims(valsetUpdate *wrappers.PeggyValsetUpdatedEvent) error {
 
 	s.logger.Info().
 		Str("eventNonce", valsetUpdate.EventNonce.String()).
@@ -340,10 +331,7 @@ func (s *peggyBroadcastClient) sendValsetUpdateClaims(
 	return nil
 }
 
-func (s *peggyBroadcastClient) sendERC20DeployedClaims(
-	ctx context.Context,
-	event *wrappers.PeggyERC20DeployedEvent,
-) error {
+func (s *peggyBroadcastClient) sendERC20DeployedClaims(event *wrappers.PeggyERC20DeployedEvent) error {
 
 	s.logger.Info().
 		Str("eventNonce", event.EventNonce.String()).
@@ -390,30 +378,31 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 	// Individual arrays (deposits, withdraws, valsetUpdates) are sorted.
 	// Broadcast claim events sequentially starting with eventNonce = lastClaimEvent + 1.
 	for count < totalClaimEvents {
+		//nolint:gocritic // (we are already working on refactoring this!)
 		if i < len(deposits) && deposits[i].EventNonce.Uint64() == lastClaimEvent+1 {
 			// send deposit
-			if err := s.sendDepositClaims(ctx, deposits[i]); err != nil {
+			if err := s.sendDepositClaims(deposits[i]); err != nil {
 				s.logger.Err(err).Msg("broadcasting MsgDepositClaim failed")
 				return err
 			}
 			i++
 		} else if j < len(withdraws) && withdraws[j].EventNonce.Uint64() == lastClaimEvent+1 {
 			// send withdraw claim
-			if err := s.sendWithdrawClaims(ctx, withdraws[j]); err != nil {
+			if err := s.sendWithdrawClaims(withdraws[j]); err != nil {
 				s.logger.Err(err).Msg("broadcasting MsgWithdrawClaim failed")
 				return err
 			}
 			j++
 		} else if k < len(valsetUpdates) && valsetUpdates[k].EventNonce.Uint64() == lastClaimEvent+1 {
 			// send valset update claim
-			if err := s.sendValsetUpdateClaims(ctx, valsetUpdates[k]); err != nil {
+			if err := s.sendValsetUpdateClaims(valsetUpdates[k]); err != nil {
 				s.logger.Err(err).Msg("broadcasting MsgValsetUpdateClaim failed")
 				return err
 			}
 			k++
 		} else if l < len(erc20Deployed) && erc20Deployed[k].EventNonce.Uint64() == lastClaimEvent+1 {
 			// send erc20 deployed claim
-			if err := s.sendERC20DeployedClaims(ctx, erc20Deployed[k]); err != nil {
+			if err := s.sendERC20DeployedClaims(erc20Deployed[k]); err != nil {
 				s.logger.Err(err).Msg("broadcasting MsgERC20DeployedClaim failed")
 				return err
 			}

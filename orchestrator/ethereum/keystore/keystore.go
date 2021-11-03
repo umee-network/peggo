@@ -92,13 +92,22 @@ func (ks *keyStore) Accounts() []common.Address {
 
 func (ks *keyStore) forEachWallet(keystorePath string, fn func(spec *WalletSpec) error) error {
 	return filepath.Walk(keystorePath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
+		switch {
+		case err != nil:
 			return err
-		} else if path == keystorePath {
+		case path == keystorePath:
 			return nil
-		} else if info.IsDir() {
+		case info.IsDir():
 			return filepath.SkipDir
 		}
+		// Original
+		// if err != nil {
+		// 	return err
+		// } else if path == keystorePath {
+		// 	return nil
+		// } else if info.IsDir() {
+		// 	return filepath.SkipDir
+		// }
 		var spec *WalletSpec
 		if data, err := ioutil.ReadFile(path); err != nil {
 			return err

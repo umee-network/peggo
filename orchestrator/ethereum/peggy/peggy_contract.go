@@ -18,7 +18,7 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
-type PeggyContract interface {
+type Contract interface {
 	committer.EVMCommitter
 
 	Address() common.Address
@@ -72,7 +72,7 @@ func NewPeggyContract(
 	logger zerolog.Logger,
 	ethCommitter committer.EVMCommitter,
 	peggyAddress common.Address,
-) (PeggyContract, error) {
+) (Contract, error) {
 	ethPeggy, err := wrappers.NewPeggy(peggyAddress, ethCommitter.Provider())
 	if err != nil {
 		return nil, err
