@@ -80,9 +80,9 @@ func (s *peggyContract) SendEthValsetUpdate(
 	// 		bytes32[] memory _s
 	// )
 	s.logger.Debug().
-		Interface("currentValidators", currentValidators).
-		Interface("currentPowers", currentPowers).
-		Interface("currentValsetNonce", currentValsetNonce).
+		Interface("current_validators", currentValidators).
+		Interface("current_powers", currentPowers).
+		Interface("current_valset_nonce", currentValsetNonce).
 		Msg("sending updateValset Ethereum TX")
 
 	txData, err := peggyABI.Pack("updateValset",

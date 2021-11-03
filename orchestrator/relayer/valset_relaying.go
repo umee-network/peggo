@@ -46,8 +46,8 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 	}
 
 	s.logger.Debug().
-		Interface("currentEthValset", currentEthValset).
-		Interface("latestCosmosConfirmed", latestCosmosConfirmed).
+		Interface("current_eth_valset", currentEthValset).
+		Interface("latest_cosmos_confirmed", latestCosmosConfirmed).
 		Msg("found latest valsets")
 
 	if latestCosmosConfirmed.Nonce > currentEthValset.Nonce {
