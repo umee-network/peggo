@@ -152,8 +152,9 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 
 		for _, oldestValset := range oldestUnsignedValsets {
 			logger.Info().Uint64("oldest_valset_nonce", oldestValset.Nonce).Msg("sending Valset confirm for nonce")
+			valset := oldestValset // use this because of scopelint
 			if err := retry.Do(func() error {
-				return p.peggyBroadcastClient.SendValsetConfirm(ctx, p.ethFrom, peggyID, oldestValset)
+				return p.peggyBroadcastClient.SendValsetConfirm(ctx, p.ethFrom, peggyID, valset)
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 				logger.Err(err).
 					Uint("retry", n).

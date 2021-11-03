@@ -208,8 +208,8 @@ func checkValsetSigsAndRepack(
 	}
 	if peggyPowerToPercent(powerOfGoodSigs) < 66 {
 		err = ErrInsufficientVotingPowerToPass
-		return
+		return validators, powers, v, r, s, err
 	}
 
-	return
+	return validators, powers, v, r, s, err
 }

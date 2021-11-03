@@ -43,7 +43,7 @@ func NewCosmosClient(
 	ctx client.Context,
 	logger zerolog.Logger,
 	protoAddr string,
-	options ...cosmosClientOption,
+	options ...CosmosClientOption,
 ) (CosmosClient, error) {
 	conn, err := grpc.Dial(protoAddr, grpc.WithInsecure(), grpc.WithContextDialer(dialerFunc))
 	if err != nil {
@@ -101,9 +101,9 @@ func defaultCosmosClientOptions() *cosmosClientOptions {
 	return &cosmosClientOptions{}
 }
 
-type cosmosClientOption func(opts *cosmosClientOptions) error
+type CosmosClientOption func(opts *cosmosClientOptions) error
 
-func OptionGasPrices(gasPrices string) cosmosClientOption {
+func OptionGasPrices(gasPrices string) CosmosClientOption {
 	return func(opts *cosmosClientOptions) error {
 		_, err := sdk.ParseDecCoins(gasPrices)
 		if err != nil {

@@ -115,7 +115,9 @@ func (e *ethCommitter) SendTx(
 
 		for {
 			opts.Nonce = big.NewInt(nonce)
-			opts.Context, _ = context.WithTimeout(ctx, e.committerOpts.RPCTimeout)
+			var cancel context.CancelFunc
+			opts.Context, cancel = context.WithTimeout(ctx, e.committerOpts.RPCTimeout)
+			defer cancel()
 
 			tx := types.NewTransaction(opts.Nonce.Uint64(), recipient, nil, opts.GasLimit, opts.GasPrice, txData)
 			signedTx, err := opts.Signer(opts.From, tx)
