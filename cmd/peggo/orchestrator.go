@@ -148,7 +148,8 @@ func getOrchestratorCmd() *cobra.Command {
 			relayer := relayer.NewPeggyRelayer(logger, peggyQueryClient, peggyContract, relayValSets, relayBatches)
 
 			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
-			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, &coingecko.Config{
+			testPriceFeed := konfig.Bool(flagTestPriceFeed)
+			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, testPriceFeed, &coingecko.Config{
 				BaseURL: coingeckoAPI,
 			})
 
@@ -193,6 +194,7 @@ func getOrchestratorCmd() *cobra.Command {
 		"If non-zero, batch requests will only be made if fee threshold criteria is met",
 	)
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
+	cmd.Flags().Bool(flagTestPriceFeed, false, "Specify if a fixed price should be used for uumee")
 	cmd.Flags().AddFlagSet(cosmosFlagSet())
 	cmd.Flags().AddFlagSet(cosmosKeyringFlagSet())
 	cmd.Flags().AddFlagSet(ethereumKeyOptsFlagSet())

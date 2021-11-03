@@ -250,7 +250,7 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 						denom = resp.GetDenom()
 
 						// send batch request only if fee threshold is met
-						if p.CheckFeeThreshold(tokenAddr, unbatchedToken.TotalFees, p.minBatchFeeUSD) {
+						if p.CheckFeeThreshold(denom, tokenAddr, unbatchedToken.TotalFees, p.minBatchFeeUSD) {
 							logger.Info().Str("token_contract", tokenAddr.String()).Str("denom", denom).Msg("sending batch request")
 							_ = p.peggyBroadcastClient.SendRequestBatch(ctx, denom)
 						}
@@ -272,12 +272,20 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 }
 
 func (p *peggyOrchestrator) CheckFeeThreshold(
+	denom string,
 	erc20Contract common.Address,
 	totalFee cosmtypes.Int,
 	minFeeInUSD float64,
 ) bool {
 	if minFeeInUSD == 0 || p.priceFeeder == nil {
 		return true
+	}
+
+	if denom == "uumee" && p.priceFeeder.IsTest {
+		tokenPriceInUSDDec := decimal.NewFromFloat(0.5)
+		totalFeeInUSDDec := decimal.NewFromBigInt(totalFee.BigInt(), -6).Mul(tokenPriceInUSDDec)
+		minFeeInUSDDec := decimal.NewFromFloat(minFeeInUSD)
+		return totalFeeInUSDDec.GreaterThan(minFeeInUSDDec)
 	}
 
 	tokenPriceInUSD, err := p.priceFeeder.QueryUSDPrice(erc20Contract)

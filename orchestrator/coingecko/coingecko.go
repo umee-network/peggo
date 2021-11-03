@@ -33,6 +33,7 @@ type PriceFeed struct {
 	interval time.Duration
 
 	logger zerolog.Logger
+	IsTest bool
 }
 
 type Config struct {
@@ -99,7 +100,7 @@ func (cp *PriceFeed) QueryUSDPrice(erc20Contract common.Address) (float64, error
 
 // NewCoingeckoPriceFeed returns price puller for given symbol. The price will be pulled
 // from endpoint and divided by scaleFactor. Symbol name (if reported by endpoint) must match.
-func NewCoingeckoPriceFeed(logger zerolog.Logger, interval time.Duration, endpointConfig *Config) *PriceFeed {
+func NewCoingeckoPriceFeed(logger zerolog.Logger, interval time.Duration, isTestPriceFeed bool, endpointConfig *Config) *PriceFeed {
 	return &PriceFeed{
 		client: &http.Client{
 			Transport: &http.Transport{
@@ -112,6 +113,7 @@ func NewCoingeckoPriceFeed(logger zerolog.Logger, interval time.Duration, endpoi
 		interval: interval,
 
 		logger: logger.With().Str("module", "coingecko_pricefeed").Logger(),
+		IsTest: isTestPriceFeed,
 	}
 }
 
