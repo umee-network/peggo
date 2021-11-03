@@ -48,7 +48,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 	s.logger.Debug().
 		Interface("currentEthValset", currentEthValset).
 		Interface("latestCosmosConfirmed", latestCosmosConfirmed).
-		Msg("Found latest valsets")
+		Msg("found latest valsets")
 
 	if latestCosmosConfirmed.Nonce > currentEthValset.Nonce {
 		latestEthereumValsetNonce, err := s.peggyContract.GetValsetNonce(ctx, s.peggyContract.FromAddress())
@@ -60,9 +60,9 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 		// Check if latestCosmosConfirmed already submitted by other validators in mean time
 		if latestCosmosConfirmed.Nonce > latestEthereumValsetNonce.Uint64() {
 			s.logger.Info().
-				Uint64("latestCosmosConfirmedNonce", latestCosmosConfirmed.Nonce).
-				Uint64("latestEthereumValsetNonce", latestEthereumValsetNonce.Uint64()).
-				Msg("Detected latest cosmos valset nonce, but latest valset on Ethereum is different. Sending update to Ethereum")
+				Uint64("latest_cosmos_confirmed_nonce", latestCosmosConfirmed.Nonce).
+				Uint64("latest_ethereum_valset_nonce", latestEthereumValsetNonce.Uint64()).
+				Msg("detected latest cosmos valset nonce, but latest valset on Ethereum is different. Sending update to Ethereum")
 
 			// Send Valset Update to Ethereum
 			txHash, err := s.peggyContract.SendEthValsetUpdate(
@@ -75,7 +75,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 				return err
 			}
 
-			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("Sent Ethereum Tx (EthValsetUpdate)")
+			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Ethereum Tx (EthValsetUpdate)")
 
 		}
 

@@ -137,7 +137,7 @@ func (e *ethCommitter) SendTx(
 			e.logger.Err(err).
 				Str("tx_hash", txHash.Hex()).
 				Str("tx_hash_ret", txHashRet.Hex()).
-				Msg("SendTransaction failed")
+				Msg("sendTransaction failed")
 
 			switch {
 			case strings.Contains(err.Error(), "invalid sender"):

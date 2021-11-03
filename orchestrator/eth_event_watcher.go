@@ -85,7 +85,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 		Uint64("start", startingBlock).
 		Uint64("end", currentBlock).
 		Int("num_events", len(erc20DeployedEvents)).
-		Msg("Scanned ERC20Deployed events from Ethereum")
+		Msg("scanned ERC20Deployed events from Ethereum")
 
 	var sendToCosmosEvents []*wrappers.PeggySendToCosmosEvent
 	{
@@ -119,7 +119,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 		Uint64("start", startingBlock).
 		Uint64("end", currentBlock).
 		Int("num_events", len(sendToCosmosEvents)).
-		Msg("Scanned SendToCosmos events from Ethereum")
+		Msg("scanned SendToCosmos events from Ethereum")
 
 	var transactionBatchExecutedEvents []*wrappers.PeggyTransactionBatchExecutedEvent
 	{
@@ -152,7 +152,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 		Uint64("start", startingBlock).
 		Uint64("end", currentBlock).
 		Int("num_events", len(transactionBatchExecutedEvents)).
-		Msg("Scanned TransactionBatchExecuted events from Ethereum")
+		Msg("scanned TransactionBatchExecuted events from Ethereum")
 
 	var valsetUpdatedEvents []*wrappers.PeggyValsetUpdatedEvent
 	{
@@ -185,7 +185,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 		Uint64("start", startingBlock).
 		Uint64("end", currentBlock).
 		Int("num_events", len(valsetUpdatedEvents)).
-		Msg("Scanned ValsetUpdatedEvents events from Ethereum")
+		Msg("scanned ValsetUpdatedEvents events from Ethereum")
 
 	// note that starting block overlaps with our last che	cked block, because we have to deal with
 	// the possibility that the relayer was killed after relaying only one of multiple events in a single

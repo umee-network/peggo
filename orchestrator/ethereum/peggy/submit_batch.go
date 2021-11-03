@@ -17,10 +17,10 @@ func (s *peggyContract) SendTransactionBatch(
 ) (*common.Hash, error) {
 	s.logger.Info().
 		Str("token_contract", batch.TokenContract).
-		Uint64("newNonce", batch.BatchNonce).
-		Msg("Checking signatures and submitting TransactionBatch to Ethereum")
+		Uint64("new_nonce", batch.BatchNonce).
+		Msg("checking signatures and submitting TransactionBatch to Ethereum")
 
-	s.logger.Debug().Interface("batch", batch).Msg("Batch")
+	s.logger.Debug().Interface("batch", batch).Msg("batch")
 
 	validators, powers, sigV, sigR, sigS, err := checkBatchSigsAndRepack(currentValset, confirms)
 	if err != nil {
@@ -78,11 +78,11 @@ func (s *peggyContract) SendTransactionBatch(
 
 	txHash, err := s.SendTx(ctx, s.peggyAddress, txData)
 	if err != nil {
-		s.logger.Err(err).Str("tx_hash", txHash.Hex()).Msg("Failed to sign and submit (Peggy submitBatch) to EVM")
+		s.logger.Err(err).Str("tx_hash", txHash.Hex()).Msg("failed to sign and submit (Peggy submitBatch) to EVM")
 		return nil, err
 	}
 
-	s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("Sent Tx (Peggy submitBatch)")
+	s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Tx (Peggy submitBatch)")
 
 	//     let before_nonce = get_tx_batch_nonce(
 	//         peggy_contract_address,

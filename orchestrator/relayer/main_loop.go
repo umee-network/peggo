@@ -17,7 +17,7 @@ func (s *peggyRelayer) Start(ctx context.Context) error {
 	return loops.RunLoop(ctx, defaultLoopDur, func() error {
 		var pg loops.ParanoidGroup
 		if s.valsetRelayEnabled {
-			logger.Info().Msg("Valset Relay Enabled. Starting to relay valsets to Ethereum")
+			logger.Info().Msg("valset Relay Enabled. Starting to relay valsets to Ethereum")
 			pg.Go(func() error {
 				return retry.Do(func() error {
 					return s.RelayValsets(ctx)
@@ -28,7 +28,7 @@ func (s *peggyRelayer) Start(ctx context.Context) error {
 		}
 
 		if s.batchRelayEnabled {
-			logger.Info().Msg("Batch Relay Enabled. Starting to relay batches to Ethereum")
+			logger.Info().Msg("batch Relay Enabled. Starting to relay batches to Ethereum")
 			pg.Go(func() error {
 				return retry.Do(func() error {
 					return s.RelayBatches(ctx)

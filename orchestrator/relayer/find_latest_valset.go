@@ -48,7 +48,7 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 	for currentBlock > 0 {
 		s.logger.Debug().
 			Uint64("block", currentBlock).
-			Msg("About to submit a Valset or Batch looking back into the history to find the last Valset Update")
+			Msg("about to submit a Valset or Batch looking back into the history to find the last Valset Update")
 
 		var endSearchBlock uint64
 		if currentBlock <= defaultBlocksToSearch {
@@ -81,8 +81,8 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 		sort.Sort(sort.Reverse(PeggyValsetUpdatedEvents(valsetUpdatedEvents)))
 
 		s.logger.Debug().
-			Interface("valsetUpdatedEvents", valsetUpdatedEvents).
-			Msg("Found ValsetUpdated events")
+			Interface("valset_updated_events", valsetUpdatedEvents).
+			Msg("found ValsetUpdated events")
 
 		// we take only the first event if we find any at all.
 		if len(valsetUpdatedEvents) > 0 {
@@ -136,25 +136,25 @@ func (s *peggyRelayer) checkIfValsetsDiffer(cosmosValset, ethereumValset *types.
 		return
 	} else if cosmosValset == nil {
 		s.logger.Error().
-			Uint64("ethValsetNonce", ethereumValset.Nonce).
-			Msg("Cosmos does not have a valset for nonce from Ethereum chain. Possible bridge hijacking!")
+			Uint64("eth_valset_nonce", ethereumValset.Nonce).
+			Msg("cosmos does not have a valset for nonce from Ethereum chain. Possible bridge hijacking!")
 		return
 	}
 
 	if cosmosValset.Nonce != ethereumValset.Nonce {
 
 		s.logger.Error().
-			Uint64("ethValsetNonce", ethereumValset.Nonce).
-			Uint64("cosmosValsetNonce", cosmosValset.Nonce).
-			Msg("Cosmos does have a wrong valset nonce, differs from Ethereum chain. Possible bridge hijacking!")
+			Uint64("eth_valset_nonce", ethereumValset.Nonce).
+			Uint64("cosmos_valset_nonce", cosmosValset.Nonce).
+			Msg("cosmos does have a wrong valset nonce, differs from Ethereum chain. Possible bridge hijacking!")
 		return
 	}
 
 	if len(cosmosValset.Members) != len(ethereumValset.Members) {
 		s.logger.Error().
-			Int("ethValset", len(ethereumValset.Members)).
-			Int("cosmosValset", len(cosmosValset.Members)).
-			Msg("Cosmos and Ethereum Valsets have different length. Possible bridge hijacking!")
+			Int("eth_valset", len(ethereumValset.Members)).
+			Int("cosmos_valset", len(cosmosValset.Members)).
+			Msg("cosmos and Ethereum Valsets have different length. Possible bridge hijacking!")
 		return
 	}
 
@@ -163,10 +163,10 @@ func (s *peggyRelayer) checkIfValsetsDiffer(cosmosValset, ethereumValset *types.
 
 	for idx, member := range cosmosValset.Members {
 		if ethereumValset.Members[idx].EthereumAddress != member.EthereumAddress {
-			s.logger.Error().Msg("Valsets are different, a sorting error?")
+			s.logger.Error().Msg("valsets are different, a sorting error?")
 		}
 		if ethereumValset.Members[idx].Power != member.Power {
-			s.logger.Error().Msg("Valsets are different, a sorting error?")
+			s.logger.Error().Msg("valsets are different, a sorting error?")
 		}
 	}
 }

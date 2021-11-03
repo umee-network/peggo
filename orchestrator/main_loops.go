@@ -63,7 +63,7 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 		return err
 	}
 
-	logger.Info().Uint64("lastCheckedBlock", lastCheckedBlock).Msg("Start scanning for events")
+	logger.Info().Uint64("last_checked_block", lastCheckedBlock).Msg("start scanning for events")
 
 	return loops.RunLoop(ctx, defaultLoopDur, func() error {
 		// Relays events from Ethereum -> Cosmos
@@ -102,9 +102,9 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 			}
 			lastResync = time.Now()
 			logger.Info().
-				Time("lastResync", lastResync).
-				Uint64("lastCheckedBlock", lastCheckedBlock).
-				Msg("Auto resync")
+				Time("last_resync", lastResync).
+				Uint64("last_checked_block", lastCheckedBlock).
+				Msg("auto resync")
 		}
 
 		return nil
@@ -151,7 +151,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 		}
 
 		for _, oldestValset := range oldestUnsignedValsets {
-			logger.Info().Uint64("oldestValset.Nonce", oldestValset.Nonce).Msg("Sending Valset confirm for nonce")
+			logger.Info().Uint64("oldest_valset_nonce", oldestValset.Nonce).Msg("sending Valset confirm for nonce")
 			if err := retry.Do(func() error {
 				return p.peggyBroadcastClient.SendValsetConfirm(ctx, p.ethFrom, peggyID, oldestValset)
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
@@ -188,8 +188,8 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 
 		if oldestUnsignedTransactionBatch != nil {
 			logger.Info().
-				Uint64("batchNonce", oldestUnsignedTransactionBatch.BatchNonce).
-				Msg("Sending TransactionBatch confirm for BatchNonce")
+				Uint64("batch_nonce", oldestUnsignedTransactionBatch.BatchNonce).
+				Msg("sending TransactionBatch confirm for BatchNonce")
 			if err := retry.Do(func() error {
 				return p.peggyBroadcastClient.SendBatchConfirm(ctx, p.ethFrom, peggyID, oldestUnsignedTransactionBatch)
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
