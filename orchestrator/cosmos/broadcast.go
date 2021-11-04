@@ -74,6 +74,16 @@ type PeggyBroadcastClient interface {
 	) error
 }
 
+// sortableEvent exists with the only purpose to make a nicer sortable slice for Ethereum events.
+// It is only used in SendEthereumClaims
+type sortableEvent struct {
+	EventNonce         uint64
+	DepositEvent       *wrappers.PeggySendToCosmosEvent
+	WithdrawEvent      *wrappers.PeggyTransactionBatchExecutedEvent
+	ValsetUpdateEvent  *wrappers.PeggyValsetUpdatedEvent
+	ERC20DeployedEvent *wrappers.PeggyERC20DeployedEvent
+}
+
 func NewPeggyBroadcastClient(
 	logger zerolog.Logger,
 	queryClient types.QueryClient,
@@ -375,21 +385,13 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 	erc20Deployed []*wrappers.PeggyERC20DeployedEvent,
 	loopDuration time.Duration,
 ) error {
-	// SortableEvent exists with the only purpose to make a nicer sortable slice
-	type SortableEvent struct {
-		EventNonce         uint64
-		DepositEvent       *wrappers.PeggySendToCosmosEvent
-		WithdrawEvent      *wrappers.PeggyTransactionBatchExecutedEvent
-		ValsetUpdateEvent  *wrappers.PeggyValsetUpdatedEvent
-		ERC20DeployedEvent *wrappers.PeggyERC20DeployedEvent
-	}
-	allevents := []SortableEvent{}
+	allevents := []sortableEvent{}
 
 	// We add all the events to the same list to be sorted.
 	// Only events that have a nonce higher than the last claim event will be appended.
 	for _, ev := range deposits {
 		if ev.EventNonce.Uint64() > lastClaimEvent {
-			allevents = append(allevents, SortableEvent{
+			allevents = append(allevents, sortableEvent{
 				EventNonce:   ev.EventNonce.Uint64(),
 				DepositEvent: ev,
 			})
@@ -398,7 +400,7 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 
 	for _, ev := range withdraws {
 		if ev.EventNonce.Uint64() > lastClaimEvent {
-			allevents = append(allevents, SortableEvent{
+			allevents = append(allevents, sortableEvent{
 				EventNonce:    ev.EventNonce.Uint64(),
 				WithdrawEvent: ev,
 			})
@@ -407,7 +409,7 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 
 	for _, ev := range valsetUpdates {
 		if ev.EventNonce.Uint64() > lastClaimEvent {
-			allevents = append(allevents, SortableEvent{
+			allevents = append(allevents, sortableEvent{
 				EventNonce:        ev.EventNonce.Uint64(),
 				ValsetUpdateEvent: ev,
 			})
@@ -416,7 +418,7 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 
 	for _, ev := range erc20Deployed {
 		if ev.EventNonce.Uint64() > lastClaimEvent {
-			allevents = append(allevents, SortableEvent{
+			allevents = append(allevents, sortableEvent{
 				EventNonce:         ev.EventNonce.Uint64(),
 				ERC20DeployedEvent: ev,
 			})
