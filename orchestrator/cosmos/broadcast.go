@@ -432,8 +432,8 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 
 	// iterate through events and send them sequentially
 	for _, ev := range allevents {
-		// if the event nonce isn't sequential, we break from this loop
-		// given that the events are sorted, this should never happen
+		// If the event nonce isn't sequential, we break from this loop
+		// given that the events are sorted, this should never happen.
 		if ev.EventNonce != lastClaimEvent+1 {
 			break
 		}
