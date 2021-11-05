@@ -319,8 +319,10 @@ func deployERC20Cmd() *cobra.Command {
 				return fmt.Errorf("failed to query for bank metadata: %w", err)
 			}
 
-			if len(resp.Metadata.Name) == 0 || len(resp.Metadata.Symbol) == 0 {
-				return fmt.Errorf("token metadata name and symbol cannot be empty")
+			if len(resp.Metadata.Name) == 0 ||
+				len(resp.Metadata.Symbol) == 0 ||
+				len(resp.Metadata.Display) == 0 {
+				return fmt.Errorf("token metadata name, symbol, and display cannot be empty")
 			}
 
 			var decimals uint8
