@@ -14,6 +14,25 @@ Peggo is a Go implementation of the Peggy (Gravity Bridge) Orchestrator original
 implemented by [Injective Labs](https://github.com/InjectiveLabs/). Peggo itself
 is a fork of the original Gravity Bridge Orchestrator implemented by [Althea](https://github.com/althea-net).
 
+
+## Table of Contents
+
+- [How it works](#how-it-works)
+- [Dependencies](#dependencies)
+- [Installation] (#installation)
+
 ## How it works
 
-It works by relaying messages from one chain to the other.
+>  TLDR; It works by relaying messages from one chain to the other via relayers (validators).
+
+## Dependencies
+
+- [Go 1.17+](https://golang.org/dl/)
+
+## Installation
+
+To install the `peggo` binary:
+
+```shell
+$ make install
+```
