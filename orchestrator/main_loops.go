@@ -298,6 +298,7 @@ func (p *peggyOrchestrator) CheckFeeThreshold(
 	}
 
 	tokenPriceInUSDDec := decimal.NewFromFloat(tokenPriceInUSD)
+	// decimals (uint8) can be safely casted into int32 because the max uint8 is 255 and the max int32 is 2147483647
 	totalFeeInUSDDec := decimal.NewFromBigInt(totalFee.BigInt(), -int32(decimals)).Mul(tokenPriceInUSDDec)
 	minFeeInUSDDec := decimal.NewFromFloat(minFeeInUSD)
 
