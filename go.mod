@@ -12,6 +12,7 @@ require (
 	github.com/ethereum/go-ethereum v1.10.11
 	github.com/go-kit/kit v0.11.0 // indirect
 	github.com/golang/glog v0.0.0-20210429001901-424d2337a529 // indirect
+	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.42.1
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -39,13 +40,9 @@ require (
 	go.etcd.io/bbolt v1.3.6 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d
 	google.golang.org/grpc v1.41.0
 	gopkg.in/yaml.v2 v2.4.0
-)
-
-require (
-	github.com/golang/mock v1.6.0
-	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d
 )
 
 require (
