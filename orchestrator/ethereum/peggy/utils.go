@@ -112,7 +112,7 @@ func (s *peggyContract) GetERC20Decimals(
 
 	decimals, err = erc20Wrapper.Decimals(callOpts)
 	if err != nil {
-		err = errors.Wrap(err, "ERC20 [decimals] call failed")
+		err = errors.Wrap(err, "ERC20 'decimals' call failed")
 		return 0, err
 	}
 
