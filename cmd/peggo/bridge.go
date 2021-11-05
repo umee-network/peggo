@@ -319,9 +319,13 @@ func deployERC20Cmd() *cobra.Command {
 				return fmt.Errorf("failed to query for bank metadata: %w", err)
 			}
 
+			if len(resp.Metadata.Name) == 0 || len(resp.Metadata.Symbol) == 0 {
+				return fmt.Errorf("token metadata name and symbol cannot be empty")
+			}
+
 			var decimals uint8
 			for _, unit := range resp.Metadata.DenomUnits {
-				if unit.Denom == baseDenom {
+				if unit.Denom == resp.Metadata.Display {
 					if unit.Exponent > math.MaxUint8 {
 						return fmt.Errorf("token exponent too large; %d > %d", unit.Exponent, math.MaxInt8)
 					}
