@@ -307,7 +307,7 @@ func (p *peggyOrchestrator) CheckFeeThreshold(
 		Int64("total_fees", totalFee.Int64()).
 		Float64("total_fee_in_usd", totalFeeInUSDDec.InexactFloat64()).
 		Float64("min_fee_in_usd", minFeeInUSDDec.InexactFloat64()).
-		Msg("checking if token fees meets set threshold amount")
+		Msg("checking if token fees meet minimum batch fee threshold")
 
 	return totalFeeInUSDDec.GreaterThan(minFeeInUSDDec)
 }
