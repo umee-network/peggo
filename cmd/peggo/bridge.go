@@ -17,6 +17,7 @@ import (
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/knadh/koanf"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	"github.com/umee-network/peggo/cmd/peggo/client"
@@ -319,10 +320,15 @@ func deployERC20Cmd() *cobra.Command {
 				return fmt.Errorf("failed to query for bank metadata: %w", err)
 			}
 
-			if len(resp.Metadata.Name) == 0 ||
-				len(resp.Metadata.Symbol) == 0 ||
-				len(resp.Metadata.Display) == 0 {
-				return fmt.Errorf("token metadata name, symbol, and display cannot be empty")
+			switch {
+			case len(resp.Metadata.Name) == 0:
+				return errors.New("token metadata name cannot be empty")
+
+			case len(resp.Metadata.Symbol) == 0:
+				return errors.New("token metadata symbol cannot be empty")
+
+			case len(resp.Metadata.Display) == 0:
+				return errors.New("token metadata display cannot be empty")
 			}
 
 			var decimals uint8
