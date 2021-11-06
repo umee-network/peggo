@@ -143,9 +143,12 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
 
+			orchLoopsDur := konfig.Duration(flagOrchLoopsDuration)
+			relayLoopDur := konfig.Duration(flagRelayerLoopDuration)
+
 			relayValSets := konfig.Bool(flagRelayValsets)
 			relayBatches := konfig.Bool(flagRelayBatches)
-			relayLoopDur := konfig.Duration(flagRelayerLoopDuration)
+
 			relayer := relayer.NewPeggyRelayer(
 				logger,
 				peggyQueryClient,
@@ -175,6 +178,7 @@ func getOrchestratorCmd() *cobra.Command {
 				signerFn,
 				personalSignFn,
 				relayer,
+				orchLoopsDur,
 				orchestrator.SetMinBatchFee(konfig.Float64(flagMinBatchFeeUSD)),
 				orchestrator.SetPriceFeeder(coingeckoFeed),
 			)
@@ -196,6 +200,7 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
 	cmd.Flags().Duration(flagRelayerLoopDuration, 5*time.Minute, "Duration between relayer loops")
+	cmd.Flags().Duration(flagOrchLoopsDuration, 1*time.Minute, "Duration between orchestrator loops")
 	cmd.Flags().Float64(
 		flagMinBatchFeeUSD,
 		float64(0.0),
