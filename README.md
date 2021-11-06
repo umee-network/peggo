@@ -17,27 +17,11 @@ is a fork of the original Gravity Bridge Orchestrator implemented by [Althea](ht
 
 ## Table of Contents
 
-- [How it works](#how-it-works)
 - [Dependencies](#dependencies)
-- [Installation] (#installation)
+- [Installation](#installation)
+- [How to run](#how-to-run)
+- [How it works](#how-it-works)
 
-## How it works
-
-Peggo allows transfers of assets back and forth between Ethereum and Umee. It supports both assets originating on Umee and assets originating on Ethereum (any ERC20 token).
-
-It works by scanning the events of the contract deployed on  Ethereum (Peggy) and relaying them as messages to the 
-Umee chain.
-
-### Events observed
-
-WIP (Withdraw, Deposit, ERC20Deployed)
-
-### Transfers from Umee to Ethereum
-
-WIP
-### Transfers from Ethereum to Umee
-
-WIP
 ## Dependencies
 
 - [Go 1.17+](https://golang.org/dl/)
@@ -49,3 +33,64 @@ To install the `peggo` binary:
 ```shell
 $ make install
 ```
+
+## How to run
+### Setup
+
+First we must register the validator's Ethereum key. This key will be used to sign claims going from Ethereum to Umee and to sign any transactions sent to Ethereum (batches or validator set updates).
+
+```shell
+$ peggo tx register-eth-key \
+  --cosmos-chain-id="..." \
+  --cosmos-grpc="tcp://..." \
+  --tendermint-rpc="http://..." \
+  --cosmos-keyring=... \
+  --cosmos-keyring-dir=... \
+  --cosmos-from=... \
+  --eth-pk=$ETH_PK
+```
+
+### Run the orchestrator
+
+```shell
+$ peggo orchestrator \
+  --eth-pk=$ETH_PK \
+  --eth-rpc=$ETH_RPC \
+  --relay-batches=true \
+  --relay-valsets=true \
+  --eth-chain-id=... \
+  --cosmos-chain-id=... \
+  --cosmos-grpc="tcp://..." \
+  --tendermint-rpc="http://..." \
+  --cosmos-keyring=... \
+  --cosmos-keyring-dir=... \
+  --cosmos-from=...
+```
+
+## How it works
+
+Peggo allows transfers of assets back and forth between Ethereum and Umee. It supports both assets originating on Umee 
+and assets originating on Ethereum (any ERC20 token).
+
+It works by scanning the events of the contract deployed on  Ethereum (Peggy) and relaying them as messages to the 
+Umee chain; and relaying transaction batches and validator sets from Umee to Ethereum.
+
+### Events observed
+
+#### From Ethereum
+
+**Deposits** (`SendToCosmosEvent`): emitted when sending tokens from Ethereum to Umee using the `sendToCosmos` function on Peggy.
+
+**Withdraw** (`TransactionBatchExecutedEvent`): emitted when a batch of transactions is sent from Umee to Ethereum using the `submitBatch` function on the Peggy contract by a validator. This serves as a confirmation to Umee that the batch was sent successfully.
+
+**Valset update*** (`ValsetUpdatedEvent`): emitted on init of the Peggy contract and on every execution of the `updateValset` function.
+
+**Deployed ERC 20** (`ERC20DeployedEvent`): emitted when executing the function `deployERC20`. This event signals Umee that there's a new ERC20 deployed from Peggy, so Umee can map the token contract address to the corresponding native coin. This enables transfers from Umee to Ethereum. 
+
+### Transfers from Umee to Ethereum
+
+WIP (describe in simple words how a transfer from Umee to Ethereum happens and provide example commands)
+
+### Transfers from Ethereum to Umee
+
+WIP
