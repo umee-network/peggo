@@ -23,10 +23,9 @@ is a fork of the original Gravity Bridge Orchestrator implemented by [Althea](ht
 
 ## How it works
 
-Peggo allows transfers of assets back and forth between Ethereum and Umee. It supports both assets originating on 
-Umee and assets originating on Ethereum (any ERC20 token).
+Peggo allows transfers of assets back and forth between Ethereum and Umee. It supports both assets originating on Umee and assets originating on Ethereum (any ERC20 token).
 
-It works by scanning the events of the contract deployed on Ethereum (Peggy) and relaying them as messages to the 
+It works by scanning the events of the contract deployed on  Ethereum (Peggy) and relaying them as messages to the 
 Umee chain.
 
 ### Events observed
