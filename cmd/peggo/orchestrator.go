@@ -145,7 +145,15 @@ func getOrchestratorCmd() *cobra.Command {
 
 			relayValSets := konfig.Bool(flagRelayValsets)
 			relayBatches := konfig.Bool(flagRelayBatches)
-			relayer := relayer.NewPeggyRelayer(logger, peggyQueryClient, peggyContract, relayValSets, relayBatches)
+			relayLoopDur := konfig.Duration(flagRelayerLoopDuration)
+			relayer := relayer.NewPeggyRelayer(
+				logger,
+				peggyQueryClient,
+				peggyContract,
+				relayValSets,
+				relayBatches,
+				relayLoopDur,
+			)
 
 			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
 			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, &coingecko.Config{
@@ -187,6 +195,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
+	cmd.Flags().Duration(flagRelayerLoopDuration, 5*time.Minute, "Duration between relayer loops")
 	cmd.Flags().Float64(
 		flagMinBatchFeeUSD,
 		float64(0.0),
