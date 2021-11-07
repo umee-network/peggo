@@ -677,12 +677,15 @@ func approveERC20(konfig *koanf.Koanf, ethRPC *ethclient.Client, erc20AddrStr, p
 	}
 
 	if allowance.Cmp(halfMaxUint256) > 0 {
+		_, _ = fmt.Fprintln(os.Stderr, "Skipping ERC20 contract approval")
 		return nil
 	}
 
-	if _, err := contract.Approve(auth, peggyAddr, maxUint256); err != nil {
+	tx, err := contract.Approve(auth, peggyAddr, maxUint256)
+	if err != nil {
 		return fmt.Errorf("failed to approve ERC20 contract: %w", err)
 	}
 
+	_, _ = fmt.Fprintf(os.Stderr, "Approved ERC20 contract: %s\n", tx.Hash().Hex())
 	return nil
 }
