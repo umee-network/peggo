@@ -560,7 +560,7 @@ Transaction: %s
 		},
 	}
 
-	cmd.Flags().Bool(flagAutoApprove, true, "Auto approve the ERC20 for Peggy to spend from")
+	cmd.Flags().Bool(flagAutoApprove, true, "Auto approve the ERC20 for Peggy to spend from (using max uint256)")
 
 	return cmd
 }
