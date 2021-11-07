@@ -648,6 +648,8 @@ func getPeggyContract(ethRPC *ethclient.Client, peggyAddr string) (*wrappers.Peg
 }
 
 func approveERC20(ethRPC *ethclient.Client, erc20Addr string) error {
+	// TODO: Check if ERC20 is already approved first.
+
 	contract, err := wrappers.NewERC20(ethcmn.HexToAddress(erc20Addr), ethRPC)
 	if err != nil {
 		return fmt.Errorf("failed to create ERC20 contract instance: %w", err)
