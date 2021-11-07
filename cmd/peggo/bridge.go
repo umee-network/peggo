@@ -28,7 +28,8 @@ import (
 )
 
 var (
-	maxUint256 = new(big.Int).SetBytes(ethcmn.Hex2Bytes("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+	maxUint256     = new(big.Int).SetBytes(ethcmn.Hex2Bytes("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+	halfMaxUint256 = new(big.Int).Div(maxUint256, big.NewInt(2))
 )
 
 func getBridgeCommand() *cobra.Command {
@@ -502,15 +503,18 @@ func sendToCosmosCmd() *cobra.Command {
 				return err
 			}
 
-			peggyContract, err := getPeggyContract(ethRPC, peggyParams.BridgeEthereumAddress)
+			peggyAddr := peggyParams.BridgeEthereumAddress
+
+			peggyContract, err := getPeggyContract(ethRPC, peggyAddr)
 			if err != nil {
 				return err
 			}
 
-			tokenAddr := ethcmn.HexToAddress(args[0])
+			tokenAddrStr := args[0]
+			tokenAddr := ethcmn.HexToAddress(tokenAddrStr)
 
 			if konfig.Bool(flagAutoApprove) {
-				if err := approveERC20(ethRPC, args[0], peggyParams.BridgeEthereumAddress); err != nil {
+				if err := approveERC20(konfig, ethRPC, tokenAddrStr, peggyAddr); err != nil {
 					return err
 				}
 			}
@@ -556,7 +560,7 @@ Transaction: %s
 		},
 	}
 
-	cmd.Flags().Bool(flagAutoApprove, false, "Auto approve the ERC20 for Peggy to spend from")
+	cmd.Flags().Bool(flagAutoApprove, true, "Auto approve the ERC20 for Peggy to spend from")
 
 	return cmd
 }
@@ -651,34 +655,34 @@ func getPeggyContract(ethRPC *ethclient.Client, peggyAddr string) (*wrappers.Peg
 	return contract, nil
 }
 
-func approveERC20(ethRPC *ethclient.Client, erc20Addr, peggyAddr string) error {
-	contract, err := wrappers.NewERC20(ethcmn.HexToAddress(erc20Addr), ethRPC)
+func approveERC20(konfig *koanf.Koanf, ethRPC *ethclient.Client, erc20AddrStr, peggyAddrStr string) error {
+	contract, err := wrappers.NewERC20(ethcmn.HexToAddress(erc20AddrStr), ethRPC)
 	if err != nil {
 		return fmt.Errorf("failed to create ERC20 contract instance: %w", err)
 	}
 
-	// TODO: Check if ERC20 is already approved first.
-	// Check if the allowance remaining is greater than half of a Uint256- it's as good
-	// a test as any.
-	// Ok(allowance > (Uint256::max_value() / 2u32.into()))
-	// contract.Allowance()
-
-	tx, err := contract.Approve(auth, ethcmn.HexToAddress(peggyAddr), maxUint256)
+	auth, err := buildTransactOpts(konfig, ethRPC)
 	if err != nil {
-		return fmt.Errorf("failed to approve ERC20 contract: %w", err)
+		return err
 	}
 
-	_, _ = fmt.Fprintf(os.Stderr, `Ethereum ERC20 successfully approved!
-Token Address: %s
-Sender: %s
-Amount: %s
-Transaction: %s
-	`,
-		erc20Addr,
-		sender,
-		amount.String(),
-		tx.Hash().Hex(),
-	)
+	peggyAddr := ethcmn.HexToAddress(peggyAddrStr)
+
+	// Check if the allowance remaining is greater than half of a Uint256 - it's
+	// as good a test as any. If so, we skip approving Peggy as the spender and
+	// assume it's already approved.
+	allowance, err := contract.Allowance(nil, auth.From, peggyAddr)
+	if err != nil {
+		return fmt.Errorf("failed to get ERC20 allowance: %w", err)
+	}
+
+	if allowance.Cmp(halfMaxUint256) > 0 {
+		return nil
+	}
+
+	if _, err := contract.Approve(auth, peggyAddr, maxUint256); err != nil {
+		return fmt.Errorf("failed to approve ERC20 contract: %w", err)
+	}
 
 	return nil
 }
