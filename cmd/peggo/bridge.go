@@ -435,7 +435,7 @@ Transaction: %s
 }
 
 func sendToCosmosCmd() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "send-to-cosmos [token-address] [recipient] [amount]",
 		Args:  cobra.ExactArgs(3),
 		Short: "Send tokens from an Ethereum account to a recipient on Cosmos via Peggy (Gravity Bridge)",
@@ -510,6 +510,12 @@ func sendToCosmosCmd() *cobra.Command {
 
 			tokenAddr := ethcmn.HexToAddress(args[0])
 
+			if konfig.Bool(flagAutoApprove) {
+				if err := approveERC20(ethRPC, args[0]); err != nil {
+					return err
+				}
+			}
+
 			recipientAddr, err := sdk.AccAddressFromBech32(args[1])
 			if err != nil {
 				return fmt.Errorf("failed to Bech32 decode recipient address: %w", err)
@@ -545,6 +551,10 @@ Transaction: %s
 			return nil
 		},
 	}
+
+	cmd.Flags().Bool(flagAutoApprove, false, "Auto approve the ERC20 for Peggy to spend from")
+
+	return cmd
 }
 
 func buildTransactOpts(konfig *koanf.Koanf, ethClient *ethclient.Client) (*bind.TransactOpts, error) {
@@ -635,4 +645,30 @@ func getPeggyContract(ethRPC *ethclient.Client, peggyAddr string) (*wrappers.Peg
 	}
 
 	return contract, nil
+}
+
+func approveERC20(ethRPC *ethclient.Client, erc20Addr string) error {
+	contract, err := wrappers.NewERC20(ethcmn.HexToAddress(erc20Addr), ethRPC)
+	if err != nil {
+		return fmt.Errorf("failed to create ERC20 contract instance: %w", err)
+	}
+
+	tx, err := contract.Approve(auth, sender, amount)
+	if err != nil {
+		return fmt.Errorf("failed to approve ERC20 contract: %w", err)
+	}
+
+	_, _ = fmt.Fprintf(os.Stderr, `Ethereum ERC20 successfully approved!
+Token Address: %s
+Sender: %s
+Amount: %s
+Transaction: %s
+	`,
+		erc20Addr,
+		sender,
+		amount.String(),
+		tx.Hash().Hex(),
+	)
+
+	return nil
 }
