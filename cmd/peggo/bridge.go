@@ -27,6 +27,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+var (
+	maxUint256 = new(big.Int).SetBytes(ethcmn.Hex2Bytes("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+)
+
 func getBridgeCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bridge",
@@ -503,17 +507,17 @@ func sendToCosmosCmd() *cobra.Command {
 				return err
 			}
 
-			auth, err := buildTransactOpts(konfig, ethRPC)
-			if err != nil {
-				return err
-			}
-
 			tokenAddr := ethcmn.HexToAddress(args[0])
 
 			if konfig.Bool(flagAutoApprove) {
-				if err := approveERC20(ethRPC, args[0]); err != nil {
+				if err := approveERC20(ethRPC, args[0], peggyParams.BridgeEthereumAddress); err != nil {
 					return err
 				}
+			}
+
+			auth, err := buildTransactOpts(konfig, ethRPC)
+			if err != nil {
+				return err
 			}
 
 			recipientAddr, err := sdk.AccAddressFromBech32(args[1])
@@ -647,7 +651,7 @@ func getPeggyContract(ethRPC *ethclient.Client, peggyAddr string) (*wrappers.Peg
 	return contract, nil
 }
 
-func approveERC20(ethRPC *ethclient.Client, erc20Addr string) error {
+func approveERC20(ethRPC *ethclient.Client, erc20Addr, peggyAddr string) error {
 	contract, err := wrappers.NewERC20(ethcmn.HexToAddress(erc20Addr), ethRPC)
 	if err != nil {
 		return fmt.Errorf("failed to create ERC20 contract instance: %w", err)
@@ -659,7 +663,7 @@ func approveERC20(ethRPC *ethclient.Client, erc20Addr string) error {
 	// Ok(allowance > (Uint256::max_value() / 2u32.into()))
 	// contract.Allowance()
 
-	tx, err := contract.Approve(auth, sender, amount)
+	tx, err := contract.Approve(auth, ethcmn.HexToAddress(peggyAddr), maxUint256)
 	if err != nil {
 		return fmt.Errorf("failed to approve ERC20 contract: %w", err)
 	}
