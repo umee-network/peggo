@@ -37,7 +37,9 @@ $ make install
 ## How to run
 ### Setup
 
-First we must register the validator's Ethereum key. This key will be used to sign claims going from Ethereum to Umee and to sign any transactions sent to Ethereum (batches or validator set updates).
+First we must register the validator's Ethereum key. This key will be used to
+sign claims going from Ethereum to Umee and to sign any transactions sent to
+Ethereum (batches or validator set updates).
 
 ```shell
 $ peggo tx register-eth-key \
@@ -67,13 +69,41 @@ $ peggo orchestrator \
   --cosmos-from=...
 ```
 
+### Send a transfer from Umee to Ethereum
+
+This is done using the command `umeed tx peggy send-to-eth`, use the `--help`
+flag for more information.
+
+If the coin doesn't have a corresponding ERC20 equivalent on the Ethereum
+network, the transaction will fail. This is only required for Umee originated
+coins and anyone can call the `deployERC20` function on the Peggy contract to
+fix this. 
+
+This process takes longer than transfers the other way around because they get
+relayed in batches rather than individually. It primarily depends on the amount
+of transfers of the same token and the fees the senders are paying.
+
+Important notice: if an "unlisted" (with no monetary value) ERC20 token gets
+sent into Umee it won't be possible to transfer it back to Ethereum, unless a
+validator is configured to batch and relay transactions of this token.
+
+### Transfers from Ethereum to Umee
+
+Any ERC20 token can be sent to Umee and it's done using the command
+`peggo bridge send-to-cosmos`, use the `--help` flag for more information. It
+can also be done by calling the `sendToCosmos` method on the Peggy contract.
+
+The ERC20 tokens will be locked in the Peggy contract and new coins will be
+minted on Umee with the denomination `peggy{token_address}`. This process takes
+around 3 minutes or 12 Ethereum blocks.
+
 ## How it works
 
 Peggo allows transfers of assets back and forth between Ethereum and Umee.
 It supports both assets originating on Umee and assets originating on Ethereum
 (any ERC20 token).
 
-It works by scanning the events of the contract deployed on  Ethereum (Peggy) and
+It works by scanning the events of the contract deployed on Ethereum (Peggy) and
 relaying them as messages to the Umee chain; and relaying transaction batches and
 validator sets from Umee to Ethereum.
 
@@ -99,8 +129,7 @@ coin. This enables transfers from Umee to Ethereum.
 
 ### Transfers from Umee to Ethereum
 
-WIP (describe in simple words how a transfer from Umee to Ethereum happens and
-provide example commands)
+WIP (describe in simple words how a transfer from Umee to Ethereum works)
 
 ### Transfers from Ethereum to Umee
 
