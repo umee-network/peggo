@@ -76,7 +76,7 @@ This is done using the command `umeed tx peggy send-to-eth`, use the `--help`
 flag for more information.
 
 If the coin doesn't have a corresponding ERC20 equivalent on the Ethereum
-network, the transaction will fail. This is only required for Umee originated
+network, the transaction will fail. This is only required for Cosmos originated
 coins and anyone can call the `deployERC20` function on the Peggy contract to
 fix this.
 
