@@ -83,7 +83,7 @@ Umee chain; and relaying transaction batches and validator sets from Umee to Eth
 
 **Withdraw** (`TransactionBatchExecutedEvent`): emitted when a batch of transactions is sent from Umee to Ethereum using the `submitBatch` function on the Peggy contract by a validator. This serves as a confirmation to Umee that the batch was sent successfully.
 
-**Valset update*** (`ValsetUpdatedEvent`): emitted on init of the Peggy contract and on every execution of the `updateValset` function.
+**Valset update** (`ValsetUpdatedEvent`): emitted on init of the Peggy contract and on every execution of the `updateValset` function.
 
 **Deployed ERC 20** (`ERC20DeployedEvent`): emitted when executing the function `deployERC20`. This event signals Umee that there's a new ERC20 deployed from Peggy, so Umee can map the token contract address to the corresponding native coin. This enables transfers from Umee to Ethereum. 
 
