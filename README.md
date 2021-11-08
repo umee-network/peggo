@@ -77,7 +77,7 @@ flag for more information.
 If the coin doesn't have a corresponding ERC20 equivalent on the Ethereum
 network, the transaction will fail. This is only required for Umee originated
 coins and anyone can call the `deployERC20` function on the Peggy contract to
-fix this. 
+fix this.
 
 This process takes longer than transfers the other way around because they get
 relayed in batches rather than individually. It primarily depends on the amount
@@ -128,7 +128,7 @@ Peggy, so Umee can map the token contract address to the corresponding native
 coin. This enables transfers from Umee to Ethereum.
 
 #### Umee
- 
+
  **Validator sets**: Umee informs the Peggy contract who are the current
  validators and their power. This results in an execution of the `updateValset`
  function.
