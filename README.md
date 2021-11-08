@@ -78,7 +78,8 @@ flag for more information.
 If the coin doesn't have a corresponding ERC20 equivalent on the Ethereum
 network, the transaction will fail. This is only required for Cosmos originated
 coins and anyone can call the `deployERC20` function on the Peggy contract to
-fix this.
+fix this (Peggo has a helper command for this, see
+`peggo bridge deploy-erc20 --help` for more details).
 
 This process takes longer than transfers the other way around because they get
 relayed in batches rather than individually. It primarily depends on the amount
