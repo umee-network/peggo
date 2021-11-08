@@ -141,11 +141,3 @@ coin. This enables transfers from Umee to Ethereum.
 
  **Batches**: Peggo queries Umee for any batches ready to be relayed and relays
  them over to Ethereum using the `submitBatch` function on the Peggy contract.
-
-### Transfers from Umee to Ethereum
-
-WIP (describe in simple words how a transfer from Umee to Ethereum works)
-
-### Transfers from Ethereum to Umee
-
-WIP
