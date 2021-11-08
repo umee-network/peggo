@@ -87,7 +87,7 @@ Important notice: if an "unlisted" (with no monetary value) ERC20 token gets
 sent into Umee it won't be possible to transfer it back to Ethereum, unless a
 validator is configured to batch and relay transactions of this token.
 
-### Transfers from Ethereum to Umee
+### Send a transfer from Ethereum to Umee
 
 Any ERC20 token can be sent to Umee and it's done using the command
 `peggo bridge send-to-cosmos`, use the `--help` flag for more information. It
@@ -107,9 +107,9 @@ It works by scanning the events of the contract deployed on Ethereum (Peggy) and
 relaying them as messages to the Umee chain; and relaying transaction batches and
 validator sets from Umee to Ethereum.
 
-### Events observed
+### Events and messages observed/relayed
 
-#### From Ethereum
+#### Ethereum
 
 **Deposits** (`SendToCosmosEvent`): emitted when sending tokens from Ethereum to
 Umee using the `sendToCosmos` function on Peggy.
@@ -126,6 +126,19 @@ and on every execution of the `updateValset` function.
 `deployERC20`. This event signals Umee that there's a new ERC20 deployed from
 Peggy, so Umee can map the token contract address to the corresponding native
 coin. This enables transfers from Umee to Ethereum.
+
+#### Umee
+ 
+ **Validator sets**: Umee informs the Peggy contract who are the current
+ validators and their power. This results in an execution of the `updateValset`
+ function.
+
+ **Request batch**: Peggo will check for new transactions in the Outgoing TX Pool
+ and if the transactions' fees are greater than the set minimum batch fee, it
+ will send a message to Umee requesting a new batch.
+
+ **Batches**: Peggo queries Umee for any batches ready to be relayed and relays
+ them over to Ethereum using the `submitBatch` function on the Peggy contract.
 
 ### Transfers from Umee to Ethereum
 
