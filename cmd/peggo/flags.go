@@ -42,7 +42,7 @@ const (
 	flagPowerThreshold       = "power-threshold"
 	flagAutoApprove          = "auto-approve"
 	flagRelayerLoopDuration  = "relayer-loop-duration"
-	flagOrchLoopsDuration    = "orch-loops-duration"
+	flagOrchLoopDuration     = "orch-loop-duration"
 )
 
 func cosmosFlagSet() *pflag.FlagSet {

@@ -58,7 +58,7 @@ func NewPeggyOrchestrator(
 	ethSignerFn keystore.SignerFn,
 	ethPersonalSignFn keystore.PersonalSignFn,
 	relayer relayer.PeggyRelayer,
-	loopsDuration time.Duration,
+	loopDuration time.Duration,
 	options ...func(PeggyOrchestrator),
 ) PeggyOrchestrator {
 
@@ -73,7 +73,7 @@ func NewPeggyOrchestrator(
 		ethSignerFn:          ethSignerFn,
 		ethPersonalSignFn:    ethPersonalSignFn,
 		relayer:              relayer,
-		loopsDuration:        loopsDuration,
+		loopsDuration:        loopDuration,
 	}
 
 	for _, option := range options {
