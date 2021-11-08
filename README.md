@@ -35,6 +35,7 @@ $ make install
 ```
 
 ## How to run
+
 ### Setup
 
 First we must register the validator's Ethereum key. This key will be used to
