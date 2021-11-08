@@ -14,8 +14,6 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
-const defaultLoopDur = 60 * time.Second
-
 // Start combines the all major roles required to make
 // up the Orchestrator, all of these are async loops.
 func (p *peggyOrchestrator) Start(ctx context.Context) error {
@@ -65,7 +63,7 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 
 	logger.Info().Uint64("last_checked_block", lastCheckedBlock).Msg("start scanning for events")
 
-	return loops.RunLoop(ctx, defaultLoopDur, func() error {
+	return loops.RunLoop(ctx, p.loopsDuration, func() error {
 		// Relays events from Ethereum -> Cosmos
 		var currentBlock uint64
 		if err := retry.Do(func() (err error) {
@@ -129,7 +127,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 	}
 	logger.Debug().Hex("peggyID", peggyID[:]).Msg("received peggyID")
 
-	return loops.RunLoop(ctx, defaultLoopDur, func() error {
+	return loops.RunLoop(ctx, p.loopsDuration, func() error {
 		var oldestUnsignedValsets []*types.Valset
 		if err := retry.Do(func() error {
 			oldestValsets, err := p.cosmosQueryClient.OldestUnsignedValsets(ctx, p.peggyBroadcastClient.AccFromAddress())
@@ -209,7 +207,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "BatchRequesterLoop").Logger()
 
-	return loops.RunLoop(ctx, defaultLoopDur, func() error {
+	return loops.RunLoop(ctx, p.loopsDuration, func() error {
 		// Each loop performs the following:
 		//
 		// - get All the denominations
@@ -250,7 +248,7 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 						denom = resp.GetDenom()
 
 						// send batch request only if fee threshold is met
-						if p.CheckFeeThreshold(tokenAddr, unbatchedToken.TotalFees, p.minBatchFeeUSD) {
+						if p.CheckFeeThreshold(ctx, tokenAddr, unbatchedToken.TotalFees, p.minBatchFeeUSD) {
 							logger.Info().Str("token_contract", tokenAddr.String()).Str("denom", denom).Msg("sending batch request")
 							_ = p.peggyBroadcastClient.SendRequestBatch(ctx, denom)
 						}
@@ -272,6 +270,7 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 }
 
 func (p *peggyOrchestrator) CheckFeeThreshold(
+	ctx context.Context,
 	erc20Contract common.Address,
 	totalFee cosmtypes.Int,
 	minFeeInUSD float64,
@@ -280,14 +279,34 @@ func (p *peggyOrchestrator) CheckFeeThreshold(
 		return true
 	}
 
+	decimals, err := p.peggyContract.GetERC20Decimals(ctx, erc20Contract, p.peggyContract.FromAddress())
+	if err != nil {
+		p.logger.Err(err).Str("token_contract", erc20Contract.String()).Msg("failed to get token decimals")
+		return false
+	}
+
+	p.logger.Debug().
+		Uint8("decimals", decimals).
+		Str("token_contract", erc20Contract.String()).
+		Msg("got token decimals")
+
 	tokenPriceInUSD, err := p.priceFeeder.QueryUSDPrice(erc20Contract)
 	if err != nil {
 		return false
 	}
 
 	tokenPriceInUSDDec := decimal.NewFromFloat(tokenPriceInUSD)
-	totalFeeInUSDDec := decimal.NewFromBigInt(totalFee.BigInt(), -18).Mul(tokenPriceInUSDDec)
+	// decimals (uint8) can be safely casted into int32 because the max uint8 is 255 and the max int32 is 2147483647
+	totalFeeInUSDDec := decimal.NewFromBigInt(totalFee.BigInt(), -int32(decimals)).Mul(tokenPriceInUSDDec)
 	minFeeInUSDDec := decimal.NewFromFloat(minFeeInUSD)
+
+	p.logger.Debug().
+		Str("token_contract", erc20Contract.String()).
+		Float64("token_price_in_usd", tokenPriceInUSD).
+		Int64("total_fees", totalFee.Int64()).
+		Float64("total_fee_in_usd", totalFeeInUSDDec.InexactFloat64()).
+		Float64("min_fee_in_usd", minFeeInUSDDec.InexactFloat64()).
+		Msg("checking if token fees meet minimum batch fee threshold")
 
 	return totalFeeInUSDDec.GreaterThan(minFeeInUSDDec)
 }
