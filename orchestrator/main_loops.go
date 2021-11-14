@@ -232,7 +232,7 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 			if len(unbatchedTokensWithFees) > 0 {
 				logger.Debug().Msg("checking if token fees meets set threshold amount and send batch request")
 				for _, unbatchedToken := range unbatchedTokensWithFees {
-					return retry.Do(func() (err error) {
+					err := retry.Do(func() (err error) {
 						// Check if the token is present in cosmos denom. If so, send batch
 						// request with cosmosDenom.
 						tokenAddr := common.HexToAddress(unbatchedToken.Token)
@@ -257,6 +257,12 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 					}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 						logger.Err(err).Uint("retry", n).Msg("failed to get LatestUnbatchOutgoingTx; retrying...")
 					}))
+
+					if err != nil {
+						logger.Err(err).
+							Str("token_address", unbatchedToken.Token).
+							Msg("exhausted attempts to get LatestUnbatchOutgoingTx")
+					}
 				}
 			} else {
 				logger.Debug().Msg("no outgoing withdraw tx or unbatched token fee less than threshold")
