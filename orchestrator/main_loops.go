@@ -232,10 +232,11 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 			if len(unbatchedTokensWithFees) > 0 {
 				logger.Debug().Msg("checking if token fees meets set threshold amount and send batch request")
 				for _, unbatchedToken := range unbatchedTokensWithFees {
+					batchFees := unbatchedToken // use this because of scopelint
 					err := retry.Do(func() (err error) {
 						// Check if the token is present in cosmos denom. If so, send batch
 						// request with cosmosDenom.
-						tokenAddr := common.HexToAddress(unbatchedToken.Token)
+						tokenAddr := common.HexToAddress(batchFees.Token)
 
 						var denom string
 						resp, err := p.cosmosQueryClient.ERC20ToDenom(ctx, tokenAddr)
@@ -248,7 +249,7 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 						denom = resp.GetDenom()
 
 						// send batch request only if fee threshold is met
-						if p.CheckFeeThreshold(ctx, tokenAddr, unbatchedToken.TotalFees, p.minBatchFeeUSD) {
+						if p.CheckFeeThreshold(ctx, tokenAddr, batchFees.TotalFees, p.minBatchFeeUSD) {
 							logger.Info().Str("token_contract", tokenAddr.String()).Str("denom", denom).Msg("sending batch request")
 							_ = p.peggyBroadcastClient.SendRequestBatch(ctx, denom)
 						}
