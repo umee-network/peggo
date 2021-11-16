@@ -43,6 +43,7 @@ type peggyOrchestrator struct {
 	relayer              relayer.PeggyRelayer
 	loopsDuration        time.Duration
 	cosmosBlockTime      time.Duration
+	ethBlocksPerLoop     uint64
 
 	// optional inputs with defaults
 	minBatchFeeUSD float64
@@ -61,6 +62,7 @@ func NewPeggyOrchestrator(
 	relayer relayer.PeggyRelayer,
 	loopDuration time.Duration,
 	cosmosBlockTime time.Duration,
+	ethBlocksPerLoop int64,
 	options ...func(PeggyOrchestrator),
 ) PeggyOrchestrator {
 
@@ -77,6 +79,7 @@ func NewPeggyOrchestrator(
 		relayer:              relayer,
 		loopsDuration:        loopDuration,
 		cosmosBlockTime:      cosmosBlockTime,
+		ethBlocksPerLoop:     uint64(ethBlocksPerLoop),
 	}
 
 	for _, option := range options {

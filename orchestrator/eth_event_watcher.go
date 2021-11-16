@@ -10,18 +10,6 @@ import (
 	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
 )
 
-// TODO: Evaluate this condition and if it needs to be configurable. For
-// Umee, our block times will average around 6s.
-//
-// Original comment:
-// Considering blocktime of up to 3 seconds approx on the Injective Chain and an
-// oracle loop duration = 1 minute, we broadcast only 20 events in each iteration.
-// So better to search only 20 blocks to ensure all the events are broadcast to
-// Injective Chain without misses.
-//
-// const defaultBlocksToSearch = 20
-const defaultBlocksToSearch = 40
-
 const ethBlockConfirmationDelay = 12
 
 // CheckForEvents checks for events such as a deposit to the Peggy Ethereum contract or a validator set update
@@ -44,8 +32,8 @@ func (p *peggyOrchestrator) CheckForEvents(
 		return currentBlock, nil
 	}
 
-	if (currentBlock - startingBlock) > defaultBlocksToSearch {
-		currentBlock = startingBlock + defaultBlocksToSearch
+	if (currentBlock - startingBlock) > p.ethBlocksPerLoop {
+		currentBlock = startingBlock + p.ethBlocksPerLoop
 	}
 
 	peggyFilterer, err := wrappers.NewPeggyFilterer(p.peggyContract.Address(), p.ethProvider)
