@@ -344,15 +344,18 @@ func getEthBlockDelay(chainID uint64) uint64 {
 	// all POW Chains
 	case 1, 3, 6, 7:
 		return 6
+
 	// Dev, our own Gravity Ethereum testnet, and Hardhat respectively
 	// all single signer chains with no chance of any reorgs
 	case 2018, 15, 31337:
 		return 0
+
 	// Rinkeby and Goerli use Clique (POA) Consensus, finality takes
 	// up to num validators blocks. Number is higher than Ethereum based
 	// on experience with operational issues
 	case 4, 5:
 		return 10
+
 	// assume the safe option (POW) where we don't know
 	default:
 		return 6
