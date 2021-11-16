@@ -19,7 +19,7 @@ import (
 
 type PeggyOrchestrator interface {
 	Start(ctx context.Context) error
-	CheckForEvents(ctx context.Context, startingBlock uint64) (currentBlock uint64, err error)
+	CheckForEvents(ctx context.Context, startingBlock, ethBlockConfirmationDelay uint64) (currentBlock uint64, err error)
 	GetLastCheckedBlock(ctx context.Context) (uint64, error)
 	EthOracleMainLoop(ctx context.Context) error
 	EthSignerMainLoop(ctx context.Context) error

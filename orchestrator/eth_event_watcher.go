@@ -10,13 +10,12 @@ import (
 	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
 )
 
-const ethBlockConfirmationDelay = 12
-
 // CheckForEvents checks for events such as a deposit to the Peggy Ethereum contract or a validator set update
 // or a transaction batch update. It then responds to these events by performing actions on the Cosmos chain if required
 func (p *peggyOrchestrator) CheckForEvents(
 	ctx context.Context,
 	startingBlock uint64,
+	ethBlockConfirmationDelay uint64,
 ) (currentBlock uint64, err error) {
 
 	latestHeader, err := p.ethProvider.HeaderByNumber(ctx, nil)
@@ -26,7 +25,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 	}
 
 	// add delay to ensure minimum confirmations are received and block is finalized
-	currentBlock = latestHeader.Number.Uint64() - uint64(ethBlockConfirmationDelay)
+	currentBlock = latestHeader.Number.Uint64() - ethBlockConfirmationDelay
 
 	if currentBlock < startingBlock {
 		return currentBlock, nil
