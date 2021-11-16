@@ -44,9 +44,9 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 	lastResync := time.Now()
 
 	var (
-	  lastCheckedBlock uint64
-	  peggyParams *types.Params
-	  )
+		lastCheckedBlock uint64
+		peggyParams      *types.Params
+	)
 
 	if err := retry.Do(func() (err error) {
 		peggyParams, err = p.cosmosQueryClient.PeggyParams(ctx)
