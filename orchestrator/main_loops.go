@@ -42,8 +42,11 @@ func (p *peggyOrchestrator) Start(ctx context.Context) error {
 func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "EthOracleMainLoop").Logger()
 	lastResync := time.Now()
-	var lastCheckedBlock uint64
-	var peggyParams *types.Params
+
+	var (
+	  lastCheckedBlock uint64
+	  peggyParams *types.Params
+	  )
 
 	if err := retry.Do(func() (err error) {
 		peggyParams, err = p.cosmosQueryClient.PeggyParams(ctx)
