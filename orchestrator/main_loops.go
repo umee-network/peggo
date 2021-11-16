@@ -42,8 +42,11 @@ func (p *peggyOrchestrator) Start(ctx context.Context) error {
 func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "EthOracleMainLoop").Logger()
 	lastResync := time.Now()
-	var lastCheckedBlock uint64
-	var peggyParams *types.Params
+
+	var (
+	  lastCheckedBlock uint64
+	  peggyParams *types.Params
+	  )
 
 	if err := retry.Do(func() (err error) {
 		peggyParams, err = p.cosmosQueryClient.PeggyParams(ctx)
@@ -73,7 +76,7 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 
 	logger.Info().Uint64("last_checked_block", lastCheckedBlock).Msg("start scanning for events")
 
-	return loops.RunLoop(ctx, p.loopsDuration, func() error {
+	return loops.RunLoop(ctx, p.logger, p.loopsDuration, func() error {
 		// Relays events from Ethereum -> Cosmos
 		var currentBlock uint64
 		if err := retry.Do(func() (err error) {
@@ -137,7 +140,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 	}
 	logger.Debug().Hex("peggyID", peggyID[:]).Msg("received peggyID")
 
-	return loops.RunLoop(ctx, p.loopsDuration, func() error {
+	return loops.RunLoop(ctx, p.logger, p.loopsDuration, func() error {
 		var oldestUnsignedValsets []*types.Valset
 		if err := retry.Do(func() error {
 			oldestValsets, err := p.cosmosQueryClient.OldestUnsignedValsets(ctx, p.peggyBroadcastClient.AccFromAddress())
@@ -217,7 +220,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "BatchRequesterLoop").Logger()
 
-	return loops.RunLoop(ctx, p.loopsDuration, func() error {
+	return loops.RunLoop(ctx, p.logger, p.loopsDuration, func() error {
 		// Each loop performs the following:
 		//
 		// - get All the denominations
