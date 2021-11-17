@@ -14,7 +14,7 @@ import (
 
 // RelayBatches gets the last batch of outgoing transactions and relays it to Ethereum in a TX.
 // Validators will only relay a batch if they consider it profitable, that is, if the total fees are over its
-// minimum-batch-fee parameter. If the batch is not profitable for this validator, we'll give it some time (relayTimeout)
+// minimum-batch-fee parameter. If the batch isn't profitable for this validator, we'll give it some time (relayTimeout)
 // to allow any other validator who considers it profitable to relay it. If after relayTimeout the batch hasn't being
 // sent, we'll skip to the next one.
 // relayTimeout is different from BatchTimeout. BatchTimeout is set 12hrs after the batch is created and relayTimeout is
@@ -150,7 +150,11 @@ func (s *peggyRelayer) IsBatchProfitable(
 		return true
 	}
 
-	decimals, err := s.peggyContract.GetERC20Decimals(ctx, common.HexToAddress(batch.TokenContract), s.peggyContract.FromAddress())
+	decimals, err := s.peggyContract.GetERC20Decimals(
+		ctx,
+		common.HexToAddress(batch.TokenContract),
+		s.peggyContract.FromAddress(),
+	)
 	if err != nil {
 		s.logger.Err(err).Str("token_contract", batch.TokenContract).Msg("failed to get token decimals")
 		return false
