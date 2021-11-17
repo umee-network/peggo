@@ -147,6 +147,7 @@ func getOrchestratorCmd() *cobra.Command {
 				logger,
 				peggyQueryClient,
 				peggyContract,
+				tmclient.NewRPCClient(logger, tmRPCEndpoint),
 				konfig.Bool(flagRelayValsets),
 				konfig.Bool(flagRelayBatches),
 				konfig.Duration(flagRelayerLoopDuration),
