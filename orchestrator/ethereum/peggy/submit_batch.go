@@ -22,7 +22,7 @@ func (s *peggyContract) SendTransactionBatch(
 
 	s.logger.Debug().Interface("batch", batch).Msg("batch")
 
-	validators, powers, sigV, sigR, sigS, err := checkBatchSigsAndRepack(currentValset, confirms)
+	validators, powers, sigV, sigR, sigS, err := CheckBatchSigsAndRepack(currentValset, confirms)
 	if err != nil {
 		err = errors.Wrap(err, "confirmations check failed")
 		return nil, err
@@ -156,7 +156,7 @@ func getBatchCheckpointValues(batch *types.OutgoingTxBatch) (
 	return
 }
 
-func checkBatchSigsAndRepack(
+func CheckBatchSigsAndRepack(
 	valset *types.Valset,
 	confirms []*types.MsgConfirmBatch,
 ) (

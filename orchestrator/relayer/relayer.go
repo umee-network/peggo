@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/orchestrator/coingecko"
 	"github.com/umee-network/peggo/orchestrator/cosmos"
@@ -17,7 +18,11 @@ type PeggyRelayer interface {
 	Start(ctx context.Context) error
 
 	FindLatestValset(ctx context.Context) (*types.Valset, error)
-	RelayBatches(ctx context.Context) error
+	RelayBatches(
+		ctx context.Context,
+		currentValset *types.Valset,
+		possibleBatches map[common.Address][]SubmittableBatch,
+	) error
 	RelayValsets(ctx context.Context) error
 
 	SetMinBatchFee(float64)

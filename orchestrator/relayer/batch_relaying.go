@@ -3,139 +3,161 @@ package relayer
 import (
 	"context"
 	"sort"
-	"time"
 
 	cosmtypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
+	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
-// RelayBatches gets the last batch of outgoing transactions and relays it to Ethereum in a TX.
-// Validators will only relay a batch if they consider it profitable, that is, if the total fees are over its
-// minimum-batch-fee parameter. If the batch isn't profitable for this validator, we'll give it some time (relayTimeout)
-// to allow any other validator who considers it profitable to relay it. If after relayTimeout the batch hasn't being
-// sent, we'll skip to the next one.
-// relayTimeout is different from BatchTimeout. BatchTimeout is set 12hrs after the batch is created and relayTimeout is
-// much shorter (2x relay loop) and it will only be used if the batch is not profitable and there is another batch
-// in line waiting. This is to prevent the bridge from being halted for 12h if a validator erronously requested an
-// unprofitable batch.
-// Any transactions left in the unsent/skipped batch will be put back in the queue (this is handled by x/peggy).
-func (s *peggyRelayer) RelayBatches(ctx context.Context) error {
+type SubmittableBatch struct {
+	Batch      *types.OutgoingTxBatch
+	Signatures []*types.MsgConfirmBatch
+}
+
+// getBatchesAndSignatures retrieves the latest batches from the Cosmos module and then iterates through the signatures
+// for each batch, determining if they are ready to submit. It is possible for a batch to not have valid signatures for
+// two reasons one is that not enough signatures have been collected yet from the validators two is that the batch is
+// old enough that the signatures do not reflect the current validator set on Ethereum. In both the later and the former
+// case the correct solution is to wait through timeouts, new signatures, or a later valid batch being submitted old
+// batches will always be resolved.
+func (s *peggyRelayer) getBatchesAndSignatures(
+	ctx context.Context,
+	currentValset *types.Valset,
+) (map[common.Address][]SubmittableBatch, error) {
+	possibleBatches := map[common.Address][]SubmittableBatch{}
+
 	latestBatches, err := s.cosmosQueryClient.LatestTransactionBatches(ctx)
 	if err != nil {
-		return err
+		s.logger.Err(err).Msg("failed to get latest batches")
+		return possibleBatches, err
 	}
 
-	var selectedBatch *types.OutgoingTxBatch
-	var selectedBatchSigs []*types.MsgConfirmBatch
-
-	// order batches by nonce ASC. That means that the next batch is [0].
-	sort.SliceStable(latestBatches, func(i, j int) bool {
-		return latestBatches[i].BatchNonce > latestBatches[j].BatchNonce
-	})
-
 	for _, batch := range latestBatches {
+		// get the signatures for the batch
 		sigs, err := s.cosmosQueryClient.TransactionBatchSignatures(
 			ctx,
 			batch.BatchNonce,
 			common.HexToAddress(batch.TokenContract),
 		)
 		if err != nil {
-			return err
+			// If we can't get the signatures for a batch we will continue to the next batch
+			s.logger.Err(err).
+				Uint64("batch_nonce", batch.BatchNonce).
+				Str("token_contract", batch.TokenContract).
+				Msg("failed to get batch's signatures")
+			continue
 		}
 
-		// if the batch is signed by the latest validator set, we can relay it
-		if len(sigs) != 0 {
+		// this checks that the signatures for the batch are actually possible to submit to the chain
+		// we only need to know if the signatures are good, we won't use the other returned values
+		_, _, _, _, _, err = peggy.CheckBatchSigsAndRepack(currentValset, sigs)
 
-			// Check if the batch is profitable
-			if !s.IsBatchProfitable(ctx, batch, s.minBatchFeeUSD) {
-				// it's not profitable, check if we should wait for it (return)
-				// or if it timeoutted, skip to the next batch
-
-				// get Cosmos' latest block height and Peggy's average block time
-				// to calculate how much time has passed since the batch was created
-				latestBlockHeight, err := s.tmClient.GetLatestBlockHeight(ctx)
-				if err != nil {
-					s.logger.Err(err).Msg("failed to get latest block height")
-					return err
-				}
-
-				peggyParams, err := s.cosmosQueryClient.PeggyParams(ctx)
-				if err != nil {
-					s.logger.Err(err).Msg("failed to query peggy params, is umeed running?")
-				}
-
-				elapsedBlocks := uint64(latestBlockHeight) - batch.Block
-				elapsedTime := time.Duration(elapsedBlocks*peggyParams.AverageBlockTime) * time.Millisecond
-
-				// if the batch has been created more than relayTimeout ago, skip it and try to send the next one
-				if elapsedTime > (s.loopDuration * 2) {
-					continue
-				}
-
-				// if the batch has been created less than relayTimeout ago, wait for it
-				return nil
-			}
-
-			// batch is profitable and has signatures, we can relay it
-			selectedBatch = batch
-			selectedBatchSigs = sigs
-			break
+		if err != nil {
+			// this batch is not ready to be relayed
+			s.logger.
+				Debug().
+				AnErr("err", err).
+				Uint64("batch_nonce", batch.BatchNonce).
+				Str("token_contract", batch.TokenContract).
+				Msg("batch can't be submitted yet, waiting for more signatures")
 		}
+
+		// if the previous check didn't fail, we can add the batch to the list of possible batches
+		possibleBatches[common.HexToAddress(batch.TokenContract)] = append(
+			possibleBatches[common.HexToAddress(batch.TokenContract)],
+			SubmittableBatch{Batch: batch, Signatures: sigs},
+		)
 	}
 
-	if selectedBatch == nil {
-		s.logger.Debug().Msg("could not find batch with signatures, nothing to relay")
-		return nil
+	// order batches by nonce ASC. That means that the next/oldest batch is [0].
+	for tokenAddress := range possibleBatches {
+		address := tokenAddress // use this because of scopelint
+		sort.SliceStable(possibleBatches[address], func(i, j int) bool {
+			return possibleBatches[address][i].Batch.BatchNonce > possibleBatches[address][j].Batch.BatchNonce
+		})
 	}
 
-	latestEthereumBatch, err := s.peggyContract.GetTxBatchNonce(
-		ctx,
-		common.HexToAddress(selectedBatch.TokenContract),
-		s.peggyContract.FromAddress(),
-	)
+	return possibleBatches, nil
+}
+
+// RelayBatches ttempts to submit batches with valid signatures, checking the state of the Ethereum chain to ensure that
+// it is valid to submit a given batch more specifically that the correctly signed batch has not timed out or already
+// been submitted. The goal of this function is to submit batches in chronological order of their creation, submitting
+// batches newest first will invalidate old batches and is less efficient if those old batches are profitable.
+// This function estimates the cost of submitting a batch before actually submitting it to Ethereum, if it is determined
+// that the ETH cost to submit is too high the batch will be skipped and a later, more profitable, batch may be
+// submitted.
+// Keep in mind that many other relayers are making this same computation and some may have different standards for
+// their profit margin, therefore there may be a race not only to submit individual batches but also batches in
+// different orders
+func (s *peggyRelayer) RelayBatches(
+	ctx context.Context,
+	currentValset *types.Valset,
+	possibleBatches map[common.Address][]SubmittableBatch,
+) error {
+	// first get current block height to check for any timeouts
+	lastEthereumHeader, err := s.ethProvider.HeaderByNumber(ctx, nil)
 	if err != nil {
+		s.logger.Err(err).Msg("failed to get last ethereum header")
 		return err
 	}
 
-	currentValset, err := s.FindLatestValset(ctx)
-	if err != nil {
-		return errors.New("failed to find latest valset")
-	} else if currentValset == nil {
-		return errors.New("latest valset not found")
-	}
+	ethBlockHeight := lastEthereumHeader.Number.Uint64()
 
-	s.logger.Debug().
-		Uint64("oldest_batch_nonce", selectedBatch.BatchNonce).
-		Uint64("latest_batch_nonce", latestEthereumBatch.Uint64()).
-		Msg("found latest valsets")
+	for tokenContract, batches := range possibleBatches {
 
-	if selectedBatch.BatchNonce > latestEthereumBatch.Uint64() {
-
+		// requests data from Ethereum only once per token type, this is valid because we are
+		// iterating from oldest to newest, so submitting a batch earlier in the loop won't
+		// ever invalidate submitting a batch later in the loop. Another relayer could always
+		// do that though.
 		latestEthereumBatch, err := s.peggyContract.GetTxBatchNonce(
 			ctx,
-			common.HexToAddress(selectedBatch.TokenContract),
+			tokenContract,
 			s.peggyContract.FromAddress(),
 		)
 		if err != nil {
+			s.logger.Err(err).Msg("failed to get latest Ethereum batch")
 			return err
 		}
-		// Check if oldestSignedBatch already submitted by other validators in mean time
-		if selectedBatch.BatchNonce > latestEthereumBatch.Uint64() {
+
+		// now we iterate through batches per token type
+		for _, batch := range batches {
+
+			if batch.Batch.BatchTimeout < ethBlockHeight {
+				s.logger.Debug().
+					Uint64("batch_nonce", batch.Batch.BatchNonce).
+					Str("token_contract", batch.Batch.TokenContract).
+					Msg("batch has timed out and can't be submitted")
+				continue
+			}
+
+			// if the batch is newer than the latest Ethereum batch, we can submit it
+			if batch.Batch.BatchNonce <= latestEthereumBatch.Uint64() {
+				continue
+			}
+
+			// TODO: estimate gas cost and check if this tx is profitable
+			// If the batch is not profitable, move on to the next one.
+			if !s.IsBatchProfitable(ctx, batch.Batch, s.minBatchFeeUSD) {
+				continue
+			}
+
 			s.logger.Info().
-				Uint64("latest_batch", selectedBatch.BatchNonce).
+				Uint64("latest_batch", batch.Batch.BatchNonce).
 				Uint64("latest_ethereum_batch", latestEthereumBatch.Uint64()).
 				Msg("we have detected latest batch but Ethereum has a different one. Sending an update!")
 
 			// Send SendTransactionBatch to Ethereum
-			txHash, err := s.peggyContract.SendTransactionBatch(ctx, currentValset, selectedBatch, selectedBatchSigs)
+			txHash, err := s.peggyContract.SendTransactionBatch(ctx, currentValset, batch.Batch, batch.Signatures)
 			if err != nil {
 				return err
 			}
 			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Ethereum Tx (TransactionBatch)")
+
 		}
+
 	}
 
 	return nil
