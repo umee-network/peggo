@@ -41,7 +41,6 @@ const (
 	flagEthGasLimit          = "eth-gas-limit"
 	flagPowerThreshold       = "power-threshold"
 	flagAutoApprove          = "auto-approve"
-	flagRelayerLoopDuration  = "relayer-loop-duration"
 	flagOrchLoopDuration     = "orch-loop-duration"
 	flagEthBlocksPerLoop     = "eth-blocks-per-loop"
 )

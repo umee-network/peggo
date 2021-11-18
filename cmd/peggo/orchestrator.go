@@ -143,6 +143,11 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
 
+			// TODO: figure out where to put this 15% buffer
+			// peggyParams.AverageEthereumBlockTime is in milliseconds. We add a 15% extra as a buffer so txs have time
+			// to get processed.
+			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime/100*115) * time.Millisecond
+
 			relayer := relayer.NewPeggyRelayer(
 				logger,
 				peggyQueryClient,
@@ -150,7 +155,7 @@ func getOrchestratorCmd() *cobra.Command {
 				tmclient.NewRPCClient(logger, tmRPCEndpoint),
 				konfig.Bool(flagRelayValsets),
 				konfig.Bool(flagRelayBatches),
-				konfig.Duration(flagRelayerLoopDuration),
+				averageEthBlockTime,
 			)
 
 			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
@@ -201,7 +206,6 @@ func getOrchestratorCmd() *cobra.Command {
 
 	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
-	cmd.Flags().Duration(flagRelayerLoopDuration, 5*time.Minute, "Duration between relayer loops")
 	cmd.Flags().Duration(flagOrchLoopDuration, 1*time.Minute, "Duration between orchestrator loops")
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 40, "Number of Ethereum blocks to process per orchestrator loop")
 	cmd.Flags().Float64(
