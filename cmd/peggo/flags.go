@@ -43,7 +43,6 @@ const (
 	flagAutoApprove          = "auto-approve"
 	flagRelayerLoopDuration  = "relayer-loop-duration"
 	flagOrchLoopDuration     = "orch-loop-duration"
-	flagCosmosBlockTime      = "cosmos-block-time"
 	flagEthBlocksPerLoop     = "eth-blocks-per-loop"
 )
 

@@ -163,6 +163,11 @@ func getOrchestratorCmd() *cobra.Command {
 				Str("relayer_ethereum_addr", ethKeyFromAddress.String()).
 				Logger()
 
+			// TODO: figure out where to put this 15% buffer
+			// peggyParams.AverageBlockTime is in milliseconds. We add a 15% extra as a buffer so txs have time to get
+			// processed.
+			averageCosmosBlockTime := time.Duration(peggyParams.AverageBlockTime/100*115) * time.Millisecond
+
 			orch := orchestrator.NewPeggyOrchestrator(
 				logger,
 				peggyQueryClient,
@@ -174,7 +179,7 @@ func getOrchestratorCmd() *cobra.Command {
 				personalSignFn,
 				relayer,
 				konfig.Duration(flagOrchLoopDuration),
-				konfig.Duration(flagCosmosBlockTime),
+				averageCosmosBlockTime,
 				konfig.Int64(flagEthBlocksPerLoop),
 				orchestrator.SetMinBatchFee(konfig.Float64(flagMinBatchFeeUSD)),
 				orchestrator.SetPriceFeeder(coingeckoFeed),
@@ -198,7 +203,6 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
 	cmd.Flags().Duration(flagRelayerLoopDuration, 5*time.Minute, "Duration between relayer loops")
 	cmd.Flags().Duration(flagOrchLoopDuration, 1*time.Minute, "Duration between orchestrator loops")
-	cmd.Flags().Duration(flagCosmosBlockTime, 5*time.Second, "Average block time of the cosmos chain")
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 40, "Number of Ethereum blocks to process per orchestrator loop")
 	cmd.Flags().Float64(
 		flagMinBatchFeeUSD,
