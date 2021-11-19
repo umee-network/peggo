@@ -161,7 +161,6 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Bool(flagRelayValsets),
 				konfig.Bool(flagRelayBatches),
 				averageEthBlockTime,
-				relayer.SetMinBatchFee(konfig.Float64(flagMinBatchFeeUSD)),
 				relayer.SetPriceFeeder(coingeckoFeed),
 			)
 

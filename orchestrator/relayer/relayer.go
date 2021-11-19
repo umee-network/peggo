@@ -25,7 +25,6 @@ type PeggyRelayer interface {
 	) error
 	RelayValsets(ctx context.Context, currentValset *types.Valset) error
 
-	SetMinBatchFee(float64)
 	SetPriceFeeder(*coingecko.PriceFeed)
 }
 

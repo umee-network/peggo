@@ -51,7 +51,53 @@ func urlJoin(baseURL string, segments ...string) string {
 
 // TODO: query CoinGecko for this price
 func (cp *PriceFeed) QueryETHUSDPrice() (float64, error) {
-	return 4000.0, nil
+	u, err := url.ParseRequestURI(urlJoin(cp.config.BaseURL, "simple", "price"))
+	if err != nil {
+		cp.logger.Fatal().Err(err).Msg("failed to parse URL")
+	}
+
+	q := make(url.Values)
+
+	q.Set("ids", "ethereum")
+	q.Set("vs_currencies", "usd")
+	u.RawQuery = q.Encode()
+
+	reqURL := u.String()
+	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
+	if err != nil {
+		cp.logger.Fatal().Err(err).Msg("failed to create HTTP request")
+	}
+
+	resp, err := cp.client.Do(req)
+	if err != nil {
+		err = errors.Wrapf(err, "failed to fetch price from %s", reqURL)
+		return zeroPrice, err
+	}
+
+	respBody, err := ioutil.ReadAll(io.LimitReader(resp.Body, maxRespBytes))
+	if err != nil {
+		_ = resp.Body.Close()
+		err = errors.Wrapf(err, "failed to read response body from %s", reqURL)
+		return zeroPrice, err
+	}
+	_ = resp.Body.Close()
+
+	var f interface{}
+	err = json.Unmarshal(respBody, &f)
+	if err != nil {
+		return zeroPrice, errors.Wrapf(err, "failed to parse response body from %s", reqURL)
+	}
+
+	m := f.(map[string]interface{})
+
+	v := m[strings.ToLower("ethereum")]
+	n, ok := v.(map[string]interface{})
+	if !ok {
+		return zeroPrice, errors.Errorf("failed to get price for ETH")
+	}
+
+	tokenPriceInUSD := n["usd"].(float64)
+	return tokenPriceInUSD, nil
 }
 
 func (cp *PriceFeed) QueryUSDPrice(erc20Contract common.Address) (float64, error) {
