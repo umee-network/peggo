@@ -18,7 +18,7 @@ func (s *peggyRelayer) Start(ctx context.Context) error {
 		err           error
 	)
 
-	retry.Do(func() error {
+	err = retry.Do(func() error {
 		currentValset, err = s.FindLatestValset(ctx)
 		if err != nil {
 			return errors.New("failed to find latest valset")
@@ -30,6 +30,10 @@ func (s *peggyRelayer) Start(ctx context.Context) error {
 	}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 		logger.Err(err).Uint("retry", n).Msg("failed to find latest valset; retrying...")
 	}))
+
+	if err != nil {
+		s.logger.Panic().Err(err).Msg("exhausted retries to get latest valset")
+	}
 
 	return loops.RunLoop(ctx, s.logger, s.ethereumBlockTime, func() error {
 		var pg loops.ParanoidGroup
