@@ -35,6 +35,12 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 	}
 
 	for _, batch := range latestBatches {
+
+		// we might have already sent this same batch. Skip it
+		if s.lastSentBatchNonce >= batch.BatchNonce {
+			continue
+		}
+
 		// get the signatures for the batch
 		sigs, err := s.cosmosQueryClient.TransactionBatchSignatures(
 			ctx,
@@ -132,6 +138,8 @@ func (s *peggyRelayer) RelayBatches(
 				s.logger.Debug().
 					Uint64("batch_nonce", batch.Batch.BatchNonce).
 					Str("token_contract", batch.Batch.TokenContract).
+					Uint64("batch_timeout", batch.Batch.BatchTimeout).
+					Uint64("eth_block_height", ethBlockHeight).
 					Msg("batch has timed out and can't be submitted")
 				continue
 			}
@@ -152,11 +160,25 @@ func (s *peggyRelayer) RelayBatches(
 				Uint64("latest_ethereum_batch", latestEthereumBatch.Uint64()).
 				Msg("we have detected latest batch but Ethereum has a different one. Sending an update!")
 
-			// Send SendTransactionBatch to Ethereum
-			txHash, err := s.peggyContract.SendTransactionBatch(ctx, currentValset, batch.Batch, batch.Signatures)
+				// Send SendTransactionBatch to Ethereum
+			s.logger.Info().
+				Str("token_contract", batch.Batch.TokenContract).
+				Uint64("new_nonce", batch.Batch.BatchNonce).
+				Msg("checking signatures and encoding TransactionBatch to Ethereum")
+
+			txData, err := s.peggyContract.EncodeTransactionBatch(ctx, currentValset, batch.Batch, batch.Signatures)
 			if err != nil {
 				return err
 			}
+
+			txHash, err := s.peggyContract.SendTransactionBatch(ctx, txData)
+			if err != nil {
+				return err
+			}
+
+			// update our local tracker of the latest batch
+			s.lastSentBatchNonce = batch.Batch.BatchNonce
+
 			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Ethereum Tx (TransactionBatch)")
 
 		}

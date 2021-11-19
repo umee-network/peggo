@@ -9,18 +9,12 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
-func (s *peggyContract) SendTransactionBatch(
+func (s *peggyContract) EncodeTransactionBatch(
 	ctx context.Context,
 	currentValset *types.Valset,
 	batch *types.OutgoingTxBatch,
 	confirms []*types.MsgConfirmBatch,
-) (*common.Hash, error) {
-	s.logger.Info().
-		Str("token_contract", batch.TokenContract).
-		Uint64("new_nonce", batch.BatchNonce).
-		Msg("checking signatures and submitting TransactionBatch to Ethereum")
-
-	s.logger.Debug().Interface("batch", batch).Msg("batch")
+) ([]byte, error) {
 
 	validators, powers, sigV, sigR, sigS, err := CheckBatchSigsAndRepack(currentValset, confirms)
 	if err != nil {
@@ -32,26 +26,6 @@ func (s *peggyContract) SendTransactionBatch(
 	currentValsetNonce := new(big.Int).SetUint64(currentValset.Nonce)
 	batchNonce := new(big.Int).SetUint64(batch.BatchNonce)
 	batchTimeout := new(big.Int).SetUint64(batch.BatchTimeout)
-
-	// Solidity function signature
-	// function submitBatch(
-	// 		// The validators that approve the batch and new valset
-	// 		address[] memory _currentValidators,
-	// 		uint256[] memory _currentPowers,
-	// 		uint256 _currentValsetNonce,
-	//
-	// 		// These are arrays of the parts of the validators signatures
-	// 		uint8[] memory _v,
-	// 		bytes32[] memory _r,
-	// 		bytes32[] memory _s,
-	//
-	// 		// The batch of transactions
-	// 		uint256[] memory _amounts,
-	// 		address[] memory _destinations,
-	// 		uint256[] memory _fees,
-	// 		uint256 _batchNonce,
-	// 		address _tokenContract
-	// )
 
 	currentValsetArs := ValsetArgs{
 		Validators:   validators,
@@ -76,6 +50,13 @@ func (s *peggyContract) SendTransactionBatch(
 		return nil, err
 	}
 
+	return txData, nil
+}
+
+func (s *peggyContract) SendTransactionBatch(
+	ctx context.Context,
+	txData []byte,
+) (*common.Hash, error) {
 	txHash, err := s.SendTx(ctx, s.peggyAddress, txData)
 	if err != nil {
 		s.logger.Err(err).Str("tx_hash", txHash.Hex()).Msg("failed to sign and submit (Peggy submitBatch) to EVM")
@@ -83,57 +64,6 @@ func (s *peggyContract) SendTransactionBatch(
 	}
 
 	s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Tx (Peggy submitBatch)")
-
-	//     let before_nonce = get_tx_batch_nonce(
-	//         peggy_contract_address,
-	//         batch.token_contract,
-	//         eth_address,
-	//         &web3,
-	//     )
-	//     .await?;
-	//     if before_nonce >= new_batch_nonce {
-	//         info!(
-	//             "Someone else updated the batch to {}, exiting early",
-	//             before_nonce
-	//         );
-	//         return Ok(());
-	//     }
-
-	//     let tx = web3
-	//         .send_transaction(
-	//             peggy_contract_address,
-	//             payload,
-	//             0u32.into(),
-	//             eth_address,
-	//             our_eth_key,
-	//             vec![SendTxOption::GasLimit(1_000_000u32.into())],
-	//         )
-	//         .await?;
-	//     info!("Sent batch update with txid {:#066x}", tx);
-
-	//     // TODO this segment of code works around the race condition for submitting batches mostly
-	//     // by not caring if our own submission reverts and only checking if the valset has been updated
-	//     // period not if our update succeeded in particular. This will require some further consideration
-	//     // in the future as many independent relayers racing to update the same thing will hopefully
-	//     // be the common case.
-	//     web3.wait_for_transaction(tx, timeout, None).await?;
-
-	//     let last_nonce = get_tx_batch_nonce(
-	//         peggy_contract_address,
-	//         batch.token_contract,
-	//         eth_address,
-	//         &web3,
-	//     )
-	//     .await?;
-	//     if last_nonce != new_batch_nonce {
-	//         error!(
-	//             "Current nonce is {} expected to update to nonce {}",
-	//             last_nonce, new_batch_nonce
-	//         );
-	//     } else {
-	//         info!("Successfully updated Batch with new Nonce {:?}", last_nonce);
-	//     }
-	//     Ok(())
 
 	return &txHash, nil
 }

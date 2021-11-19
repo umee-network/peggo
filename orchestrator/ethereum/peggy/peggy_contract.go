@@ -31,11 +31,16 @@ type Contract interface {
 		senderAddress common.Address,
 	) (*common.Hash, error)
 
-	SendTransactionBatch(
+	EncodeTransactionBatch(
 		ctx context.Context,
 		currentValset *types.Valset,
 		batch *types.OutgoingTxBatch,
 		confirms []*types.MsgConfirmBatch,
+	) ([]byte, error)
+
+	SendTransactionBatch(
+		ctx context.Context,
+		txData []byte,
 	) (*common.Hash, error)
 
 	SendEthValsetUpdate(

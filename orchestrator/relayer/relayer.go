@@ -23,7 +23,7 @@ type PeggyRelayer interface {
 		currentValset *types.Valset,
 		possibleBatches map[common.Address][]SubmittableBatch,
 	) error
-	RelayValsets(ctx context.Context) error
+	RelayValsets(ctx context.Context, currentValset *types.Valset) error
 
 	SetMinBatchFee(float64)
 	SetPriceFeeder(*coingecko.PriceFeed)
@@ -40,6 +40,10 @@ type peggyRelayer struct {
 	ethereumBlockTime  time.Duration
 	minBatchFeeUSD     float64
 	priceFeeder        *coingecko.PriceFeed
+
+	// store locally the last tx this validator made to avoid sending duplicates
+	// or invalid txs
+	lastSentBatchNonce uint64
 }
 
 func NewPeggyRelayer(
