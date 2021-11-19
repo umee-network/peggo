@@ -164,7 +164,7 @@ func (s *peggyRelayer) RelayBatches(
 			s.logger.Info().
 				Str("token_contract", batch.Batch.TokenContract).
 				Uint64("new_nonce", batch.Batch.BatchNonce).
-				Msg("checking signatures and encoding TransactionBatch to Ethereum")
+				Msg("checking signatures and sending TransactionBatch to Ethereum")
 
 			txData, err := s.peggyContract.EncodeTransactionBatch(ctx, currentValset, batch.Batch, batch.Signatures)
 			if err != nil {
