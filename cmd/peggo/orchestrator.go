@@ -54,12 +54,6 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Cosmos keyring: %w", err)
 			}
 
-			ethChainID := konfig.Int64(flagEthChainID)
-			ethKeyFromAddress, signerFn, personalSignFn, err := initEthereumAccountsManager(logger, uint64(ethChainID), konfig)
-			if err != nil {
-				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
-			}
-
 			cosmosChainID := konfig.String(flagCosmosChainID)
 			clientCtx, err := client.NewClientContext(cosmosChainID, valAddress.String(), cosmosKeyring)
 			if err != nil {
@@ -98,13 +92,6 @@ func getOrchestratorCmd() *cobra.Command {
 			waitForService(ctx, gRPCConn)
 
 			peggyQuerier := peggytypes.NewQueryClient(gRPCConn)
-			peggyBroadcaster := cosmos.NewPeggyBroadcastClient(
-				logger,
-				peggyQuerier,
-				daemonClient,
-				signerFn,
-				personalSignFn,
-			)
 
 			// query peggy params
 			peggyQueryClient := cosmos.NewPeggyQueryClient(peggyQuerier)
@@ -114,6 +101,12 @@ func getOrchestratorCmd() *cobra.Command {
 			peggyParams, err := peggyQueryClient.PeggyParams(ctx)
 			if err != nil {
 				return fmt.Errorf("failed to query for Peggy params: %w", err)
+			}
+
+			ethChainID := peggyParams.BridgeChainId
+			ethKeyFromAddress, signerFn, personalSignFn, err := initEthereumAccountsManager(logger, ethChainID, konfig)
+			if err != nil {
+				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
 
 			ethRPCEndpoint := konfig.String(flagEthRPC)
@@ -136,6 +129,14 @@ func getOrchestratorCmd() *cobra.Command {
 			if err != nil && err != grpc.ErrServerStopped {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
+
+			peggyBroadcaster := cosmos.NewPeggyBroadcastClient(
+				logger,
+				peggyQuerier,
+				daemonClient,
+				signerFn,
+				personalSignFn,
+			)
 
 			peggyAddress := ethcmn.HexToAddress(peggyParams.BridgeEthereumAddress)
 			peggyContract, err := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress)
