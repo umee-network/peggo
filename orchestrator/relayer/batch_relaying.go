@@ -149,38 +149,35 @@ func (s *peggyRelayer) RelayBatches(
 				continue
 			}
 
+			txData, err := s.peggyContract.EncodeTransactionBatch(ctx, currentValset, batch.Batch, batch.Signatures)
+			if err != nil {
+				return err
+			}
+
+			estimatedGasCost, gasPrice, err := s.peggyContract.EstimateGas(ctx, s.peggyContract.Address(), txData)
+			if err != nil {
+				s.logger.Err(err).Msg("failed to estimate gas cost")
+				return err
+			}
+
 			// TODO: estimate gas cost and check if this tx is profitable
 			// If the batch is not profitable, move on to the next one.
-			if !s.IsBatchProfitable(ctx, batch.Batch, s.minBatchFeeUSD) {
+			if !s.IsBatchProfitable(ctx, batch.Batch, estimatedGasCost, gasPrice) {
 				continue
 			}
 
 			s.logger.Info().
 				Uint64("latest_batch", batch.Batch.BatchNonce).
 				Uint64("latest_ethereum_batch", latestEthereumBatch.Uint64()).
-				Msg("we have detected latest batch but Ethereum has a different one. Sending an update!")
+				Msg("we have detected a newer profitable batch. Sending an update!")
 
-				// Send SendTransactionBatch to Ethereum
-			s.logger.Info().
-				Str("token_contract", batch.Batch.TokenContract).
-				Uint64("new_nonce", batch.Batch.BatchNonce).
-				Msg("checking signatures and sending TransactionBatch to Ethereum")
-
-			txData, err := s.peggyContract.EncodeTransactionBatch(ctx, currentValset, batch.Batch, batch.Signatures)
-			if err != nil {
-				return err
-			}
-
-			txHash, err := s.peggyContract.SendTransactionBatch(ctx, txData)
+			_, err = s.peggyContract.SendTransactionBatch(ctx, txData)
 			if err != nil {
 				return err
 			}
 
 			// update our local tracker of the latest batch
 			s.lastSentBatchNonce = batch.Batch.BatchNonce
-
-			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Ethereum Tx (TransactionBatch)")
-
 		}
 
 	}
@@ -191,12 +188,24 @@ func (s *peggyRelayer) RelayBatches(
 func (s *peggyRelayer) IsBatchProfitable(
 	ctx context.Context,
 	batch *types.OutgoingTxBatch,
-	minFeeInUSD float64,
+	ethGasCost uint64,
+	gasPrice *big.Int,
 ) bool {
-	if minFeeInUSD == 0 || s.priceFeeder == nil {
+	if s.priceFeeder == nil {
 		return true
 	}
 
+	// First we get the cost of the transaction in USD
+	ethereumPriceInUSD, err := s.priceFeeder.QueryETHUSDPrice()
+	if err != nil {
+		s.logger.Err(err).Msg("failed to get ETH price")
+		return false
+	}
+	ethereumPriceInUSDDec := decimal.NewFromFloat(ethereumPriceInUSD)
+	totalETHcost := big.NewInt(0).Mul(gasPrice, big.NewInt(int64(ethGasCost)))
+	gasCostInUSDDec := decimal.NewFromBigInt(totalETHcost, -18).Mul(ethereumPriceInUSDDec)
+
+	// Then we get the fees of the batch in USD
 	decimals, err := s.peggyContract.GetERC20Decimals(
 		ctx,
 		common.HexToAddress(batch.TokenContract),
@@ -226,15 +235,14 @@ func (s *peggyRelayer) IsBatchProfitable(
 	tokenPriceInUSDDec := decimal.NewFromFloat(tokenPriceInUSD)
 	// decimals (uint8) can be safely casted into int32 because the max uint8 is 255 and the max int32 is 2147483647
 	totalFeeInUSDDec := decimal.NewFromBigInt(totalBatchFees, -int32(decimals)).Mul(tokenPriceInUSDDec)
-	minFeeInUSDDec := decimal.NewFromFloat(minFeeInUSD)
 
 	s.logger.Debug().
 		Str("token_contract", batch.TokenContract).
 		Float64("token_price_in_usd", tokenPriceInUSD).
 		Int64("total_fees", totalBatchFees.Int64()).
 		Float64("total_fee_in_usd", totalFeeInUSDDec.InexactFloat64()).
-		Float64("min_fee_in_usd", minFeeInUSDDec.InexactFloat64()).
+		Float64("gas_cost_in_usd", gasCostInUSDDec.InexactFloat64()).
 		Msg("checking if batch fees meet minimum batch fee threshold")
 
-	return totalFeeInUSDDec.GreaterThan(minFeeInUSDDec)
+	return totalFeeInUSDDec.GreaterThan(gasCostInUSDDec)
 }

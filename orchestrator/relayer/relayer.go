@@ -38,7 +38,6 @@ type peggyRelayer struct {
 	valsetRelayEnabled bool
 	batchRelayEnabled  bool
 	ethereumBlockTime  time.Duration
-	minBatchFeeUSD     float64
 	priceFeeder        *coingecko.PriceFeed
 
 	// store locally the last tx this validator made to avoid sending duplicates

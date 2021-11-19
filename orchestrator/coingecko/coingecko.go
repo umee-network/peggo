@@ -49,6 +49,11 @@ func urlJoin(baseURL string, segments ...string) string {
 
 }
 
+// TODO: query CoinGecko for this price
+func (cp *PriceFeed) QueryETHUSDPrice() (float64, error) {
+	return 4000.0, nil
+}
+
 func (cp *PriceFeed) QueryUSDPrice(erc20Contract common.Address) (float64, error) {
 
 	u, err := url.ParseRequestURI(urlJoin(cp.config.BaseURL, "simple", "token_price", "ethereum"))
