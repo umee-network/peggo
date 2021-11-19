@@ -13,7 +13,9 @@ import (
 func (s *peggyRelayer) Start(ctx context.Context) error {
 	logger := s.logger.With().Str("loop", "RelayerMainLoop").Logger()
 
-	return loops.RunLoop(ctx, s.logger, s.ethereumBlockTime, func() error {
+	// TODO: for now we multiply the blocktime by 3 to allow a bit more time to pass so we sent duplicated txs less
+	// often
+	return loops.RunLoop(ctx, s.logger, s.ethereumBlockTime*3, func() error {
 		var pg loops.ParanoidGroup
 		if s.valsetRelayEnabled {
 			logger.Info().Msg("valset relay enabled; starting to relay valsets to Ethereum")

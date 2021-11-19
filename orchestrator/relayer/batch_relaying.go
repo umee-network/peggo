@@ -2,9 +2,9 @@ package relayer
 
 import (
 	"context"
+	"math/big"
 	"sort"
 
-	cosmtypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/shopspring/decimal"
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
@@ -62,6 +62,9 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 				Uint64("batch_nonce", batch.BatchNonce).
 				Str("token_contract", batch.TokenContract).
 				Msg("batch can't be submitted yet, waiting for more signatures")
+
+			// Do not return an error here, we want to continue to the next batch
+			continue
 		}
 
 		// if the previous check didn't fail, we can add the batch to the list of possible batches
@@ -193,14 +196,14 @@ func (s *peggyRelayer) IsBatchProfitable(
 	}
 
 	// We calculate the total fee in ERC20 tokens
-	totalBatchFees := cosmtypes.Int{}
+	totalBatchFees := big.NewInt(0)
 	for _, tx := range batch.Transactions {
-		totalBatchFees.Add(tx.Erc20Fee.Amount)
+		totalBatchFees = totalBatchFees.Add(tx.Erc20Fee.Amount.BigInt(), totalBatchFees)
 	}
 
 	tokenPriceInUSDDec := decimal.NewFromFloat(tokenPriceInUSD)
 	// decimals (uint8) can be safely casted into int32 because the max uint8 is 255 and the max int32 is 2147483647
-	totalFeeInUSDDec := decimal.NewFromBigInt(totalBatchFees.BigInt(), -int32(decimals)).Mul(tokenPriceInUSDDec)
+	totalFeeInUSDDec := decimal.NewFromBigInt(totalBatchFees, -int32(decimals)).Mul(tokenPriceInUSDDec)
 	minFeeInUSDDec := decimal.NewFromFloat(minFeeInUSD)
 
 	s.logger.Debug().
@@ -209,7 +212,7 @@ func (s *peggyRelayer) IsBatchProfitable(
 		Int64("total_fees", totalBatchFees.Int64()).
 		Float64("total_fee_in_usd", totalFeeInUSDDec.InexactFloat64()).
 		Float64("min_fee_in_usd", minFeeInUSDDec.InexactFloat64()).
-		Msg("checking if token fees meet minimum batch fee threshold")
+		Msg("checking if batch fees meet minimum batch fee threshold")
 
 	return totalFeeInUSDDec.GreaterThan(minFeeInUSDDec)
 }

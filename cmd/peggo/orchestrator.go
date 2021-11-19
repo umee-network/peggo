@@ -143,6 +143,11 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
 
+			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
+			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, &coingecko.Config{
+				BaseURL: coingeckoAPI,
+			})
+
 			// TODO: figure out where to put this 15% buffer
 			// peggyParams.AverageEthereumBlockTime is in milliseconds. We add a 15% extra as a buffer so txs have time
 			// to get processed.
@@ -156,12 +161,9 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Bool(flagRelayValsets),
 				konfig.Bool(flagRelayBatches),
 				averageEthBlockTime,
+				relayer.SetMinBatchFee(konfig.Float64(flagMinBatchFeeUSD)),
+				relayer.SetPriceFeeder(coingeckoFeed),
 			)
-
-			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
-			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, &coingecko.Config{
-				BaseURL: coingeckoAPI,
-			})
 
 			logger = logger.With().
 				Str("relayer_validator_addr", sdk.ValAddress(valAddress).String()).
@@ -206,7 +208,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
-	cmd.Flags().Duration(flagOrchLoopDuration, 1*time.Minute, "Duration between orchestrator loops")
+	cmd.Flags().Duration(flagOrchLoopDuration, 20*time.Second, "Duration between orchestrator loops")
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 40, "Number of Ethereum blocks to process per orchestrator loop")
 	cmd.Flags().Float64(
 		flagMinBatchFeeUSD,
