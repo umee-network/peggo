@@ -42,6 +42,7 @@ const (
 	flagAutoApprove          = "auto-approve"
 	flagOrchLoopDuration     = "orch-loop-duration"
 	flagEthBlocksPerLoop     = "eth-blocks-per-loop"
+	flagEthPendingTXWait     = "eth-pending-tx-wait"
 )
 
 func cosmosFlagSet() *pflag.FlagSet {

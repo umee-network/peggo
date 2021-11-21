@@ -4,7 +4,6 @@ import (
 	"context"
 	"math/big"
 	"sort"
-	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/shopspring/decimal"
@@ -169,8 +168,7 @@ func (s *peggyRelayer) RelayBatches(
 
 			// Checking in pending txs(mempool) if tx with same input is already submitted
 			// We have to check this at the last moment because any other relayer could have submitted
-			// TODO: remove hardcoded time
-			if s.peggyContract.IsPendingTxInput(txData, time.Minute) {
+			if s.peggyContract.IsPendingTxInput(txData, s.pendingTxWait) {
 				s.logger.Error().
 					Msg("Transaction with same batch input data is already present in mempool")
 				continue

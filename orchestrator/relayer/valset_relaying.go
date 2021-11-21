@@ -2,7 +2,6 @@ package relayer
 
 import (
 	"context"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/umee-network/umee/x/peggy/types"
@@ -73,8 +72,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset *types.Va
 
 			// Checking in pending txs (mempool) if tx with same input is already submitted
 			// We have to check this at the very last moment because any other relayer could have submitted
-			// TODO: remove hardcoded time
-			if s.peggyContract.IsPendingTxInput(txData, time.Minute) {
+			if s.peggyContract.IsPendingTxInput(txData, s.pendingTxWait) {
 				s.logger.Error().
 					Msg("Transaction with same valset input data is already present in mempool")
 				return nil
