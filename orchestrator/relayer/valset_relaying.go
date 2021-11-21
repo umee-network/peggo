@@ -2,6 +2,7 @@ package relayer
 
 import (
 	"context"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/umee-network/umee/x/peggy/types"
@@ -58,8 +59,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset *types.Va
 				Uint64("latest_ethereum_valset_nonce", latestEthereumValsetNonce.Uint64()).
 				Msg("detected latest cosmos valset nonce, but latest valset on Ethereum is different. Sending update to Ethereum")
 
-			// Send Valset Update to Ethereum
-			txHash, err := s.peggyContract.SendEthValsetUpdate(
+			txData, err := s.peggyContract.EncodeValsetUpdate(
 				ctx,
 				currentValset,
 				latestCosmosConfirmed,
@@ -69,7 +69,27 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset *types.Va
 				return err
 			}
 
-			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Ethereum Tx (EthValsetUpdate)")
+			//TODO: estimate gas and profitability using "valset reward" param
+
+			// Checking in pending txs (mempool) if tx with same input is already submitted
+			// We have to check this at the very last moment because any other relayer could have submitted
+			// TODO: remove hardcoded time
+			if s.peggyContract.IsPendingTxInput(txData, time.Minute) {
+				s.logger.Error().
+					Msg("Transaction with same valset input data is already present in mempool")
+				return nil
+			}
+
+			// Send Valset Update to Ethereum
+			txHash, err := s.peggyContract.SendTx(ctx, s.peggyContract.Address(), txData)
+			if err != nil {
+				s.logger.Err(err).
+					Str("tx_hash", txHash.Hex()).
+					Msg("failed to sign and submit (Peggy updateValset) to EVM")
+				return err
+			}
+
+			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Tx (Peggy updateValset)")
 
 		}
 

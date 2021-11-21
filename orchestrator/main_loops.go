@@ -260,7 +260,9 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 
 				logger.Info().Str("token_contract", tokenAddr.String()).Str("denom", denom).Msg("sending batch request")
 				err = p.peggyBroadcastClient.SendRequestBatch(ctx, denom)
-				logger.Err(err).Msg("failed to send batch request")
+				if err != nil {
+					logger.Err(err).Msg("failed to send batch request")
+				}
 
 			}
 

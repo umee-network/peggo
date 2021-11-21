@@ -417,6 +417,7 @@ func (c *cosmosClient) runBatchBroadcast() {
 			}
 			if err != nil {
 				resJSON, _ := json.MarshalIndent(res, "", "\t")
+				// TODO: this error is not always an actual error, but rather a response that there aren't any txs
 				c.logger.Err(err).
 					Int("size", len(toSubmit)).
 					RawJSON("tx_response", resJSON).

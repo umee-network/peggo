@@ -154,6 +154,12 @@ func getOrchestratorCmd() *cobra.Command {
 			// to get processed.
 			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime/100*115) * time.Millisecond
 
+			// If we have the alchemy WS endpoint, start listening for txs against the Peggy contract.
+			alchemyWS := konfig.String(flagEthAlchemyWS)
+			if alchemyWS != "" {
+				go peggyContract.SubscribeToPendingTxs(alchemyWS)
+			}
+
 			relayer := relayer.NewPeggyRelayer(
 				logger,
 				peggyQueryClient,
@@ -188,8 +194,6 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Duration(flagOrchLoopDuration),
 				averageCosmosBlockTime,
 				konfig.Int64(flagEthBlocksPerLoop),
-				orchestrator.SetMinBatchFee(konfig.Float64(flagMinBatchFeeUSD)),
-				orchestrator.SetPriceFeeder(coingeckoFeed),
 			)
 
 			ctx, cancel = context.WithCancel(context.Background())
@@ -210,11 +214,6 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
 	cmd.Flags().Duration(flagOrchLoopDuration, 20*time.Second, "Duration between orchestrator loops")
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 40, "Number of Ethereum blocks to process per orchestrator loop")
-	cmd.Flags().Float64(
-		flagMinBatchFeeUSD,
-		float64(0.0),
-		"If non-zero, batch requests will only be made if fee threshold criteria is met",
-	)
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
 	cmd.Flags().AddFlagSet(cosmosFlagSet())
 	cmd.Flags().AddFlagSet(cosmosKeyringFlagSet())

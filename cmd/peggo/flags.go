@@ -32,9 +32,9 @@ const (
 	flagEthUseLedger         = "eth-use-ledger"
 	flagEthRPC               = "eth-rpc"
 	flagEthGasAdjustment     = "eth-gas-price-adjustment"
+	flagEthAlchemyWS         = "eth-alchemy-ws"
 	flagRelayValsets         = "relay-valsets"
 	flagRelayBatches         = "relay-batches"
-	flagMinBatchFeeUSD       = "min-batch-fee-usd"
 	flagCoinGeckoAPI         = "coingecko-api"
 	flagEthGasPrice          = "eth-gas-price"
 	flagEthGasLimit          = "eth-gas-limit"
@@ -86,6 +86,7 @@ func ethereumOptsFlagSet() *pflag.FlagSet {
 
 	fs.String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
 	fs.Float64(flagEthGasAdjustment, float64(1.3), "Specify a gas price adjustment for Ethereum transactions")
+	fs.String(flagEthAlchemyWS, "", "Specify the Alchemy websocket endpoint")
 
 	return fs
 }

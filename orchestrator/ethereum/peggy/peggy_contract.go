@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/big"
 	"strings"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -38,17 +39,22 @@ type Contract interface {
 		confirms []*types.MsgConfirmBatch,
 	) ([]byte, error)
 
-	SendTransactionBatch(
-		ctx context.Context,
-		txData []byte,
-	) (*common.Hash, error)
+	// SendTransactionBatch(
+	// 	ctx context.Context,
+	// 	txData []byte,
+	// ) (*common.Hash, error)
 
-	SendEthValsetUpdate(
+	EncodeValsetUpdate(
 		ctx context.Context,
 		oldValset *types.Valset,
 		newValset *types.Valset,
 		confirms []*types.MsgValsetConfirm,
-	) (*common.Hash, error)
+	) ([]byte, error)
+
+	// SendValsetUpdate(
+	// 	ctx context.Context,
+	// 	txData []byte,
+	// ) (*common.Hash, error)
 
 	GetTxBatchNonce(
 		ctx context.Context,
@@ -77,6 +83,10 @@ type Contract interface {
 		erc20ContractAddress common.Address,
 		callerAddress common.Address,
 	) (decimals uint8, err error)
+
+	SubscribeToPendingTxs(alchemyWebsocketURL string)
+
+	IsPendingTxInput(txInput []byte, pendingTxWaitDuration time.Duration) bool
 }
 
 func NewPeggyContract(
@@ -106,6 +116,8 @@ type peggyContract struct {
 	ethProvider  provider.EVMProvider
 	peggyAddress common.Address
 	ethPeggy     *wrappers.Peggy
+
+	pendingTxInputList PendingTxInputList
 }
 
 func (s *peggyContract) Address() common.Address {

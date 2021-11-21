@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 	"sort"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/shopspring/decimal"
@@ -166,15 +167,27 @@ func (s *peggyRelayer) RelayBatches(
 				continue
 			}
 
+			// Checking in pending txs(mempool) if tx with same input is already submitted
+			// We have to check this at the last moment because any other relayer could have submitted
+			// TODO: remove hardcoded time
+			if s.peggyContract.IsPendingTxInput(txData, time.Minute) {
+				s.logger.Error().
+					Msg("Transaction with same batch input data is already present in mempool")
+				continue
+			}
+
 			s.logger.Info().
 				Uint64("latest_batch", batch.Batch.BatchNonce).
 				Uint64("latest_ethereum_batch", latestEthereumBatch.Uint64()).
 				Msg("we have detected a newer profitable batch. Sending an update!")
 
-			_, err = s.peggyContract.SendTransactionBatch(ctx, txData)
+			txHash, err := s.peggyContract.SendTx(ctx, s.peggyContract.Address(), txData)
 			if err != nil {
+				s.logger.Err(err).Str("tx_hash", txHash.Hex()).Msg("failed to sign and submit (Peggy submitBatch) to EVM")
 				return err
 			}
+
+			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Tx (Peggy submitBatch)")
 
 			// update our local tracker of the latest batch
 			s.lastSentBatchNonce = batch.Batch.BatchNonce
