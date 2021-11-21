@@ -30,7 +30,6 @@ func (s *peggyRelayer) Start(ctx context.Context) error {
 	}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 		logger.Err(err).Uint("retry", n).Msg("failed to find latest valset; retrying...")
 	}))
-
 	if err != nil {
 		s.logger.Panic().Err(err).Msg("exhausted retries to get latest valset")
 	}

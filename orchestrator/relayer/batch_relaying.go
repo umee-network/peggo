@@ -36,12 +36,11 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 
 	for _, batch := range latestBatches {
 
-		// we might have already sent this same batch. Skip it
+		// We might have already sent this same batch. Skip it.
 		if s.lastSentBatchNonce >= batch.BatchNonce {
 			continue
 		}
 
-		// get the signatures for the batch
 		sigs, err := s.cosmosQueryClient.TransactionBatchSignatures(
 			ctx,
 			batch.BatchNonce,
@@ -80,9 +79,9 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 		)
 	}
 
-	// order batches by nonce ASC. That means that the next/oldest batch is [0].
+	// Order batches by nonce ASC. That means that the next/oldest batch is [0].
 	for tokenAddress := range possibleBatches {
-		address := tokenAddress // use this because of scopelint
+		tokenAddress := tokenAddress
 		sort.SliceStable(possibleBatches[address], func(i, j int) bool {
 			return possibleBatches[address][i].Batch.BatchNonce > possibleBatches[address][j].Batch.BatchNonce
 		})
@@ -91,7 +90,7 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 	return possibleBatches, nil
 }
 
-// RelayBatches ttempts to submit batches with valid signatures, checking the state of the Ethereum chain to ensure that
+// RelayBatches attempts to submit batches with valid signatures, checking the state of the Ethereum chain to ensure that
 // it is valid to submit a given batch more specifically that the correctly signed batch has not timed out or already
 // been submitted. The goal of this function is to submit batches in chronological order of their creation, submitting
 // batches newest first will invalidate old batches and is less efficient if those old batches are profitable.
@@ -117,7 +116,7 @@ func (s *peggyRelayer) RelayBatches(
 
 	for tokenContract, batches := range possibleBatches {
 
-		// requests data from Ethereum only once per token type, this is valid because we are
+		// Requests data from Ethereum only once per token type, this is valid because we are
 		// iterating from oldest to newest, so submitting a batch earlier in the loop won't
 		// ever invalidate submitting a batch later in the loop. Another relayer could always
 		// do that though.
@@ -133,7 +132,6 @@ func (s *peggyRelayer) RelayBatches(
 
 		// now we iterate through batches per token type
 		for _, batch := range batches {
-
 			if batch.Batch.BatchTimeout < ethBlockHeight {
 				s.logger.Debug().
 					Uint64("batch_nonce", batch.Batch.BatchNonce).
@@ -168,7 +166,7 @@ func (s *peggyRelayer) RelayBatches(
 			s.logger.Info().
 				Uint64("latest_batch", batch.Batch.BatchNonce).
 				Uint64("latest_ethereum_batch", latestEthereumBatch.Uint64()).
-				Msg("we have detected a newer profitable batch. Sending an update!")
+				Msg("we have detected a newer profitable batch; sending an update")
 
 			_, err = s.peggyContract.SendTransactionBatch(ctx, txData)
 			if err != nil {
@@ -195,12 +193,12 @@ func (s *peggyRelayer) IsBatchProfitable(
 	}
 
 	// First we get the cost of the transaction in USD
-	ethereumPriceInUSD, err := s.priceFeeder.QueryETHUSDPrice()
+	usdEthPrice, err := s.priceFeeder.QueryETHUSDPrice()
 	if err != nil {
 		s.logger.Err(err).Msg("failed to get ETH price")
 		return false
 	}
-	ethereumPriceInUSDDec := decimal.NewFromFloat(ethereumPriceInUSD)
+	usdEthPriceDec := decimal.NewFromFloat(ethereumPriceInUSD)
 	totalETHcost := big.NewInt(0).Mul(gasPrice, big.NewInt(int64(ethGasCost)))
 	gasCostInUSDDec := decimal.NewFromBigInt(totalETHcost, -18).Mul(ethereumPriceInUSDDec)
 
@@ -220,7 +218,7 @@ func (s *peggyRelayer) IsBatchProfitable(
 		Str("token_contract", batch.TokenContract).
 		Msg("got token decimals")
 
-	tokenPriceInUSD, err := s.priceFeeder.QueryUSDPrice(common.HexToAddress(batch.TokenContract))
+	usdTokenPrice, err := s.priceFeeder.QueryUSDPrice(common.HexToAddress(batch.TokenContract))
 	if err != nil {
 		return false
 	}
@@ -231,7 +229,7 @@ func (s *peggyRelayer) IsBatchProfitable(
 		totalBatchFees = totalBatchFees.Add(tx.Erc20Fee.Amount.BigInt(), totalBatchFees)
 	}
 
-	tokenPriceInUSDDec := decimal.NewFromFloat(tokenPriceInUSD)
+	usdTokenPriceDec := decimal.NewFromFloat(tokenPriceInUSD)
 	// decimals (uint8) can be safely casted into int32 because the max uint8 is 255 and the max int32 is 2147483647
 	totalFeeInUSDDec := decimal.NewFromBigInt(totalBatchFees, -int32(decimals)).Mul(tokenPriceInUSDDec)
 
