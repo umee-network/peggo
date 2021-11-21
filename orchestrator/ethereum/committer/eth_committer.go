@@ -76,25 +76,22 @@ func (e *ethCommitter) EstimateGas(
 	opts := &bind.TransactOpts{
 		From:   e.fromAddress,
 		Signer: e.fromSigner,
-
 		GasPrice: e.committerOpts.GasPrice.BigInt(),
 		GasLimit: e.committerOpts.GasLimit,
 		Context:  ctx, // with RPC timeout
 	}
 
-	// Figure out the gas price values
 	suggestedGasPrice, err := e.evmProvider.SuggestGasPrice(opts.Context)
 	if err != nil {
 		return 0, nil, errors.Errorf("failed to suggest gas price: %v", err)
 	}
 
-	// Suggested gas price is not accurate. Increment by multiplying with gasprice adjustment factor
+	// Suggested gas price may not be accurate, so we multiply the result by the gas price adjustment factor.
 	incrementedPrice := big.NewFloat(0).Mul(
 		new(big.Float).SetInt(suggestedGasPrice),
 		big.NewFloat(e.ethGasPriceAdjustment),
 	)
 
-	// set gasprice to incremented gas price.
 	gasPrice = new(big.Int)
 	incrementedPrice.Int(gasPrice)
 
