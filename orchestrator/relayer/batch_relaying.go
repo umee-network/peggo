@@ -36,19 +36,18 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 
 	for _, batch := range latestBatches {
 
-		// we might have already sent this same batch. Skip it
+		// We might have already sent this same batch. Skip it.
 		if s.lastSentBatchNonce >= batch.BatchNonce {
 			continue
 		}
 
-		// get the signatures for the batch
 		sigs, err := s.cosmosQueryClient.TransactionBatchSignatures(
 			ctx,
 			batch.BatchNonce,
 			common.HexToAddress(batch.TokenContract),
 		)
 		if err != nil {
-			// If we can't get the signatures for a batch we will continue to the next batch
+			// If we can't get the signatures for a batch we will continue to the next batch.
 			s.logger.Err(err).
 				Uint64("batch_nonce", batch.BatchNonce).
 				Str("token_contract", batch.TokenContract).
@@ -56,9 +55,9 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 			continue
 		}
 
-		// this checks that the signatures for the batch are actually possible to submit to the chain
-		// we only need to know if the signatures are good, we won't use the other returned values
-		_, _, _, _, _, err = peggy.CheckBatchSigsAndRepack(currentValset, sigs)
+		// This checks that the signatures for the batch are actually possible to submit to the chain.
+		// We only need to know if the signatures are good, we won't use the other returned value.
+		_, err = peggy.CheckBatchSigsAndRepack(currentValset, sigs)
 
 		if err != nil {
 			// this batch is not ready to be relayed
@@ -80,27 +79,25 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 		)
 	}
 
-	// order batches by nonce ASC. That means that the next/oldest batch is [0].
+	// Order batches by nonce ASC. That means that the next/oldest batch is [0].
 	for tokenAddress := range possibleBatches {
-		address := tokenAddress // use this because of scopelint
-		sort.SliceStable(possibleBatches[address], func(i, j int) bool {
-			return possibleBatches[address][i].Batch.BatchNonce > possibleBatches[address][j].Batch.BatchNonce
+		tokenAddress := tokenAddress
+		sort.SliceStable(possibleBatches[tokenAddress], func(i, j int) bool {
+			return possibleBatches[tokenAddress][i].Batch.BatchNonce > possibleBatches[tokenAddress][j].Batch.BatchNonce
 		})
 	}
 
 	return possibleBatches, nil
 }
 
-// RelayBatches ttempts to submit batches with valid signatures, checking the state of the Ethereum chain to ensure that
-// it is valid to submit a given batch more specifically that the correctly signed batch has not timed out or already
-// been submitted. The goal of this function is to submit batches in chronological order of their creation, submitting
-// batches newest first will invalidate old batches and is less efficient if those old batches are profitable.
-// This function estimates the cost of submitting a batch before actually submitting it to Ethereum, if it is determined
-// that the ETH cost to submit is too high the batch will be skipped and a later, more profitable, batch may be
-// submitted.
+// RelayBatches attempts to submit batches with valid signatures, checking the state of the Ethereum chain to ensure
+// that it is valid to submit a given batch, more specifically that the correctly signed batch has not timed out or
+// already been submitted. The goal of this function is to submit batches in chronological order of their creation.
+// This function estimates the cost of submitting a batch before submitting it to Ethereum, if it is determined that
+// the ETH cost to submit is too high the batch will be skipped and a later, more profitable, batch may be submitted.
 // Keep in mind that many other relayers are making this same computation and some may have different standards for
 // their profit margin, therefore there may be a race not only to submit individual batches but also batches in
-// different orders
+// different orders.
 func (s *peggyRelayer) RelayBatches(
 	ctx context.Context,
 	currentValset *types.Valset,
@@ -117,7 +114,7 @@ func (s *peggyRelayer) RelayBatches(
 
 	for tokenContract, batches := range possibleBatches {
 
-		// requests data from Ethereum only once per token type, this is valid because we are
+		// Requests data from Ethereum only once per token type, this is valid because we are
 		// iterating from oldest to newest, so submitting a batch earlier in the loop won't
 		// ever invalidate submitting a batch later in the loop. Another relayer could always
 		// do that though.
@@ -133,7 +130,6 @@ func (s *peggyRelayer) RelayBatches(
 
 		// now we iterate through batches per token type
 		for _, batch := range batches {
-
 			if batch.Batch.BatchTimeout < ethBlockHeight {
 				s.logger.Debug().
 					Uint64("batch_nonce", batch.Batch.BatchNonce).
@@ -160,7 +156,6 @@ func (s *peggyRelayer) RelayBatches(
 				return err
 			}
 
-			// TODO: estimate gas cost and check if this tx is profitable
 			// If the batch is not profitable, move on to the next one.
 			if !s.IsBatchProfitable(ctx, batch.Batch, estimatedGasCost, gasPrice) {
 				continue
@@ -177,7 +172,7 @@ func (s *peggyRelayer) RelayBatches(
 			s.logger.Info().
 				Uint64("latest_batch", batch.Batch.BatchNonce).
 				Uint64("latest_ethereum_batch", latestEthereumBatch.Uint64()).
-				Msg("we have detected a newer profitable batch. Sending an update!")
+				Msg("we have detected a newer profitable batch; sending an update")
 
 			txHash, err := s.peggyContract.SendTx(ctx, s.peggyContract.Address(), txData)
 			if err != nil {
@@ -196,6 +191,9 @@ func (s *peggyRelayer) RelayBatches(
 	return nil
 }
 
+// IsBatchProfitable gets the current prices in USD of ETH and the ERC20 token and compares the value of the estimated
+// gas cost of the transaction to the fees paid by the batch. If the estimated gas cost is greater than the batch's
+// fees, the batch is not profitable and should not be submitted.
 func (s *peggyRelayer) IsBatchProfitable(
 	ctx context.Context,
 	batch *types.OutgoingTxBatch,
@@ -207,14 +205,14 @@ func (s *peggyRelayer) IsBatchProfitable(
 	}
 
 	// First we get the cost of the transaction in USD
-	ethereumPriceInUSD, err := s.priceFeeder.QueryETHUSDPrice()
+	usdEthPrice, err := s.priceFeeder.QueryETHUSDPrice()
 	if err != nil {
 		s.logger.Err(err).Msg("failed to get ETH price")
 		return false
 	}
-	ethereumPriceInUSDDec := decimal.NewFromFloat(ethereumPriceInUSD)
+	usdEthPriceDec := decimal.NewFromFloat(usdEthPrice)
 	totalETHcost := big.NewInt(0).Mul(gasPrice, big.NewInt(int64(ethGasCost)))
-	gasCostInUSDDec := decimal.NewFromBigInt(totalETHcost, -18).Mul(ethereumPriceInUSDDec)
+	gasCostInUSDDec := decimal.NewFromBigInt(totalETHcost, -18).Mul(usdEthPriceDec)
 
 	// Then we get the fees of the batch in USD
 	decimals, err := s.peggyContract.GetERC20Decimals(
@@ -232,7 +230,7 @@ func (s *peggyRelayer) IsBatchProfitable(
 		Str("token_contract", batch.TokenContract).
 		Msg("got token decimals")
 
-	tokenPriceInUSD, err := s.priceFeeder.QueryUSDPrice(common.HexToAddress(batch.TokenContract))
+	usdTokenPrice, err := s.priceFeeder.QueryUSDPrice(common.HexToAddress(batch.TokenContract))
 	if err != nil {
 		return false
 	}
@@ -243,13 +241,13 @@ func (s *peggyRelayer) IsBatchProfitable(
 		totalBatchFees = totalBatchFees.Add(tx.Erc20Fee.Amount.BigInt(), totalBatchFees)
 	}
 
-	tokenPriceInUSDDec := decimal.NewFromFloat(tokenPriceInUSD)
+	usdTokenPriceDec := decimal.NewFromFloat(usdTokenPrice)
 	// decimals (uint8) can be safely casted into int32 because the max uint8 is 255 and the max int32 is 2147483647
-	totalFeeInUSDDec := decimal.NewFromBigInt(totalBatchFees, -int32(decimals)).Mul(tokenPriceInUSDDec)
+	totalFeeInUSDDec := decimal.NewFromBigInt(totalBatchFees, -int32(decimals)).Mul(usdTokenPriceDec)
 
 	s.logger.Debug().
 		Str("token_contract", batch.TokenContract).
-		Float64("token_price_in_usd", tokenPriceInUSD).
+		Float64("token_price_in_usd", usdTokenPrice).
 		Int64("total_fees", totalBatchFees.Int64()).
 		Float64("total_fee_in_usd", totalFeeInUSDDec.InexactFloat64()).
 		Float64("gas_cost_in_usd", gasCostInUSDDec.InexactFloat64()).

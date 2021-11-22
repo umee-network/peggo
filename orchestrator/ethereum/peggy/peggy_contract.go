@@ -22,8 +22,10 @@ import (
 type Contract interface {
 	committer.EVMCommitter
 
+	// Address returns the Peggy contract address
 	Address() common.Address
 
+	// SendToCosmos executes the function of the same name on the Peggy contract to send ERC20 tokens to Cosmos.
 	SendToCosmos(
 		ctx context.Context,
 		erc20 common.Address,
@@ -32,6 +34,8 @@ type Contract interface {
 		senderAddress common.Address,
 	) (*common.Hash, error)
 
+	// EncodeTransactionBatch encodes a batch into a tx byte data. This is specially helpful for estimating gas and
+	// detecting identical transactions in the mempool.
 	EncodeTransactionBatch(
 		ctx context.Context,
 		currentValset *types.Valset,
@@ -39,22 +43,12 @@ type Contract interface {
 		confirms []*types.MsgConfirmBatch,
 	) ([]byte, error)
 
-	// SendTransactionBatch(
-	// 	ctx context.Context,
-	// 	txData []byte,
-	// ) (*common.Hash, error)
-
 	EncodeValsetUpdate(
 		ctx context.Context,
 		oldValset *types.Valset,
 		newValset *types.Valset,
 		confirms []*types.MsgValsetConfirm,
 	) ([]byte, error)
-
-	// SendValsetUpdate(
-	// 	ctx context.Context,
-	// 	txData []byte,
-	// ) (*common.Hash, error)
 
 	GetTxBatchNonce(
 		ctx context.Context,

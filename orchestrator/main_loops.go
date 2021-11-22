@@ -218,9 +218,11 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "BatchRequesterLoop").Logger()
 
-	// TODO: change this time for something like 20 x average block time.
+	// TODO: Change p.loopsDuration for something like 20 x average block time.
 	// We now send a batch request without checking for profitability, that'll be
 	// done during the relayer loop.
+	//
+	// Ref: https://github.com/umee-network/peggo/issues/55
 	return loops.RunLoop(ctx, p.logger, p.loopsDuration, func() error {
 		// Each loop performs the following:
 		//
@@ -243,10 +245,10 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 			}
 
 			for _, unbatchedToken := range unbatchedTokensWithFees {
-				batchFees := unbatchedToken // use this because of scopelint
+				unbatchedToken := unbatchedToken // use this because of scopelint
 				// Check if the token is present in cosmos denom. If so, send batch
 				// request with cosmosDenom.
-				tokenAddr := common.HexToAddress(batchFees.Token)
+				tokenAddr := common.HexToAddress(unbatchedToken.Token)
 
 				var denom string
 				resp, err := p.cosmosQueryClient.ERC20ToDenom(ctx, tokenAddr)
@@ -260,9 +262,7 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 
 				logger.Info().Str("token_contract", tokenAddr.String()).Str("denom", denom).Msg("sending batch request")
 				err = p.peggyBroadcastClient.SendRequestBatch(ctx, denom)
-				if err != nil {
-					logger.Err(err).Msg("failed to send batch request")
-				}
+				logger.Err(err).Msg("failed to send batch request")
 
 			}
 

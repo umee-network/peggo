@@ -152,6 +152,8 @@ func getOrchestratorCmd() *cobra.Command {
 			// TODO: figure out where to put this 15% buffer
 			// peggyParams.AverageEthereumBlockTime is in milliseconds. We add a 15% extra as a buffer so txs have time
 			// to get processed.
+			//
+			// Ref: https://github.com/umee-network/peggo/issues/55
 			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime/100*115) * time.Millisecond
 
 			// If we have the alchemy WS endpoint, start listening for txs against the Peggy contract.
@@ -180,6 +182,8 @@ func getOrchestratorCmd() *cobra.Command {
 			// TODO: figure out where to put this 15% buffer
 			// peggyParams.AverageBlockTime is in milliseconds. We add a 15% extra as a buffer so txs have time to get
 			// processed.
+			//
+			// Ref: https://github.com/umee-network/peggo/issues/55
 			averageCosmosBlockTime := time.Duration(peggyParams.AverageBlockTime/100*115) * time.Millisecond
 
 			orch := orchestrator.NewPeggyOrchestrator(
