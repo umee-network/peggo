@@ -23,7 +23,7 @@ func (p *PendingTxInputList) AddPendingTxInput(pendingTx *RPCTransaction) {
 	submitBatchMethod := peggyABI.Methods["submitBatch"]
 	valsetUpdateMethod := peggyABI.Methods["updateValset"]
 
-	// if it's not a submitBatch or updateValset transaction, ignore it
+	// If it's not a submitBatch or updateValset transaction, ignore it
 	if !bytes.Equal(submitBatchMethod.ID, pendingTx.Input[:4]) &&
 		!bytes.Equal(valsetUpdateMethod.ID, pendingTx.Input[:4]) {
 		return
@@ -45,11 +45,11 @@ func (p *PendingTxInputList) AddPendingTxInput(pendingTx *RPCTransaction) {
 }
 
 // IsPendingTxInput returns true if the input data is found in the pending tx list. If the tx is found but the tx is
-// older than pendingTxWaitDuration, we consider it stale and return false, so the validator re-sends it
+// older than pendingTxWaitDuration, we consider it stale and return false, so the validator re-sends it.
 func (s *peggyContract) IsPendingTxInput(txData []byte, pendingTxWaitDuration time.Duration) bool {
 	for _, pendingTxInput := range s.pendingTxInputList {
 		if bytes.Equal(pendingTxInput.InputData, txData) {
-			// if this tx was for too long in the pending list, consider it stale
+			// If this tx was for too long in the pending list, consider it stale
 			return time.Now().Before(pendingTxInput.ReceivedTime.Add(pendingTxWaitDuration))
 		}
 	}
