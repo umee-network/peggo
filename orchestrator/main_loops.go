@@ -218,9 +218,11 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "BatchRequesterLoop").Logger()
 
-	// TODO: Change this time for something like 20 x average block time.
+	// TODO: Change p.loopsDuration for something like 20 x average block time.
 	// We now send a batch request without checking for profitability, that'll be
 	// done during the relayer loop.
+	//
+	// Ref: https://github.com/umee-network/peggo/issues/55
 	return loops.RunLoop(ctx, p.logger, p.loopsDuration, func() error {
 		// Each loop performs the following:
 		//
