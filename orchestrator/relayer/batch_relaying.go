@@ -47,7 +47,7 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 			common.HexToAddress(batch.TokenContract),
 		)
 		if err != nil {
-			// If we can't get the signatures for a batch we will continue to the next batch
+			// If we can't get the signatures for a batch we will continue to the next batch.
 			s.logger.Err(err).
 				Uint64("batch_nonce", batch.BatchNonce).
 				Str("token_contract", batch.TokenContract).
@@ -55,9 +55,9 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 			continue
 		}
 
-		// this checks that the signatures for the batch are actually possible to submit to the chain
-		// we only need to know if the signatures are good, we won't use the other returned values
-		_, _, _, _, _, err = peggy.CheckBatchSigsAndRepack(currentValset, sigs)
+		// This checks that the signatures for the batch are actually possible to submit to the chain.
+		// We only need to know if the signatures are good, we won't use the other returned value.
+		_, err = peggy.CheckBatchSigsAndRepack(currentValset, sigs)
 
 		if err != nil {
 			// this batch is not ready to be relayed

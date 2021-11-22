@@ -9,6 +9,14 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
+type RepackedBatchSigs struct {
+	validators []common.Address
+	powers     []*big.Int
+	v          []uint8
+	r          []common.Hash
+	s          []common.Hash
+}
+
 func (s *peggyContract) EncodeTransactionBatch(
 	ctx context.Context,
 	currentValset *types.Valset,
@@ -16,7 +24,7 @@ func (s *peggyContract) EncodeTransactionBatch(
 	confirms []*types.MsgConfirmBatch,
 ) ([]byte, error) {
 
-	validators, powers, sigV, sigR, sigS, err := CheckBatchSigsAndRepack(currentValset, confirms)
+	sigs, err := CheckBatchSigsAndRepack(currentValset, confirms)
 	if err != nil {
 		err = errors.Wrap(err, "confirmations check failed")
 		return nil, err
@@ -28,8 +36,8 @@ func (s *peggyContract) EncodeTransactionBatch(
 	batchTimeout := new(big.Int).SetUint64(batch.BatchTimeout)
 
 	currentValsetArs := ValsetArgs{
-		Validators:   validators,
-		Powers:       powers,
+		Validators:   sigs.validators,
+		Powers:       sigs.powers,
 		ValsetNonce:  currentValsetNonce,
 		RewardAmount: currentValset.RewardAmount.BigInt(),
 		RewardToken:  common.HexToAddress(currentValset.RewardToken),
@@ -37,7 +45,7 @@ func (s *peggyContract) EncodeTransactionBatch(
 
 	txData, err := peggyABI.Pack("submitBatch",
 		currentValsetArs,
-		sigV, sigR, sigS,
+		sigs.v, sigs.r, sigs.s,
 		amounts,
 		destinations,
 		fees,
@@ -86,21 +94,17 @@ func getBatchCheckpointValues(batch *types.OutgoingTxBatch) (
 	return
 }
 
-func CheckBatchSigsAndRepack(
-	valset *types.Valset,
-	confirms []*types.MsgConfirmBatch,
-) (
-	validators []common.Address,
-	powers []*big.Int,
-	v []uint8,
-	r []common.Hash,
-	s []common.Hash,
-	err error,
-) {
+// CheckBatchSigsAndRepack checks all the signatures for a batch (confirmations), assembles them into the expected
+// format and checks if the power of the signatures would be enough to send this batch to Ethereum.
+func CheckBatchSigsAndRepack(valset *types.Valset, confirms []*types.MsgConfirmBatch) (*RepackedBatchSigs, error) {
+	var err error
+
 	if len(confirms) == 0 {
 		err = errors.New("no signatures in batch confirmation")
-		return
+		return nil, err
 	}
+
+	sigs := &RepackedBatchSigs{}
 
 	signerToSig := make(map[string]*types.MsgConfirmBatch, len(confirms))
 	for _, sig := range confirms {
@@ -114,25 +118,25 @@ func CheckBatchSigsAndRepack(
 		if sig, ok := signerToSig[m.EthereumAddress]; ok && sig.EthSigner == m.EthereumAddress {
 			powerOfGoodSigs.Add(powerOfGoodSigs, mPower)
 
-			validators = append(validators, common.HexToAddress(m.EthereumAddress))
-			powers = append(powers, mPower)
+			sigs.validators = append(sigs.validators, common.HexToAddress(m.EthereumAddress))
+			sigs.powers = append(sigs.powers, mPower)
 
 			sigV, sigR, sigS := sigToVRS(sig.Signature)
-			v = append(v, sigV)
-			r = append(r, sigR)
-			s = append(s, sigS)
+			sigs.v = append(sigs.v, sigV)
+			sigs.r = append(sigs.r, sigR)
+			sigs.s = append(sigs.s, sigS)
 		} else {
-			validators = append(validators, common.HexToAddress(m.EthereumAddress))
-			powers = append(powers, mPower)
-			v = append(v, 0)
-			r = append(r, [32]byte{})
-			s = append(s, [32]byte{})
+			sigs.validators = append(sigs.validators, common.HexToAddress(m.EthereumAddress))
+			sigs.powers = append(sigs.powers, mPower)
+			sigs.v = append(sigs.v, 0)
+			sigs.r = append(sigs.r, [32]byte{})
+			sigs.s = append(sigs.s, [32]byte{})
 		}
 	}
 	if peggyPowerToPercent(powerOfGoodSigs) < 66 {
 		err = ErrInsufficientVotingPowerToPass
-		return validators, powers, v, r, s, err
+		return sigs, err
 	}
 
-	return validators, powers, v, r, s, err
+	return sigs, err
 }
