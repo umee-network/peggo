@@ -87,7 +87,6 @@ func ethereumOptsFlagSet() *pflag.FlagSet {
 
 	fs.String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
 	fs.Float64(flagEthGasAdjustment, float64(1.3), "Specify a gas price adjustment for Ethereum transactions")
-	fs.String(flagEthAlchemyWS, "", "Specify the Alchemy websocket endpoint")
 
 	return fs
 }
