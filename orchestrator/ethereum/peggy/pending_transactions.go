@@ -46,9 +46,9 @@ func (p *PendingTxInputList) AddPendingTxInput(pendingTx *RPCTransaction) {
 
 // IsPendingTxInput returns true if the input data is found in the pending tx list. If the tx is found but the tx is
 // older than pendingTxWaitDuration, we consider it stale and return false, so the validator re-sends it
-func (s *peggyContract) IsPendingTxInput(txInput []byte, pendingTxWaitDuration time.Duration) bool {
+func (s *peggyContract) IsPendingTxInput(txData []byte, pendingTxWaitDuration time.Duration) bool {
 	for _, pendingTxInput := range s.pendingTxInputList {
-		if bytes.Equal(pendingTxInput.InputData, txInput) {
+		if bytes.Equal(pendingTxInput.InputData, txData) {
 			// if this tx was for too long in the pending list, consider it stale
 			return time.Now().Before(pendingTxInput.ReceivedTime.Add(pendingTxWaitDuration))
 		}

@@ -68,7 +68,9 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset *types.Va
 				return err
 			}
 
-			//TODO: estimate gas and profitability using "valset reward" param
+			//TODO: estimate gas and profitability using "valset reward" param.
+			//
+			// Ref: https://github.com/umee-network/peggo/issues/56
 
 			// Checking in pending txs (mempool) if tx with same input is already submitted
 			// We have to check this at the very last moment because any other relayer could have submitted

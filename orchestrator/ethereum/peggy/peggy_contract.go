@@ -43,6 +43,8 @@ type Contract interface {
 		confirms []*types.MsgConfirmBatch,
 	) ([]byte, error)
 
+	// EncodeValsetUpdate encodes a valset update into a tx byte data. This is specially helpful for estimating gas and
+	// detecting identical transactions in the mempool.
 	EncodeValsetUpdate(
 		ctx context.Context,
 		oldValset *types.Valset,
@@ -78,9 +80,12 @@ type Contract interface {
 		callerAddress common.Address,
 	) (decimals uint8, err error)
 
+	// SubscribeToPendingTxs starts a websocket connection to Alchemy's service that listens for new pending txs made
+	// to the Peggy contract.
 	SubscribeToPendingTxs(alchemyWebsocketURL string)
 
-	IsPendingTxInput(txInput []byte, pendingTxWaitDuration time.Duration) bool
+	// IsPendingTxInput checks if the txData is found already in another tx in the mempool.
+	IsPendingTxInput(txData []byte, pendingTxWaitDuration time.Duration) bool
 }
 
 func NewPeggyContract(
