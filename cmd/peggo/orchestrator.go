@@ -156,20 +156,6 @@ func getOrchestratorCmd() *cobra.Command {
 			// Ref: https://github.com/umee-network/peggo/issues/55
 			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime/100*115) * time.Millisecond
 
-			// If we have the alchemy WS endpoint, start listening for txs against the Peggy contract.
-			alchemyWS := konfig.String(flagEthAlchemyWS)
-			if alchemyWS != "" {
-				ctx, cancel = context.WithCancel(context.Background())
-				g, errCtx := errgroup.WithContext(ctx)
-
-				g.Go(func() error {
-					return peggyContract.SubscribeToPendingTxs(errCtx, alchemyWS)
-				})
-
-				// listen for and trap any OS signal to gracefully shutdown and exit
-				trapSignal(cancel)
-			}
-
 			relayer := relayer.NewPeggyRelayer(
 				logger,
 				peggyQueryClient,
@@ -215,6 +201,14 @@ func getOrchestratorCmd() *cobra.Command {
 			g.Go(func() error {
 				return startOrchestrator(errCtx, logger, orch)
 			})
+
+			// If we have the alchemy WS endpoint, start listening for txs against the Peggy contract.
+			alchemyWS := konfig.String(flagEthAlchemyWS)
+			if alchemyWS != "" {
+				g.Go(func() error {
+					return peggyContract.SubscribeToPendingTxs(errCtx, alchemyWS)
+				})
+			}
 
 			// listen for and trap any OS signal to gracefully shutdown and exit
 			trapSignal(cancel)
