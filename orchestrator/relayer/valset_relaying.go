@@ -68,7 +68,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset *types.Va
 				return err
 			}
 
-			//TODO: estimate gas and profitability using "valset reward" param.
+			// TODO: Estimate gas and profitability using "valset reward" param.
 			//
 			// Ref: https://github.com/umee-network/peggo/issues/56
 
