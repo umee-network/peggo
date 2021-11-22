@@ -74,12 +74,11 @@ func (cp *PriceFeed) QueryETHUSDPrice() (float64, error) {
 	}
 
 	respBody, err := ioutil.ReadAll(io.LimitReader(resp.Body, maxRespBytes))
+	defer resp.Body.Close()
 	if err != nil {
-		_ = resp.Body.Close()
 		err = errors.Wrapf(err, "failed to read response body from %s", reqURL)
 		return zeroPrice, err
 	}
-	_ = resp.Body.Close()
 
 	var f interface{}
 	err = json.Unmarshal(respBody, &f)
@@ -125,12 +124,11 @@ func (cp *PriceFeed) QueryUSDPrice(erc20Contract common.Address) (float64, error
 	}
 
 	respBody, err := ioutil.ReadAll(io.LimitReader(resp.Body, maxRespBytes))
+	defer resp.Body.Close()
 	if err != nil {
-		_ = resp.Body.Close()
 		err = errors.Wrapf(err, "failed to read response body from %s", reqURL)
 		return zeroPrice, err
 	}
-	_ = resp.Body.Close()
 
 	var f interface{}
 	err = json.Unmarshal(respBody, &f)

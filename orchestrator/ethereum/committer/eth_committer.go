@@ -74,8 +74,8 @@ func (e *ethCommitter) EstimateGas(
 ) (gasCost uint64, gasPrice *big.Int, err error) {
 
 	opts := &bind.TransactOpts{
-		From:   e.fromAddress,
-		Signer: e.fromSigner,
+		From:     e.fromAddress,
+		Signer:   e.fromSigner,
 		GasPrice: e.committerOpts.GasPrice.BigInt(),
 		GasLimit: e.committerOpts.GasLimit,
 		Context:  ctx, // with RPC timeout

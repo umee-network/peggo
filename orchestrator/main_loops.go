@@ -243,10 +243,10 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 			}
 
 			for _, unbatchedToken := range unbatchedTokensWithFees {
-				batchFees := unbatchedToken // use this because of scopelint
+				unbatchedToken := unbatchedToken // use this because of scopelint
 				// Check if the token is present in cosmos denom. If so, send batch
 				// request with cosmosDenom.
-				tokenAddr := common.HexToAddress(batchFees.Token)
+				tokenAddr := common.HexToAddress(unbatchedToken.Token)
 
 				var denom string
 				resp, err := p.cosmosQueryClient.ERC20ToDenom(ctx, tokenAddr)

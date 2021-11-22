@@ -82,24 +82,22 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 	// Order batches by nonce ASC. That means that the next/oldest batch is [0].
 	for tokenAddress := range possibleBatches {
 		tokenAddress := tokenAddress
-		sort.SliceStable(possibleBatches[address], func(i, j int) bool {
-			return possibleBatches[address][i].Batch.BatchNonce > possibleBatches[address][j].Batch.BatchNonce
+		sort.SliceStable(possibleBatches[tokenAddress], func(i, j int) bool {
+			return possibleBatches[tokenAddress][i].Batch.BatchNonce > possibleBatches[tokenAddress][j].Batch.BatchNonce
 		})
 	}
 
 	return possibleBatches, nil
 }
 
-// RelayBatches attempts to submit batches with valid signatures, checking the state of the Ethereum chain to ensure that
-// it is valid to submit a given batch more specifically that the correctly signed batch has not timed out or already
-// been submitted. The goal of this function is to submit batches in chronological order of their creation, submitting
-// batches newest first will invalidate old batches and is less efficient if those old batches are profitable.
-// This function estimates the cost of submitting a batch before actually submitting it to Ethereum, if it is determined
-// that the ETH cost to submit is too high the batch will be skipped and a later, more profitable, batch may be
-// submitted.
+// RelayBatches attempts to submit batches with valid signatures, checking the state of the Ethereum chain to ensure
+// that it is valid to submit a given batch, more specifically that the correctly signed batch has not timed out or
+// already been submitted. The goal of this function is to submit batches in chronological order of their creation.
+// This function estimates the cost of submitting a batch before submitting it to Ethereum, if it is determined that
+// the ETH cost to submit is too high the batch will be skipped and a later, more profitable, batch may be submitted.
 // Keep in mind that many other relayers are making this same computation and some may have different standards for
 // their profit margin, therefore there may be a race not only to submit individual batches but also batches in
-// different orders
+// different orders.
 func (s *peggyRelayer) RelayBatches(
 	ctx context.Context,
 	currentValset *types.Valset,
@@ -182,6 +180,9 @@ func (s *peggyRelayer) RelayBatches(
 	return nil
 }
 
+// IsBatchProfitable gets the current prices in USD of ETH and the ERC20 token and compares the value of the estimated
+// gas cost of the transaction to the fees paid by the batch. If the estimated gas cost is greater than the batch's
+// fees, the batch is not profitable and should not be submitted.
 func (s *peggyRelayer) IsBatchProfitable(
 	ctx context.Context,
 	batch *types.OutgoingTxBatch,
@@ -198,9 +199,9 @@ func (s *peggyRelayer) IsBatchProfitable(
 		s.logger.Err(err).Msg("failed to get ETH price")
 		return false
 	}
-	usdEthPriceDec := decimal.NewFromFloat(ethereumPriceInUSD)
+	usdEthPriceDec := decimal.NewFromFloat(usdEthPrice)
 	totalETHcost := big.NewInt(0).Mul(gasPrice, big.NewInt(int64(ethGasCost)))
-	gasCostInUSDDec := decimal.NewFromBigInt(totalETHcost, -18).Mul(ethereumPriceInUSDDec)
+	gasCostInUSDDec := decimal.NewFromBigInt(totalETHcost, -18).Mul(usdEthPriceDec)
 
 	// Then we get the fees of the batch in USD
 	decimals, err := s.peggyContract.GetERC20Decimals(
@@ -229,13 +230,13 @@ func (s *peggyRelayer) IsBatchProfitable(
 		totalBatchFees = totalBatchFees.Add(tx.Erc20Fee.Amount.BigInt(), totalBatchFees)
 	}
 
-	usdTokenPriceDec := decimal.NewFromFloat(tokenPriceInUSD)
+	usdTokenPriceDec := decimal.NewFromFloat(usdTokenPrice)
 	// decimals (uint8) can be safely casted into int32 because the max uint8 is 255 and the max int32 is 2147483647
-	totalFeeInUSDDec := decimal.NewFromBigInt(totalBatchFees, -int32(decimals)).Mul(tokenPriceInUSDDec)
+	totalFeeInUSDDec := decimal.NewFromBigInt(totalBatchFees, -int32(decimals)).Mul(usdTokenPriceDec)
 
 	s.logger.Debug().
 		Str("token_contract", batch.TokenContract).
-		Float64("token_price_in_usd", tokenPriceInUSD).
+		Float64("token_price_in_usd", usdTokenPrice).
 		Int64("total_fees", totalBatchFees.Int64()).
 		Float64("total_fee_in_usd", totalFeeInUSDDec.InexactFloat64()).
 		Float64("gas_cost_in_usd", gasCostInUSDDec.InexactFloat64()).
