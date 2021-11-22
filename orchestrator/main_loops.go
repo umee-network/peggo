@@ -92,8 +92,8 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 		//	1. It takes some time for events to be indexed on Ethereum. So if peggo queried events immediately as
 		//	   block produced, there is a chance the event is missed. We need to re-scan this block to ensure events
 		//	   are not missed due to indexing delay.
-		//	2. if validator was in UnBonding state, the claims broadcasted in last iteration are failed.
-		//	3. if infura call failed while filtering events, the peggo missed to broadcast claim events occurred in
+		//	2. If validator was in UnBonding state, the claims broadcasted in last iteration are failed.
+		//	3. If the ETH call failed while filtering events, the peggo missed to broadcast claim events occurred in
 		//	   last iteration.
 		if time.Since(lastResync) >= 48*time.Hour {
 			if err := retry.Do(func() (err error) {

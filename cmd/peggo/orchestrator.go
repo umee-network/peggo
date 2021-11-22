@@ -159,7 +159,15 @@ func getOrchestratorCmd() *cobra.Command {
 			// If we have the alchemy WS endpoint, start listening for txs against the Peggy contract.
 			alchemyWS := konfig.String(flagEthAlchemyWS)
 			if alchemyWS != "" {
-				go peggyContract.SubscribeToPendingTxs(alchemyWS)
+				ctx, cancel = context.WithCancel(context.Background())
+				g, errCtx := errgroup.WithContext(ctx)
+
+				g.Go(func() error {
+					return peggyContract.SubscribeToPendingTxs(errCtx, alchemyWS)
+				})
+
+				// listen for and trap any OS signal to gracefully shutdown and exit
+				trapSignal(cancel)
 			}
 
 			relayer := relayer.NewPeggyRelayer(

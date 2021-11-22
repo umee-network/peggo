@@ -22,7 +22,6 @@ func (s *peggyRelayer) Start(ctx context.Context) error {
 	}
 
 	return loops.RunLoop(ctx, s.logger, s.ethereumBlockTime, func() error {
-
 		var (
 			currentValset *types.Valset
 			err           error

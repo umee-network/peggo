@@ -82,9 +82,10 @@ type Contract interface {
 
 	// SubscribeToPendingTxs starts a websocket connection to Alchemy's service that listens for new pending txs made
 	// to the Peggy contract.
-	SubscribeToPendingTxs(alchemyWebsocketURL string)
+	SubscribeToPendingTxs(ctx context.Context, alchemyWebsocketURL string) error
 
-	// IsPendingTxInput checks if the txData is found already in another tx in the mempool.
+	// IsPendingTxInput returns true if the input data is found in the pending tx list. If the tx is found but the tx is
+	// older than pendingTxWaitDuration, we consider it stale and return false, so the validator re-sends it.
 	IsPendingTxInput(txData []byte, pendingTxWaitDuration time.Duration) bool
 }
 
