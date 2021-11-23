@@ -289,7 +289,7 @@ func (p *peggyOrchestrator) ERC20ToDenom(ctx context.Context, tokenAddr common.A
 	defer p.mtx.Unlock()
 
 	tokenAddrStr := tokenAddr.String()
-	denom, ok := p.ercDenomCache[tokenAddrStr]
+	denom, ok := p.erc20DenomCache[tokenAddrStr]
 	if ok {
 		return denom, nil
 	}
@@ -299,7 +299,7 @@ func (p *peggyOrchestrator) ERC20ToDenom(ctx context.Context, tokenAddr common.A
 		return "", err
 	}
 
-	p.ercDenomCache[tokenAddrStr] = resp.Denom
+	p.erc20DenomCache[tokenAddrStr] = resp.Denom
 	return resp.Denom, nil
 }
 

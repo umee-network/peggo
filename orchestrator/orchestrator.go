@@ -40,8 +40,8 @@ type peggyOrchestrator struct {
 	cosmosBlockTime      time.Duration
 	ethBlocksPerLoop     uint64
 
-	mtx           sync.RWMutex
-	ercDenomCache map[string]string
+	mtx             sync.Mutex
+	erc20DenomCache map[string]string
 }
 
 func NewPeggyOrchestrator(
