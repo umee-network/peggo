@@ -254,18 +254,18 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 				unbatchedToken := unbatchedToken
 				tokenAddr := common.HexToAddress(unbatchedToken.Token)
 
-				resp, err := p.cosmosQueryClient.ERC20ToDenom(ctx, tokenAddr)
+				denom, err := p.ERC20ToDenom(ctx, tokenAddr)
 				if err != nil {
-					logger.Err(err).Str("token_contract", tokenAddr.String()).Msg("failed to get denom; will not request a batch")
 					// do not return error, just continue with the next unbatched tx
+					logger.Err(err).Str("token_contract", tokenAddr.String()).Msg("failed to get denom; will not request a batch")
 					return nil
 				}
 
-				denom = resp.GetDenom()
 				logger.Info().Str("token_contract", tokenAddr.String()).Str("denom", denom).Msg("sending batch request")
 
-				err = p.peggyBroadcastClient.SendRequestBatch(ctx, denom)
-				logger.Err(err).Msg("failed to send batch request")
+				if err := p.peggyBroadcastClient.SendRequestBatch(ctx, denom); err != nil {
+					logger.Err(err).Msg("failed to send batch request")
+				}
 			}
 
 			return nil
@@ -281,6 +281,28 @@ func (p *peggyOrchestrator) RelayerMainLoop(ctx context.Context) (err error) {
 	}
 
 	return errors.New("relayer is nil")
+}
+
+// ERC20ToDenom attempts to return the denomination that maps to an ERC20 token
+// contract on the Cosmos chain. First, we check the cache. If the token address
+// does not exist in the cache, we query the Cosmos chain and cache the result.
+func (p *peggyOrchestrator) ERC20ToDenom(ctx context.Context, tokenAddr common.Address) (string, error) {
+	p.mtx.Lock()
+	defer p.mtx.Unlock()
+
+	tokenAddrStr := tokenAddr.String()
+	denom, ok := p.ercDenomCache[tokenAddrStr]
+	if ok {
+		return denom, nil
+	}
+
+	resp, err := p.cosmosQueryClient.ERC20ToDenom(ctx, tokenAddr)
+	if err != nil {
+		return "", err
+	}
+
+	p.ercDenomCache[tokenAddrStr] = resp.Denom
+	return resp.Denom, nil
 }
 
 // getEthBlockDelay returns the right amount of Ethereum blocks to wait until we
