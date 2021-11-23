@@ -27,19 +27,20 @@ type PeggyOrchestrator interface {
 }
 
 type peggyOrchestrator struct {
-	logger               zerolog.Logger
-	tmClient             tmclient.TendermintClient
-	cosmosQueryClient    sidechain.PeggyQueryClient
-	peggyBroadcastClient sidechain.PeggyBroadcastClient
-	peggyContract        peggy.Contract
-	ethProvider          provider.EVMProvider
-	ethFrom              ethcmn.Address
-	ethSignerFn          keystore.SignerFn
-	ethPersonalSignFn    keystore.PersonalSignFn
-	relayer              relayer.PeggyRelayer
-	cosmosBlockTime      time.Duration
-	ethereumBlockTime    time.Duration
-	ethBlocksPerLoop     uint64
+	logger                       zerolog.Logger
+	tmClient                     tmclient.TendermintClient
+	cosmosQueryClient            sidechain.PeggyQueryClient
+	peggyBroadcastClient         sidechain.PeggyBroadcastClient
+	peggyContract                peggy.Contract
+	ethProvider                  provider.EVMProvider
+	ethFrom                      ethcmn.Address
+	ethSignerFn                  keystore.SignerFn
+	ethPersonalSignFn            keystore.PersonalSignFn
+	relayer                      relayer.PeggyRelayer
+	cosmosBlockTime              time.Duration
+	ethereumBlockTime            time.Duration
+	batchRequesterLoopMultiplier float64
+	ethBlocksPerLoop             uint64
 }
 
 func NewPeggyOrchestrator(
@@ -54,24 +55,26 @@ func NewPeggyOrchestrator(
 	relayer relayer.PeggyRelayer,
 	cosmosBlockTime time.Duration,
 	ethereumBlockTime time.Duration,
+	batchRequesterLoopMultiplier float64,
 	ethBlocksPerLoop int64,
 	options ...func(PeggyOrchestrator),
 ) PeggyOrchestrator {
 
 	orch := &peggyOrchestrator{
-		logger:               logger.With().Str("module", "orchestrator").Logger(),
-		tmClient:             tmClient,
-		cosmosQueryClient:    cosmosQueryClient,
-		peggyBroadcastClient: peggyBroadcastClient,
-		peggyContract:        peggyContract,
-		ethProvider:          peggyContract.Provider(),
-		ethFrom:              ethFrom,
-		ethSignerFn:          ethSignerFn,
-		ethPersonalSignFn:    ethPersonalSignFn,
-		relayer:              relayer,
-		cosmosBlockTime:      cosmosBlockTime,
-		ethereumBlockTime:    ethereumBlockTime,
-		ethBlocksPerLoop:     uint64(ethBlocksPerLoop),
+		logger:                       logger.With().Str("module", "orchestrator").Logger(),
+		tmClient:                     tmClient,
+		cosmosQueryClient:            cosmosQueryClient,
+		peggyBroadcastClient:         peggyBroadcastClient,
+		peggyContract:                peggyContract,
+		ethProvider:                  peggyContract.Provider(),
+		ethFrom:                      ethFrom,
+		ethSignerFn:                  ethSignerFn,
+		ethPersonalSignFn:            ethPersonalSignFn,
+		relayer:                      relayer,
+		cosmosBlockTime:              cosmosBlockTime,
+		ethereumBlockTime:            ethereumBlockTime,
+		batchRequesterLoopMultiplier: batchRequesterLoopMultiplier,
+		ethBlocksPerLoop:             uint64(ethBlocksPerLoop),
 	}
 
 	for _, option := range options {

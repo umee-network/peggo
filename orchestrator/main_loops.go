@@ -21,11 +21,6 @@ const (
 	// If we run this faster we would be getting the same block more than once, which is not efficient.
 	ethOracleLoopMultiplier = 5
 
-	// Run every approximately 60 Cosmos blocks (around 5m) to allow time to receive new transactions.
-	// Running this faster will cause a lot of small batches and lots of messages going around the network.
-	// We need to remember that this call is going to be made by all the validators.
-	batchRequesterLoopMultiplier = 60
-
 	// Run every approximately 3 Cosmos blocks; so we sign batches and valset updates ASAP but not run these requests
 	// too often that we make too many requests to Cosmos.
 	ethSignerLoopMultiplier = 3
@@ -153,10 +148,8 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 	}
 	logger.Debug().Hex("peggyID", peggyID[:]).Msg("received peggyID")
 
-	// Run every approximately 2 Cosmos blocks to allow time to receive new transactions to sign.
+	// Run every approximately 3 Cosmos blocks to allow time to receive new transactions to sign.
 	// If we run this faster we would be getting the same block more than once, which is not efficient.
-	//
-	// Ref: https://github.com/umee-network/peggo/issues/55
 	return loops.RunLoop(ctx, p.logger, p.cosmosBlockTime*ethSignerLoopMultiplier, func() error {
 		var oldestUnsignedValsets []*types.Valset
 		if err := retry.Do(func() error {
@@ -237,7 +230,16 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "BatchRequesterLoop").Logger()
 
-	return loops.RunLoop(ctx, p.logger, p.cosmosBlockTime*batchRequesterLoopMultiplier, func() error {
+	// Run every approximately 60 Cosmos blocks (around 5m) to allow time to receive new transactions.
+	// Running this faster will cause a lot of small batches and lots of messages going around the network.
+	// We need to remember that this call is going to be made by all the validators.
+	// This loop is configurable so it can be adjusted for E2E tests.
+	loopDuration := time.Duration(
+		float64(p.cosmosBlockTime.Milliseconds())*
+			p.batchRequesterLoopMultiplier) *
+		time.Millisecond
+
+	return loops.RunLoop(ctx, p.logger, loopDuration, func() error {
 		// Each loop performs the following:
 		//
 		// - get All the denominations
@@ -276,7 +278,10 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 
 				logger.Info().Str("token_contract", tokenAddr.String()).Str("denom", denom).Msg("sending batch request")
 				err = p.peggyBroadcastClient.SendRequestBatch(ctx, denom)
-				logger.Err(err).Msg("failed to send batch request")
+
+				if err != nil {
+					logger.Err(err).Msg("failed to send batch request")
+				}
 
 			}
 
