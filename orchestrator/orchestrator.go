@@ -37,8 +37,8 @@ type peggyOrchestrator struct {
 	ethSignerFn          keystore.SignerFn
 	ethPersonalSignFn    keystore.PersonalSignFn
 	relayer              relayer.PeggyRelayer
-	loopsDuration        time.Duration
 	cosmosBlockTime      time.Duration
+	ethereumBlockTime    time.Duration
 	ethBlocksPerLoop     uint64
 }
 
@@ -52,8 +52,8 @@ func NewPeggyOrchestrator(
 	ethSignerFn keystore.SignerFn,
 	ethPersonalSignFn keystore.PersonalSignFn,
 	relayer relayer.PeggyRelayer,
-	loopDuration time.Duration,
 	cosmosBlockTime time.Duration,
+	ethereumBlockTime time.Duration,
 	ethBlocksPerLoop int64,
 	options ...func(PeggyOrchestrator),
 ) PeggyOrchestrator {
@@ -69,8 +69,8 @@ func NewPeggyOrchestrator(
 		ethSignerFn:          ethSignerFn,
 		ethPersonalSignFn:    ethPersonalSignFn,
 		relayer:              relayer,
-		loopsDuration:        loopDuration,
 		cosmosBlockTime:      cosmosBlockTime,
+		ethereumBlockTime:    ethereumBlockTime,
 		ethBlocksPerLoop:     uint64(ethBlocksPerLoop),
 	}
 

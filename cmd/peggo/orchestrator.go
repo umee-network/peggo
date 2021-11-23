@@ -149,12 +149,8 @@ func getOrchestratorCmd() *cobra.Command {
 				BaseURL: coingeckoAPI,
 			})
 
-			// TODO: figure out where to put this 15% buffer
-			// peggyParams.AverageEthereumBlockTime is in milliseconds. We add a 15% extra as a buffer so txs have time
-			// to get processed.
-			//
-			// Ref: https://github.com/umee-network/peggo/issues/55
-			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime/100*115) * time.Millisecond
+			// peggyParams.AverageEthereumBlockTime is in milliseconds.
+			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime) * time.Millisecond
 
 			relayer := relayer.NewPeggyRelayer(
 				logger,
@@ -173,12 +169,8 @@ func getOrchestratorCmd() *cobra.Command {
 				Str("relayer_ethereum_addr", ethKeyFromAddress.String()).
 				Logger()
 
-			// TODO: figure out where to put this 15% buffer
-			// peggyParams.AverageBlockTime is in milliseconds. We add a 15% extra as a buffer so txs have time to get
-			// processed.
-			//
-			// Ref: https://github.com/umee-network/peggo/issues/55
-			averageCosmosBlockTime := time.Duration(peggyParams.AverageBlockTime/100*115) * time.Millisecond
+				// peggyParams.AverageBlockTime is in milliseconds.
+			averageCosmosBlockTime := time.Duration(peggyParams.AverageBlockTime) * time.Millisecond
 
 			orch := orchestrator.NewPeggyOrchestrator(
 				logger,
@@ -190,8 +182,8 @@ func getOrchestratorCmd() *cobra.Command {
 				signerFn,
 				personalSignFn,
 				relayer,
-				konfig.Duration(flagOrchLoopDuration),
 				averageCosmosBlockTime,
+				averageEthBlockTime,
 				konfig.Int64(flagEthBlocksPerLoop),
 			)
 
@@ -219,7 +211,6 @@ func getOrchestratorCmd() *cobra.Command {
 
 	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
-	cmd.Flags().Duration(flagOrchLoopDuration, 20*time.Second, "Duration between orchestrator loops")
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 40, "Number of Ethereum blocks to process per orchestrator loop")
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
 	cmd.Flags().Duration(flagEthPendingTXWait, 20*time.Minute, "Time for a pending tx to be considered stale")
