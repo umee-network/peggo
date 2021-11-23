@@ -74,7 +74,6 @@ func (s *peggyContract) SubscribeToPendingTxs(ctx context.Context, alchemyWebsoc
 
 	ch := make(chan *RPCTransaction)
 	_, err = wsClient.EthSubscribe(ctx, ch, "alchemy_filteredNewFullPendingTransactions", args)
-
 	if err != nil {
 		s.logger.Fatal().
 			AnErr("err", err).
