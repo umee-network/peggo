@@ -216,7 +216,7 @@ func (s *peggyContract) GetERC20Symbol(
 
 	symbol, err = erc20Wrapper.Symbol(callOpts)
 	if err != nil {
-		err = errors.Wrap(err, "ERC20 [symbol] call failed")
+		err = errors.Wrap(err, "ERC20 'symbol' call failed")
 		return "", err
 	}
 
