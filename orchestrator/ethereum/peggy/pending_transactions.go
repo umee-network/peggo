@@ -83,9 +83,13 @@ func (s *peggyContract) SubscribeToPendingTxs(ctx context.Context, alchemyWebsoc
 	}
 
 	for {
-		// Check that the transaction was send over the channel
-		pendingTransaction := <-ch
-		s.pendingTxInputList.AddPendingTxInput(pendingTransaction)
+		select {
+		case pendingTransaction := <-ch:
+			s.pendingTxInputList.AddPendingTxInput(pendingTransaction)
+
+		case <-ctx.Done():
+			return nil
+		}
 	}
 }
 
