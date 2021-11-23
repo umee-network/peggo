@@ -18,7 +18,7 @@ const (
 	// Ref: https://github.com/umee-network/peggo/issues/55
 
 	// Run every approximately 5 Ethereum blocks to allow time to receive new blocks.
-	// If we run this faster we would be getting the same block more than once, which is not efficient.
+	// If we run this faster we wouldn't be getting new blocks, which is not efficient.
 	ethOracleLoopMultiplier = 5
 
 	// Run every approximately 3 Cosmos blocks; so we sign batches and valset updates ASAP but not run these requests
@@ -148,8 +148,6 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 	}
 	logger.Debug().Hex("peggyID", peggyID[:]).Msg("received peggyID")
 
-	// Run every approximately 3 Cosmos blocks to allow time to receive new transactions to sign.
-	// If we run this faster we would be getting the same block more than once, which is not efficient.
 	return loops.RunLoop(ctx, p.logger, p.cosmosBlockTime*ethSignerLoopMultiplier, func() error {
 		var oldestUnsignedValsets []*types.Valset
 		if err := retry.Do(func() error {

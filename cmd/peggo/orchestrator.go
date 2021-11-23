@@ -222,6 +222,7 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().Duration(flagEthPendingTXWait, 20*time.Minute, "Time for a pending tx to be considered stale")
 	cmd.Flags().String(flagEthAlchemyWS, "", "Specify the Alchemy websocket endpoint")
 	cmd.Flags().Float64(flagRelayerLoopMultiplier, 3.0, "Multiplier for the relayer loop duration (in ETH blocks)")
+	// nolint: lll
 	cmd.Flags().Float64(flagRequesterLoopMultiplier, 60.0, "Multiplier for the batch requester loop duration (in Cosmos blocks)")
 
 	cmd.Flags().AddFlagSet(cosmosFlagSet())
