@@ -249,8 +249,6 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 			}
 
 			for _, unbatchedToken := range unbatchedTokensWithFees {
-				var denom string
-
 				unbatchedToken := unbatchedToken
 				tokenAddr := common.HexToAddress(unbatchedToken.Token)
 
