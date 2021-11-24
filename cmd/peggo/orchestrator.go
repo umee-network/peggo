@@ -1,3 +1,4 @@
+// nolint: lll
 package peggo
 
 import (
@@ -177,6 +178,15 @@ func getOrchestratorCmd() *cobra.Command {
 			averageCosmosBlockTime := time.Duration(peggyParams.AverageBlockTime) * time.Millisecond
 			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime) * time.Millisecond
 
+			// Run every approximately 60 Cosmos blocks (around 5m) to allow time to receive new transactions.
+			// Running this faster will cause a lot of small batches and lots of messages going around the network.
+			// We need to remember that this call is going to be made by all the validators.
+			// This loop is configurable so it can be adjusted for E2E tests.
+			batchRequesterLoopDuration := time.Duration(
+				float64(averageCosmosBlockTime.Milliseconds())*
+					konfig.Float64(flagRequesterLoopMultiplier)) *
+				time.Millisecond
+
 			orch := orchestrator.NewPeggyOrchestrator(
 				logger,
 				peggyQueryClient,
@@ -189,7 +199,7 @@ func getOrchestratorCmd() *cobra.Command {
 				relayer,
 				averageCosmosBlockTime,
 				averageEthBlockTime,
-				konfig.Float64(flagRequesterLoopMultiplier),
+				batchRequesterLoopDuration,
 				konfig.Int64(flagEthBlocksPerLoop),
 			)
 
@@ -222,7 +232,6 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().Duration(flagEthPendingTXWait, 20*time.Minute, "Time for a pending tx to be considered stale")
 	cmd.Flags().String(flagEthAlchemyWS, "", "Specify the Alchemy websocket endpoint")
 	cmd.Flags().Float64(flagRelayerLoopMultiplier, 3.0, "Multiplier for the relayer loop duration (in ETH blocks)")
-	// nolint: lll
 	cmd.Flags().Float64(flagRequesterLoopMultiplier, 60.0, "Multiplier for the batch requester loop duration (in Cosmos blocks)")
 
 	cmd.Flags().AddFlagSet(cosmosFlagSet())

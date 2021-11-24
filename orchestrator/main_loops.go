@@ -236,16 +236,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "BatchRequesterLoop").Logger()
 
-	// Run every approximately 60 Cosmos blocks (around 5m) to allow time to receive new transactions.
-	// Running this faster will cause a lot of small batches and lots of messages going around the network.
-	// We need to remember that this call is going to be made by all the validators.
-	// This loop is configurable so it can be adjusted for E2E tests.
-	loopDuration := time.Duration(
-		float64(p.cosmosBlockTime.Milliseconds())*
-			p.batchRequesterLoopMultiplier) *
-		time.Millisecond
-
-	return loops.RunLoop(ctx, p.logger, loopDuration, func() error {
+	return loops.RunLoop(ctx, p.logger, p.batchRequesterLoopDuration, func() error {
 		// Each loop performs the following:
 		//
 		// - get All the denominations
