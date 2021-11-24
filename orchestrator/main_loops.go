@@ -299,6 +299,10 @@ func (p *peggyOrchestrator) ERC20ToDenom(ctx context.Context, tokenAddr common.A
 		return "", err
 	}
 
+	if p.erc20DenomCache == nil {
+		p.erc20DenomCache = map[string]string{}
+	}
+
 	p.erc20DenomCache[tokenAddrStr] = resp.Denom
 	return resp.Denom, nil
 }
