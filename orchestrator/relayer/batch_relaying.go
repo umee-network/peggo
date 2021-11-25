@@ -249,7 +249,7 @@ func (s *peggyRelayer) IsBatchProfitable(
 	totalFeeInUSDDec := decimal.NewFromBigInt(totalBatchFees, -int32(decimals)).Mul(usdTokenPriceDec)
 
 	// Simplified: totalFee > (gasCost * profitMultiplier).
-	isProfitable := totalFeeInUSDDec.GreaterThan(gasCostInUSDDec.Mul(decimal.NewFromFloat(profitMultiplier)))
+	isProfitable := totalFeeInUSDDec.GreaterThanOrEqual(gasCostInUSDDec.Mul(decimal.NewFromFloat(profitMultiplier)))
 
 	s.logger.Debug().
 		Str("token_contract", batch.TokenContract).
