@@ -43,7 +43,7 @@ const (
 	flagOrchLoopDuration        = "orch-loop-duration"
 	flagEthBlocksPerLoop        = "eth-blocks-per-loop"
 	flagEthPendingTXWait        = "eth-pending-tx-wait"
-	flagRelayerProfitMultiplier = "relayer-profit-multiplier"
+	flagProfitMultiplier = "profit-multiplier"
 )
 
 func cosmosFlagSet() *pflag.FlagSet {
