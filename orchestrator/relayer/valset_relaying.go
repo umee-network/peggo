@@ -9,7 +9,7 @@ import (
 
 // RelayValsets checks the last validator set on Ethereum, if it's lower than our latest validator
 // set then we should package and submit the update as an Ethereum transaction
-func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
+func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset *types.Valset) error {
 	// we should determine if we need to relay one
 	// to Ethereum for that we will find the latest confirmed valset and compare it to the ethereum chain
 	latestValsets, err := s.cosmosQueryClient.LatestValsets(ctx)
@@ -39,18 +39,12 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 		return nil
 	}
 
-	currentEthValset, err := s.FindLatestValset(ctx)
-	if err != nil {
-		err = errors.Wrap(err, "couldn't find latest confirmed valset on Ethereum")
-		return err
-	}
-
 	s.logger.Debug().
-		Interface("current_eth_valset", currentEthValset).
-		Interface("latest_cosmos_confirmed", latestCosmosConfirmed).
+		Uint64("current_eth_valset_nonce", currentValset.Nonce).
+		Uint64("latest_cosmos_confirmed_nonce", latestCosmosConfirmed.Nonce).
 		Msg("found latest valsets")
 
-	if latestCosmosConfirmed.Nonce > currentEthValset.Nonce {
+	if latestCosmosConfirmed.Nonce > currentValset.Nonce {
 		latestEthereumValsetNonce, err := s.peggyContract.GetValsetNonce(ctx, s.peggyContract.FromAddress())
 		if err != nil {
 			err = errors.Wrap(err, "failed to get latest Valset nonce")
@@ -64,10 +58,9 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 				Uint64("latest_ethereum_valset_nonce", latestEthereumValsetNonce.Uint64()).
 				Msg("detected latest cosmos valset nonce, but latest valset on Ethereum is different. Sending update to Ethereum")
 
-			// Send Valset Update to Ethereum
-			txHash, err := s.peggyContract.SendEthValsetUpdate(
+			txData, err := s.peggyContract.EncodeValsetUpdate(
 				ctx,
-				currentEthValset,
+				currentValset,
 				latestCosmosConfirmed,
 				latestCosmosSigs,
 			)
@@ -75,7 +68,28 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context) error {
 				return err
 			}
 
-			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Ethereum Tx (EthValsetUpdate)")
+			// TODO: Estimate gas and profitability using "valset reward" param.
+			//
+			// Ref: https://github.com/umee-network/peggo/issues/56
+
+			// Checking in pending txs (mempool) if tx with same input is already submitted.
+			// We have to check this at the very last moment because any other relayer could have submitted.
+			if s.peggyContract.IsPendingTxInput(txData, s.pendingTxWait) {
+				s.logger.Error().
+					Msg("Transaction with same valset input data is already present in mempool")
+				return nil
+			}
+
+			// Send Valset Update to Ethereum
+			txHash, err := s.peggyContract.SendTx(ctx, s.peggyContract.Address(), txData)
+			if err != nil {
+				s.logger.Err(err).
+					Str("tx_hash", txHash.Hex()).
+					Msg("failed to sign and submit (Peggy updateValset) to EVM")
+				return err
+			}
+
+			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Tx (Peggy updateValset)")
 
 		}
 

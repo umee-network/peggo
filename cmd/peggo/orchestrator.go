@@ -54,12 +54,6 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Cosmos keyring: %w", err)
 			}
 
-			ethChainID := konfig.Int64(flagEthChainID)
-			ethKeyFromAddress, signerFn, personalSignFn, err := initEthereumAccountsManager(logger, uint64(ethChainID), konfig)
-			if err != nil {
-				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
-			}
-
 			cosmosChainID := konfig.String(flagCosmosChainID)
 			clientCtx, err := client.NewClientContext(cosmosChainID, valAddress.String(), cosmosKeyring)
 			if err != nil {
@@ -98,13 +92,6 @@ func getOrchestratorCmd() *cobra.Command {
 			waitForService(ctx, gRPCConn)
 
 			peggyQuerier := peggytypes.NewQueryClient(gRPCConn)
-			peggyBroadcaster := cosmos.NewPeggyBroadcastClient(
-				logger,
-				peggyQuerier,
-				daemonClient,
-				signerFn,
-				personalSignFn,
-			)
 
 			// query peggy params
 			peggyQueryClient := cosmos.NewPeggyQueryClient(peggyQuerier)
@@ -114,6 +101,12 @@ func getOrchestratorCmd() *cobra.Command {
 			peggyParams, err := peggyQueryClient.PeggyParams(ctx)
 			if err != nil {
 				return fmt.Errorf("failed to query for Peggy params: %w", err)
+			}
+
+			ethChainID := peggyParams.BridgeChainId
+			ethKeyFromAddress, signerFn, personalSignFn, err := initEthereumAccountsManager(logger, ethChainID, konfig)
+			if err != nil {
+				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
 
 			ethRPCEndpoint := konfig.String(flagEthRPC)
@@ -137,30 +130,55 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
 
+			peggyBroadcaster := cosmos.NewPeggyBroadcastClient(
+				logger,
+				peggyQuerier,
+				daemonClient,
+				signerFn,
+				personalSignFn,
+			)
+
 			peggyAddress := ethcmn.HexToAddress(peggyParams.BridgeEthereumAddress)
 			peggyContract, err := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress)
 			if err != nil {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
 
-			relayer := relayer.NewPeggyRelayer(
-				logger,
-				peggyQueryClient,
-				peggyContract,
-				konfig.Bool(flagRelayValsets),
-				konfig.Bool(flagRelayBatches),
-				konfig.Duration(flagRelayerLoopDuration),
-			)
-
 			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
 			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, &coingecko.Config{
 				BaseURL: coingeckoAPI,
 			})
 
+			// TODO: figure out where to put this 15% buffer
+			// peggyParams.AverageEthereumBlockTime is in milliseconds. We add a 15% extra as a buffer so txs have time
+			// to get processed.
+			//
+			// Ref: https://github.com/umee-network/peggo/issues/55
+			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime/100*115) * time.Millisecond
+
+			relayer := relayer.NewPeggyRelayer(
+				logger,
+				peggyQueryClient,
+				peggyContract,
+				tmclient.NewRPCClient(logger, tmRPCEndpoint),
+				konfig.Bool(flagRelayValsets),
+				konfig.Bool(flagRelayBatches),
+				averageEthBlockTime,
+				konfig.Duration(flagEthPendingTXWait),
+				relayer.SetPriceFeeder(coingeckoFeed),
+			)
+
 			logger = logger.With().
 				Str("relayer_validator_addr", sdk.ValAddress(valAddress).String()).
 				Str("relayer_ethereum_addr", ethKeyFromAddress.String()).
 				Logger()
+
+			// TODO: figure out where to put this 15% buffer
+			// peggyParams.AverageBlockTime is in milliseconds. We add a 15% extra as a buffer so txs have time to get
+			// processed.
+			//
+			// Ref: https://github.com/umee-network/peggo/issues/55
+			averageCosmosBlockTime := time.Duration(peggyParams.AverageBlockTime/100*115) * time.Millisecond
 
 			orch := orchestrator.NewPeggyOrchestrator(
 				logger,
@@ -173,9 +191,8 @@ func getOrchestratorCmd() *cobra.Command {
 				personalSignFn,
 				relayer,
 				konfig.Duration(flagOrchLoopDuration),
-				konfig.Duration(flagCosmosBlockTime),
-				orchestrator.SetMinBatchFee(konfig.Float64(flagMinBatchFeeUSD)),
-				orchestrator.SetPriceFeeder(coingeckoFeed),
+				averageCosmosBlockTime,
+				konfig.Int64(flagEthBlocksPerLoop),
 			)
 
 			ctx, cancel = context.WithCancel(context.Background())
@@ -184,6 +201,14 @@ func getOrchestratorCmd() *cobra.Command {
 			g.Go(func() error {
 				return startOrchestrator(errCtx, logger, orch)
 			})
+
+			// If we have the alchemy WS endpoint, start listening for txs against the Peggy contract.
+			alchemyWS := konfig.String(flagEthAlchemyWS)
+			if alchemyWS != "" {
+				g.Go(func() error {
+					return peggyContract.SubscribeToPendingTxs(errCtx, alchemyWS)
+				})
+			}
 
 			// listen for and trap any OS signal to gracefully shutdown and exit
 			trapSignal(cancel)
@@ -194,15 +219,11 @@ func getOrchestratorCmd() *cobra.Command {
 
 	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
-	cmd.Flags().Duration(flagRelayerLoopDuration, 5*time.Minute, "Duration between relayer loops")
-	cmd.Flags().Duration(flagOrchLoopDuration, 1*time.Minute, "Duration between orchestrator loops")
-	cmd.Flags().Duration(flagCosmosBlockTime, 5*time.Second, "Average block time of the cosmos chain")
-	cmd.Flags().Float64(
-		flagMinBatchFeeUSD,
-		float64(0.0),
-		"If non-zero, batch requests will only be made if fee threshold criteria is met",
-	)
+	cmd.Flags().Duration(flagOrchLoopDuration, 20*time.Second, "Duration between orchestrator loops")
+	cmd.Flags().Int64(flagEthBlocksPerLoop, 40, "Number of Ethereum blocks to process per orchestrator loop")
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
+	cmd.Flags().Duration(flagEthPendingTXWait, 20*time.Minute, "Time for a pending tx to be considered stale")
+	cmd.Flags().String(flagEthAlchemyWS, "", "Specify the Alchemy websocket endpoint")
 	cmd.Flags().AddFlagSet(cosmosFlagSet())
 	cmd.Flags().AddFlagSet(cosmosKeyringFlagSet())
 	cmd.Flags().AddFlagSet(ethereumKeyOptsFlagSet())
