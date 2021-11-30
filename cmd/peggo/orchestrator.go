@@ -158,6 +158,7 @@ func getOrchestratorCmd() *cobra.Command {
 			// peggyParams.AverageEthereumBlockTime is in milliseconds.
 			ethBlockTimeF64 := float64(averageEthBlockTime.Milliseconds())
 			relayerLoopMultiplier := konfig.Float64(flagRelayerLoopMultiplier)
+
 			// Here we cast the float64 to a Duration (int64); as we are dealing with ms, we'll lose as much as 1ms.
 			relayerLoopDuration := time.Duration(ethBlockTimeF64*relayerLoopMultiplier) * time.Millisecond
 
