@@ -150,12 +150,16 @@ func getOrchestratorCmd() *cobra.Command {
 				BaseURL: coingeckoAPI,
 			})
 
+			// peggyParams.AverageBlockTime and peggyParams.AverageEthereumBlockTime are in milliseconds.
+			averageCosmosBlockTime := time.Duration(peggyParams.AverageBlockTime) * time.Millisecond
+			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime) * time.Millisecond
+
 			// We multiply the relayer loop multiplier by the ETH block time.
 			// peggyParams.AverageEthereumBlockTime is in milliseconds.
-			relayerLoopDuration := time.Duration(
-				float64(peggyParams.AverageEthereumBlockTime)*
-					konfig.Float64(flagRelayerLoopMultiplier)) *
-				time.Millisecond
+			ethBlockTimeF64 := float64(averageEthBlockTime.Milliseconds())
+			relayerLoopMultiplier := konfig.Float64(flagRelayerLoopMultiplier)
+			// Here we cast the float64 to a Duration (int64); as we are dealing with ms, we'll lose as much as 1ms.
+			relayerLoopDuration := time.Duration(ethBlockTimeF64*relayerLoopMultiplier) * time.Millisecond
 
 			relayer := relayer.NewPeggyRelayer(
 				logger,
@@ -174,18 +178,16 @@ func getOrchestratorCmd() *cobra.Command {
 				Str("relayer_ethereum_addr", ethKeyFromAddress.String()).
 				Logger()
 
-			// peggyParams.AverageBlockTime and peggyParams.AverageEthereumBlockTime are in milliseconds.
-			averageCosmosBlockTime := time.Duration(peggyParams.AverageBlockTime) * time.Millisecond
-			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime) * time.Millisecond
+			// Run the requester loop every approximately 60 Cosmos blocks (around 5m by default) to allow time to
+			// receive new transactions. Running this faster will cause a lot of small batches and lots of messages
+			// going around the network. We need to keep in mind that this call is going to be made by all the
+			// validators. This loop is configurable so it can be adjusted for E2E tests.
 
-			// Run every approximately 60 Cosmos blocks (around 5m) to allow time to receive new transactions.
-			// Running this faster will cause a lot of small batches and lots of messages going around the network.
-			// We need to remember that this call is going to be made by all the validators.
-			// This loop is configurable so it can be adjusted for E2E tests.
-			batchRequesterLoopDuration := time.Duration(
-				float64(averageCosmosBlockTime.Milliseconds())*
-					konfig.Float64(flagRequesterLoopMultiplier)) *
-				time.Millisecond
+			cosmosBlockTimeF64 := float64(averageCosmosBlockTime.Milliseconds())
+			requesterLoopMultiplier := konfig.Float64(flagRequesterLoopMultiplier)
+
+			// Here we cast the float64 to a Duration (int64); as we are dealing with ms, we'll lose as much as 1ms.
+			batchRequesterLoopDuration := time.Duration(cosmosBlockTimeF64*requesterLoopMultiplier) * time.Millisecond
 
 			orch := orchestrator.NewPeggyOrchestrator(
 				logger,
