@@ -1,3 +1,4 @@
+// nolint: lll
 package peggo
 
 import (
@@ -157,11 +158,52 @@ func getOrchestratorCmd() *cobra.Command {
 				BaseURL: coingeckoAPI,
 			})
 
+<<<<<<< HEAD
+=======
+			// peggyParams.AverageBlockTime and peggyParams.AverageEthereumBlockTime are in milliseconds.
+			averageCosmosBlockTime := time.Duration(peggyParams.AverageBlockTime) * time.Millisecond
+			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime) * time.Millisecond
+
+			// We multiply the relayer loop multiplier by the ETH block time.
+			// peggyParams.AverageEthereumBlockTime is in milliseconds.
+			ethBlockTimeF64 := float64(averageEthBlockTime.Milliseconds())
+			relayerLoopMultiplier := konfig.Float64(flagRelayerLoopMultiplier)
+
+			// Here we cast the float64 to a Duration (int64); as we are dealing with ms, we'll lose as much as 1ms.
+			relayerLoopDuration := time.Duration(ethBlockTimeF64*relayerLoopMultiplier) * time.Millisecond
+
+			relayer := relayer.NewPeggyRelayer(
+				logger,
+				peggyQueryClient,
+				peggyContract,
+				tmclient.NewRPCClient(logger, tmRPCEndpoint),
+				konfig.Bool(flagRelayValsets),
+				konfig.Bool(flagRelayBatches),
+				relayerLoopDuration,
+				konfig.Duration(flagEthPendingTXWait),
+				relayer.SetPriceFeeder(coingeckoFeed),
+			)
+
+>>>>>>> 5c56265 (feat: tweak loops durations (#60))
 			logger = logger.With().
 				Str("relayer_validator_addr", sdk.ValAddress(valAddress).String()).
 				Str("relayer_ethereum_addr", ethKeyFromAddress.String()).
 				Logger()
 
+<<<<<<< HEAD
+=======
+			// Run the requester loop every approximately 60 Cosmos blocks (around 5m by default) to allow time to
+			// receive new transactions. Running this faster will cause a lot of small batches and lots of messages
+			// going around the network. We need to keep in mind that this call is going to be made by all the
+			// validators. This loop is configurable so it can be adjusted for E2E tests.
+
+			cosmosBlockTimeF64 := float64(averageCosmosBlockTime.Milliseconds())
+			requesterLoopMultiplier := konfig.Float64(flagRequesterLoopMultiplier)
+
+			// Here we cast the float64 to a Duration (int64); as we are dealing with ms, we'll lose as much as 1ms.
+			batchRequesterLoopDuration := time.Duration(cosmosBlockTimeF64*requesterLoopMultiplier) * time.Millisecond
+
+>>>>>>> 5c56265 (feat: tweak loops durations (#60))
 			orch := orchestrator.NewPeggyOrchestrator(
 				logger,
 				peggyQueryClient,
@@ -172,10 +214,17 @@ func getOrchestratorCmd() *cobra.Command {
 				signerFn,
 				personalSignFn,
 				relayer,
+<<<<<<< HEAD
 				konfig.Duration(flagOrchLoopDuration),
 				konfig.Duration(flagCosmosBlockTime),
 				orchestrator.SetMinBatchFee(konfig.Float64(flagMinBatchFeeUSD)),
 				orchestrator.SetPriceFeeder(coingeckoFeed),
+=======
+				averageCosmosBlockTime,
+				averageEthBlockTime,
+				batchRequesterLoopDuration,
+				konfig.Int64(flagEthBlocksPerLoop),
+>>>>>>> 5c56265 (feat: tweak loops durations (#60))
 			)
 
 			ctx, cancel = context.WithCancel(context.Background())
@@ -194,6 +243,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
+<<<<<<< HEAD
 	cmd.Flags().Duration(flagRelayerLoopDuration, 5*time.Minute, "Duration between relayer loops")
 	cmd.Flags().Duration(flagOrchLoopDuration, 1*time.Minute, "Duration between orchestrator loops")
 	cmd.Flags().Duration(flagCosmosBlockTime, 5*time.Second, "Average block time of the cosmos chain")
@@ -203,6 +253,15 @@ func getOrchestratorCmd() *cobra.Command {
 		"If non-zero, batch requests will only be made if fee threshold criteria is met",
 	)
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
+=======
+	cmd.Flags().Int64(flagEthBlocksPerLoop, 40, "Number of Ethereum blocks to process per orchestrator loop")
+	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
+	cmd.Flags().Duration(flagEthPendingTXWait, 20*time.Minute, "Time for a pending tx to be considered stale")
+	cmd.Flags().String(flagEthAlchemyWS, "", "Specify the Alchemy websocket endpoint")
+	cmd.Flags().Float64(flagRelayerLoopMultiplier, 3.0, "Multiplier for the relayer loop duration (in ETH blocks)")
+	cmd.Flags().Float64(flagRequesterLoopMultiplier, 60.0, "Multiplier for the batch requester loop duration (in Cosmos blocks)")
+
+>>>>>>> 5c56265 (feat: tweak loops durations (#60))
 	cmd.Flags().AddFlagSet(cosmosFlagSet())
 	cmd.Flags().AddFlagSet(cosmosKeyringFlagSet())
 	cmd.Flags().AddFlagSet(ethereumKeyOptsFlagSet())

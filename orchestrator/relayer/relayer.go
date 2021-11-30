@@ -27,6 +27,15 @@ type peggyRelayer struct {
 	valsetRelayEnabled bool
 	batchRelayEnabled  bool
 	loopDuration       time.Duration
+<<<<<<< HEAD
+=======
+	priceFeeder        *coingecko.PriceFeed
+	pendingTxWait      time.Duration
+
+	// store locally the last tx this validator made to avoid sending duplicates
+	// or invalid txs
+	lastSentBatchNonce uint64
+>>>>>>> 5c56265 (feat: tweak loops durations (#60))
 }
 
 func NewPeggyRelayer(
@@ -36,6 +45,11 @@ func NewPeggyRelayer(
 	valsetRelayEnabled bool,
 	batchRelayEnabled bool,
 	loopDuration time.Duration,
+<<<<<<< HEAD
+=======
+	pendingTxWait time.Duration,
+	options ...func(PeggyRelayer),
+>>>>>>> 5c56265 (feat: tweak loops durations (#60))
 ) PeggyRelayer {
 	return &peggyRelayer{
 		logger:             logger.With().Str("module", "peggy_relayer").Logger(),
@@ -45,5 +59,9 @@ func NewPeggyRelayer(
 		valsetRelayEnabled: valsetRelayEnabled,
 		batchRelayEnabled:  batchRelayEnabled,
 		loopDuration:       loopDuration,
+<<<<<<< HEAD
+=======
+		pendingTxWait:      pendingTxWait,
+>>>>>>> 5c56265 (feat: tweak loops durations (#60))
 	}
 }

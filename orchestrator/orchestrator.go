@@ -31,6 +31,7 @@ type PeggyOrchestrator interface {
 }
 
 type peggyOrchestrator struct {
+<<<<<<< HEAD
 	logger               zerolog.Logger
 	tmClient             tmclient.TendermintClient
 	cosmosQueryClient    sidechain.PeggyQueryClient
@@ -43,6 +44,22 @@ type peggyOrchestrator struct {
 	relayer              relayer.PeggyRelayer
 	loopsDuration        time.Duration
 	cosmosBlockTime      time.Duration
+=======
+	logger                     zerolog.Logger
+	tmClient                   tmclient.TendermintClient
+	cosmosQueryClient          sidechain.PeggyQueryClient
+	peggyBroadcastClient       sidechain.PeggyBroadcastClient
+	peggyContract              peggy.Contract
+	ethProvider                provider.EVMProvider
+	ethFrom                    ethcmn.Address
+	ethSignerFn                keystore.SignerFn
+	ethPersonalSignFn          keystore.PersonalSignFn
+	relayer                    relayer.PeggyRelayer
+	cosmosBlockTime            time.Duration
+	ethereumBlockTime          time.Duration
+	batchRequesterLoopDuration time.Duration
+	ethBlocksPerLoop           uint64
+>>>>>>> 5c56265 (feat: tweak loops durations (#60))
 
 	// optional inputs with defaults
 	minBatchFeeUSD float64
@@ -59,12 +76,18 @@ func NewPeggyOrchestrator(
 	ethSignerFn keystore.SignerFn,
 	ethPersonalSignFn keystore.PersonalSignFn,
 	relayer relayer.PeggyRelayer,
-	loopDuration time.Duration,
 	cosmosBlockTime time.Duration,
+<<<<<<< HEAD
+=======
+	ethereumBlockTime time.Duration,
+	batchRequesterLoopDuration time.Duration,
+	ethBlocksPerLoop int64,
+>>>>>>> 5c56265 (feat: tweak loops durations (#60))
 	options ...func(PeggyOrchestrator),
 ) PeggyOrchestrator {
 
 	orch := &peggyOrchestrator{
+<<<<<<< HEAD
 		logger:               logger.With().Str("module", "orchestrator").Logger(),
 		tmClient:             tmClient,
 		cosmosQueryClient:    cosmosQueryClient,
@@ -77,6 +100,22 @@ func NewPeggyOrchestrator(
 		relayer:              relayer,
 		loopsDuration:        loopDuration,
 		cosmosBlockTime:      cosmosBlockTime,
+=======
+		logger:                     logger.With().Str("module", "orchestrator").Logger(),
+		tmClient:                   tmClient,
+		cosmosQueryClient:          cosmosQueryClient,
+		peggyBroadcastClient:       peggyBroadcastClient,
+		peggyContract:              peggyContract,
+		ethProvider:                peggyContract.Provider(),
+		ethFrom:                    ethFrom,
+		ethSignerFn:                ethSignerFn,
+		ethPersonalSignFn:          ethPersonalSignFn,
+		relayer:                    relayer,
+		cosmosBlockTime:            cosmosBlockTime,
+		ethereumBlockTime:          ethereumBlockTime,
+		batchRequesterLoopDuration: batchRequesterLoopDuration,
+		ethBlocksPerLoop:           uint64(ethBlocksPerLoop),
+>>>>>>> 5c56265 (feat: tweak loops durations (#60))
 	}
 
 	for _, option := range options {
