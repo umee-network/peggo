@@ -40,7 +40,7 @@ type peggyRelayer struct {
 	tmClient           tmclient.TendermintClient
 	valsetRelayEnabled bool
 	batchRelayEnabled  bool
-	ethereumBlockTime  time.Duration
+	loopDuration       time.Duration
 	priceFeeder        *coingecko.PriceFeed
 	pendingTxWait      time.Duration
 	profitMultiplier   float64
@@ -57,7 +57,7 @@ func NewPeggyRelayer(
 	tmClient tmclient.TendermintClient,
 	valsetRelayEnabled bool,
 	batchRelayEnabled bool,
-	ethereumBlockTime time.Duration,
+	loopDuration time.Duration,
 	pendingTxWait time.Duration,
 	profitMultiplier float64,
 	options ...func(PeggyRelayer),
@@ -70,7 +70,7 @@ func NewPeggyRelayer(
 		ethProvider:        peggyContract.Provider(),
 		valsetRelayEnabled: valsetRelayEnabled,
 		batchRelayEnabled:  batchRelayEnabled,
-		ethereumBlockTime:  ethereumBlockTime,
+		loopDuration:       loopDuration,
 		pendingTxWait:      pendingTxWait,
 		profitMultiplier:   profitMultiplier,
 	}
