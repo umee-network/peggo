@@ -40,7 +40,6 @@ const (
 	flagEthGasLimit             = "eth-gas-limit"
 	flagPowerThreshold          = "power-threshold"
 	flagAutoApprove             = "auto-approve"
-	flagOrchLoopDuration        = "orch-loop-duration"
 	flagEthBlocksPerLoop        = "eth-blocks-per-loop"
 	flagEthPendingTXWait        = "eth-pending-tx-wait"
 	flagProfitMultiplier        = "profit-multiplier"
