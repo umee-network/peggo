@@ -61,7 +61,6 @@ $ peggo orchestrator \
   --eth-rpc=$ETH_RPC \
   --relay-batches=true \
   --relay-valsets=true \
-  --eth-chain-id=... \
   --cosmos-chain-id=... \
   --cosmos-grpc="tcp://..." \
   --tendermint-rpc="http://..." \
