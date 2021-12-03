@@ -7,7 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/pkg/errors"
-	"github.com/umee-network/peggo/orchestrator/ethereum/util"
 	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
 	"github.com/umee-network/umee/x/peggy/types"
 )
@@ -179,7 +178,7 @@ func (b BridgeValidators) Sort() {
 	sort.Slice(b, func(i, j int) bool {
 		if b[i].Power == b[j].Power {
 			// Secondary sort on eth address in case powers are equal
-			return util.EthAddrLessThan(b[i].EthereumAddress, b[j].EthereumAddress)
+			return types.EthAddrLessThan(b[i].EthereumAddress, b[j].EthereumAddress)
 		}
 		return b[i].Power > b[j].Power
 	})
