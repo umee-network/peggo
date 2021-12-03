@@ -7,25 +7,25 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/orchestrator/coingecko"
-	"github.com/umee-network/peggo/orchestrator/cosmos"
 	"github.com/umee-network/peggo/orchestrator/cosmos/tmclient"
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
-	"github.com/umee-network/umee/x/peggy/types"
+
+	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 type PeggyRelayer interface {
 	Start(ctx context.Context) error
 
-	FindLatestValset(ctx context.Context) (*types.Valset, error)
+	FindLatestValset(ctx context.Context) (*peggytypes.Valset, error)
 
 	RelayBatches(
 		ctx context.Context,
-		currentValset *types.Valset,
+		currentValset *peggytypes.Valset,
 		possibleBatches map[common.Address][]SubmittableBatch,
 	) error
 
-	RelayValsets(ctx context.Context, currentValset *types.Valset) error
+	RelayValsets(ctx context.Context, currentValset *peggytypes.Valset) error
 
 	// SetPriceFeeder sets the (optional) price feeder used when performing profitable
 	// batch calculations.
@@ -34,7 +34,7 @@ type PeggyRelayer interface {
 
 type peggyRelayer struct {
 	logger             zerolog.Logger
-	cosmosQueryClient  cosmos.PeggyQueryClient
+	cosmosQueryClient  peggytypes.QueryClient
 	peggyContract      peggy.Contract
 	ethProvider        provider.EVMProvider
 	tmClient           tmclient.TendermintClient
@@ -45,14 +45,14 @@ type peggyRelayer struct {
 	pendingTxWait      time.Duration
 	profitMultiplier   float64
 
-	// store locally the last tx this validator made to avoid sending duplicates
+	// Store locally the last tx this validator made to avoid sending duplicates
 	// or invalid txs
 	lastSentBatchNonce uint64
 }
 
 func NewPeggyRelayer(
 	logger zerolog.Logger,
-	cosmosQueryClient cosmos.PeggyQueryClient,
+	peggyQueryClient peggytypes.QueryClient,
 	peggyContract peggy.Contract,
 	tmClient tmclient.TendermintClient,
 	valsetRelayEnabled bool,
@@ -64,7 +64,7 @@ func NewPeggyRelayer(
 ) PeggyRelayer {
 	relayer := &peggyRelayer{
 		logger:             logger.With().Str("module", "peggy_relayer").Logger(),
-		cosmosQueryClient:  cosmosQueryClient,
+		cosmosQueryClient:  peggyQueryClient,
 		peggyContract:      peggyContract,
 		tmClient:           tmClient,
 		ethProvider:        peggyContract.Provider(),

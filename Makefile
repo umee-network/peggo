@@ -57,6 +57,9 @@ mocks:
 	@go run github.com/golang/mock/mockgen -destination=mocks/cosmos.go \
 			 -package=mocks github.com/umee-network/peggo/cmd/peggo/client \
 			  CosmosClient
+	@go run github.com/golang/mock/mockgen -destination=mocks/peggy_query_client.go \
+			 -package=mocks github.com/umee-network/umee/x/peggy/types \
+			  QueryClient
 
 .PHONY: test-integration lint mocks
 

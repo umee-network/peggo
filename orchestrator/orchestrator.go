@@ -13,6 +13,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	"github.com/umee-network/peggo/orchestrator/relayer"
+	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 type PeggyOrchestrator interface {
@@ -28,7 +29,7 @@ type PeggyOrchestrator interface {
 type peggyOrchestrator struct {
 	logger                     zerolog.Logger
 	tmClient                   tmclient.TendermintClient
-	cosmosQueryClient          sidechain.PeggyQueryClient
+	cosmosQueryClient          peggytypes.QueryClient
 	peggyBroadcastClient       sidechain.PeggyBroadcastClient
 	peggyContract              peggy.Contract
 	ethProvider                provider.EVMProvider
@@ -47,7 +48,7 @@ type peggyOrchestrator struct {
 
 func NewPeggyOrchestrator(
 	logger zerolog.Logger,
-	cosmosQueryClient sidechain.PeggyQueryClient,
+	cosmosQueryClient peggytypes.QueryClient,
 	peggyBroadcastClient sidechain.PeggyBroadcastClient,
 	tmClient tmclient.TendermintClient,
 	peggyContract peggy.Contract,

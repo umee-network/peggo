@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
+	"github.com/umee-network/umee/x/peggy/types"
 )
 
 // CheckForEvents checks for events such as a deposit to the Peggy Ethereum contract or a validator set update
@@ -179,11 +180,20 @@ func (p *peggyOrchestrator) CheckForEvents(
 	// block, so we also need this routine so make sure we don't send in the first event in this hypothetical
 	// multi event block again. In theory we only send all events for every block and that will pass of fail
 	// atomically but lets not take that risk.
-	lastClaimEvent, err := p.cosmosQueryClient.LastClaimEventByAddr(ctx, p.peggyBroadcastClient.AccFromAddress())
+	lastEventResp, err := p.cosmosQueryClient.LastEventByAddr(ctx, &types.QueryLastEventByAddrRequest{
+		Address: p.peggyBroadcastClient.AccFromAddress().String(),
+	})
+
 	if err != nil {
 		err = errors.New("failed to query last claim event from backend")
 		return 0, err
 	}
+
+	if lastEventResp == nil {
+		return 0, errors.New("no last event response returned")
+	}
+
+	lastClaimEvent := lastEventResp.LastClaimEvent
 
 	deposits := filterSendToCosmosEventsByNonce(sendToCosmosEvents, lastClaimEvent.EthereumEventNonce)
 	withdraws := filterTransactionBatchExecutedEventsByNonce(

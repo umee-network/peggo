@@ -94,12 +94,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 			peggyQuerier := peggytypes.NewQueryClient(gRPCConn)
 
-			// query peggy params
-			peggyQueryClient := cosmos.NewPeggyQueryClient(peggyQuerier)
-			ctx, cancel = context.WithTimeout(context.Background(), time.Minute)
-			defer cancel()
-
-			peggyParams, err := peggyQueryClient.PeggyParams(ctx)
+			peggyParams, err := getPeggyParams(gRPCConn)
 			if err != nil {
 				return fmt.Errorf("failed to query for Peggy params: %w", err)
 			}
@@ -164,7 +159,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 			relayer := relayer.NewPeggyRelayer(
 				logger,
-				peggyQueryClient,
+				peggyQuerier,
 				peggyContract,
 				tmclient.NewRPCClient(logger, tmRPCEndpoint),
 				konfig.Bool(flagRelayValsets),
@@ -193,7 +188,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 			orch := orchestrator.NewPeggyOrchestrator(
 				logger,
-				peggyQueryClient,
+				peggyQuerier,
 				peggyBroadcaster,
 				tmclient.NewRPCClient(logger, tmRPCEndpoint),
 				peggyContract,

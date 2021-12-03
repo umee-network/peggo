@@ -39,10 +39,15 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 		return nil, err
 	}
 
-	cosmosValset, err := s.cosmosQueryClient.ValsetAt(ctx, latestEthereumValsetNonce.Uint64())
+	cosmosValset, err := s.cosmosQueryClient.ValsetRequest(ctx, &types.QueryValsetRequestRequest{
+		Nonce: latestEthereumValsetNonce.Uint64(),
+	})
+
 	if err != nil {
 		err = errors.Wrap(err, "failed to get cosmos Valset")
 		return nil, err
+	} else if cosmosValset == nil {
+		return nil, errors.New("failed to get cosmos Valset, empty response")
 	}
 
 	for currentBlock > 0 {
@@ -97,7 +102,7 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 				})
 			}
 
-			s.checkIfValsetsDiffer(cosmosValset, valset)
+			s.checkIfValsetsDiffer(cosmosValset.Valset, valset)
 			return valset, nil
 		}
 
