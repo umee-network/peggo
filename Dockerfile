@@ -12,12 +12,12 @@ RUN make install
 
 # Fetch umeed binary
 FROM golang:1.17-alpine AS umeed-builder
-ARG UMEE_VERSION=main
+ARG UMEE_VERSION=v0.5.0-rc1
 ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev python3
 RUN apk add --no-cache $PACKAGES
 WORKDIR /downloads/
 RUN git clone https://github.com/umee-network/umee.git
-RUN cd umee && make build && cp ./build/umeed /usr/local/bin/
+RUN cd umee && git checkout ${UMEE_VERSION} && make build && cp ./build/umeed /usr/local/bin/
 
 # Add to a distroless container
 FROM gcr.io/distroless/cc:$IMG_TAG
