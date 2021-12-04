@@ -15,7 +15,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/shopspring/decimal"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
-	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
 	"github.com/umee-network/umee/x/peggy/types"
 )
@@ -27,10 +26,6 @@ const totalPeggyPower int64 = math.MaxUint32
 
 var (
 	peggyABI, _ = abi.JSON(strings.NewReader(wrappers.PeggyABI))
-	erc20ABI, _ = abi.JSON(strings.NewReader(wrappers.ERC20ABI))
-
-	// maxUintAllowance is uint constant MAX_UINT = 2**256 - 1
-	maxUintAllowance = big.NewInt(0).Sub(big.NewInt(0).Exp(big.NewInt(2), big.NewInt(256), nil), big.NewInt(1))
 
 	ErrInsufficientVotingPowerToPass = errors.New("insufficient voting power")
 )
@@ -100,7 +95,6 @@ type peggyContract struct {
 	committer.EVMCommitter
 
 	logger             zerolog.Logger
-	ethProvider        provider.EVMProvider
 	peggyAddress       common.Address
 	ethPeggy           *wrappers.Peggy
 	pendingTxInputList PendingTxInputList
