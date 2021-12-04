@@ -89,6 +89,8 @@ type Contract interface {
 	// IsPendingTxInput returns true if the input data is found in the pending tx list. If the tx is found but the tx is
 	// older than pendingTxWaitDuration, we consider it stale and return false, so the validator re-sends it.
 	IsPendingTxInput(txData []byte, pendingTxWaitDuration time.Duration) bool
+
+	GetPendingTxInputList() *PendingTxInputList
 }
 
 type peggyContract struct {
