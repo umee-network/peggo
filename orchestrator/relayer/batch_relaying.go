@@ -7,7 +7,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/shopspring/decimal"
-	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
@@ -63,7 +62,7 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 
 		// This checks that the signatures for the batch are actually possible to submit to the chain.
 		// We only need to know if the signatures are good, we won't use the other returned value.
-		_, err = peggy.CheckBatchSigsAndRepack(currentValset, batchConfirms.Confirms)
+		_, err = s.peggyContract.EncodeTransactionBatch(ctx, currentValset, batch, batchConfirms.Confirms)
 
 		if err != nil {
 			// this batch is not ready to be relayed

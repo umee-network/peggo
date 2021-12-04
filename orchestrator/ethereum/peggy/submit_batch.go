@@ -31,7 +31,7 @@ func (s *peggyContract) EncodeTransactionBatch(
 	confirms []*types.MsgConfirmBatch,
 ) ([]byte, error) {
 
-	sigs, err := CheckBatchSigsAndRepack(currentValset, confirms)
+	sigs, err := checkBatchSigsAndRepack(currentValset, confirms)
 	if err != nil {
 		err = errors.Wrap(err, "confirmations check failed")
 		return nil, err
@@ -86,9 +86,9 @@ func getBatchCheckpointValues(batch *types.OutgoingTxBatch) (
 	return
 }
 
-// CheckBatchSigsAndRepack checks all the signatures for a batch (confirmations), assembles them into the expected
+// checkBatchSigsAndRepack checks all the signatures for a batch (confirmations), assembles them into the expected
 // format and checks if the power of the signatures would be enough to send this batch to Ethereum.
-func CheckBatchSigsAndRepack(valset *types.Valset, confirms []*types.MsgConfirmBatch) (*RepackedSigs, error) {
+func checkBatchSigsAndRepack(valset *types.Valset, confirms []*types.MsgConfirmBatch) (*RepackedSigs, error) {
 	if len(confirms) == 0 {
 		return nil, errors.New("no signatures in batch confirmation")
 	}
