@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -41,15 +40,6 @@ type Contract interface {
 
 	// Address returns the Peggy contract address
 	Address() common.Address
-
-	// SendToCosmos executes the function of the same name on the Peggy contract to send ERC20 tokens to Cosmos.
-	SendToCosmos(
-		ctx context.Context,
-		erc20 common.Address,
-		amount *big.Int,
-		cosmosAccAddress sdk.AccAddress,
-		senderAddress common.Address,
-	) (*common.Hash, error)
 
 	// EncodeTransactionBatch encodes a batch into a tx byte data. This is specially helpful for estimating gas and
 	// detecting identical transactions in the mempool.
