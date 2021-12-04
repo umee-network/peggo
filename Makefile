@@ -75,6 +75,9 @@ mocks:
 	@go run github.com/golang/mock/mockgen -destination=mocks/cosmos.go \
 			 -package=mocks github.com/umee-network/peggo/cmd/peggo/client \
 			  CosmosClient
+	@go run github.com/golang/mock/mockgen -destination=mocks/evm_provider.go \
+			 -package=mocks github.com/umee-network/peggo/orchestrator/ethereum/provider \
+			  EVMProviderWithRet
 
 .PHONY: test-integration lint mocks
 
