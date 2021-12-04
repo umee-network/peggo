@@ -18,7 +18,6 @@ import (
 )
 
 type PeggyBroadcastClient interface {
-	ValFromAddress() sdk.ValAddress
 	AccFromAddress() sdk.AccAddress
 
 	// SendValsetConfirm broadcasts in a confirmation for a specific validator set for a specific block height.
@@ -79,10 +78,6 @@ func NewPeggyBroadcastClient(
 		ethSignerFn:       ethSignerFn,
 		ethPersonalSignFn: ethPersonalSignFn,
 	}
-}
-
-func (s *peggyBroadcastClient) ValFromAddress() sdk.ValAddress {
-	return sdk.ValAddress(s.broadcastClient.FromAddress().Bytes())
 }
 
 func (s *peggyBroadcastClient) AccFromAddress() sdk.AccAddress {
@@ -380,8 +375,8 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 
 	// iterate through events and send them sequentially
 	for _, ev := range allevents {
-		// If the event nonce isn't sequential, we break from this loop
-		// given that the events are sorted, this should never happen.
+		// If the event nonce isn't sequential, we break from this loop.
+		// Given that the events are sorted, this should never happen.
 		if ev.EventNonce != lastClaimEvent+1 {
 			break
 		}
