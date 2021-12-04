@@ -3,11 +3,13 @@ package cosmos
 import (
 	"context"
 	"math/big"
+	"os"
 	"testing"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/golang/mock/gomock"
+	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/mocks"
 	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
 	"github.com/umee-network/umee/x/peggy/types"
@@ -74,10 +76,13 @@ func TestSendEthereumClaims(t *testing.T) {
 	biggerNonceMatcher := HasBiggerNonce(0)
 	mockCosmos.EXPECT().SyncBroadcastMsg(biggerNonceMatcher).Return(&sdk.TxResponse{}, nil).Times(8)
 
-	s := peggyBroadcastClient{
-		daemonQueryClient: nil,
-		broadcastClient:   mockCosmos,
-	}
+	s := NewPeggyBroadcastClient(
+		zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+		nil,
+		mockCosmos,
+		nil,
+		nil,
+	)
 
 	deposits := []*wrappers.PeggySendToCosmosEvent{
 		{
