@@ -19,7 +19,6 @@ import (
 	"github.com/umee-network/peggo/orchestrator"
 	"github.com/umee-network/peggo/orchestrator/coingecko"
 	"github.com/umee-network/peggo/orchestrator/cosmos"
-	"github.com/umee-network/peggo/orchestrator/cosmos/tmclient"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
@@ -161,7 +160,6 @@ func getOrchestratorCmd() *cobra.Command {
 				logger,
 				peggyQuerier,
 				peggyContract,
-				tmclient.NewRPCClient(logger, tmRPCEndpoint),
 				konfig.Bool(flagRelayValsets),
 				konfig.Bool(flagRelayBatches),
 				relayerLoopDuration,
@@ -190,7 +188,6 @@ func getOrchestratorCmd() *cobra.Command {
 				logger,
 				peggyQuerier,
 				peggyBroadcaster,
-				tmclient.NewRPCClient(logger, tmRPCEndpoint),
 				peggyContract,
 				ethKeyFromAddress,
 				signerFn,

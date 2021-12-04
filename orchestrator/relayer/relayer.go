@@ -7,7 +7,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/orchestrator/coingecko"
-	"github.com/umee-network/peggo/orchestrator/cosmos/tmclient"
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 
@@ -37,7 +36,6 @@ type peggyRelayer struct {
 	cosmosQueryClient  peggytypes.QueryClient
 	peggyContract      peggy.Contract
 	ethProvider        provider.EVMProvider
-	tmClient           tmclient.TendermintClient
 	valsetRelayEnabled bool
 	batchRelayEnabled  bool
 	loopDuration       time.Duration
@@ -54,7 +52,6 @@ func NewPeggyRelayer(
 	logger zerolog.Logger,
 	peggyQueryClient peggytypes.QueryClient,
 	peggyContract peggy.Contract,
-	tmClient tmclient.TendermintClient,
 	valsetRelayEnabled bool,
 	batchRelayEnabled bool,
 	loopDuration time.Duration,
@@ -66,7 +63,6 @@ func NewPeggyRelayer(
 		logger:             logger.With().Str("module", "peggy_relayer").Logger(),
 		cosmosQueryClient:  peggyQueryClient,
 		peggyContract:      peggyContract,
-		tmClient:           tmClient,
 		ethProvider:        peggyContract.Provider(),
 		valsetRelayEnabled: valsetRelayEnabled,
 		batchRelayEnabled:  batchRelayEnabled,
