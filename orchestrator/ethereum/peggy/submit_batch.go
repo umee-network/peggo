@@ -9,12 +9,19 @@ import (
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
-type RepackedBatchSigs struct {
+type RepackedSigs struct {
 	validators []common.Address
 	powers     []*big.Int
 	v          []uint8
 	r          []common.Hash
 	s          []common.Hash
+}
+
+// genericConfirm exists only to aid the check and repacking of signatures.
+// This way both ValsetUpdates and Batch's signatures can be checked and repacked in the same function.
+type genericConfirm struct {
+	EthSigner string
+	Signature string
 }
 
 func (s *peggyContract) EncodeTransactionBatch(
@@ -81,17 +88,28 @@ func getBatchCheckpointValues(batch *types.OutgoingTxBatch) (
 
 // CheckBatchSigsAndRepack checks all the signatures for a batch (confirmations), assembles them into the expected
 // format and checks if the power of the signatures would be enough to send this batch to Ethereum.
-func CheckBatchSigsAndRepack(valset *types.Valset, confirms []*types.MsgConfirmBatch) (*RepackedBatchSigs, error) {
-	var err error
-
+func CheckBatchSigsAndRepack(valset *types.Valset, confirms []*types.MsgConfirmBatch) (*RepackedSigs, error) {
 	if len(confirms) == 0 {
-		err = errors.New("no signatures in batch confirmation")
-		return nil, err
+		return nil, errors.New("no signatures in batch confirmation")
 	}
 
-	sigs := &RepackedBatchSigs{}
+	genericConfirms := make([]genericConfirm, len(confirms))
+	for i, c := range confirms {
+		genericConfirms[i] = genericConfirm{
+			EthSigner: c.EthSigner,
+			Signature: c.Signature,
+		}
+	}
 
-	signerToSig := make(map[string]*types.MsgConfirmBatch, len(confirms))
+	return checkAndRepackSigs(valset, genericConfirms)
+}
+
+func checkAndRepackSigs(valset *types.Valset, confirms []genericConfirm) (*RepackedSigs, error) {
+	var err error
+
+	sigs := &RepackedSigs{}
+
+	signerToSig := make(map[string]genericConfirm, len(confirms))
 	for _, sig := range confirms {
 		signerToSig[sig.EthSigner] = sig
 	}
