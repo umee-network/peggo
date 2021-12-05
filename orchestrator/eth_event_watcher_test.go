@@ -133,7 +133,7 @@ func TestCheckForEvents(t *testing.T) {
 		}
 
 		peggyBroadcastClient := cosmos.NewPeggyBroadcastClient(
-			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+			logger,
 			nil,
 			mockCosmos,
 			nil,
@@ -151,7 +151,7 @@ func TestCheckForEvents(t *testing.T) {
 		}, nil)
 
 		orch := NewPeggyOrchestrator(
-			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+			logger,
 			mockQClient,
 			peggyBroadcastClient,
 			peggyContract,
@@ -201,11 +201,10 @@ func TestCheckForEvents(t *testing.T) {
 				errors.New("some error"),
 			).Times(1)
 
-		ethGasPriceAdjustment := 1.0
 		ethCommitter, _ := committer.NewEthCommitter(
 			logger,
 			fromAddress,
-			ethGasPriceAdjustment,
+			1.0,
 			nil,
 			ethProvider,
 		)
@@ -219,7 +218,7 @@ func TestCheckForEvents(t *testing.T) {
 		}
 
 		peggyBroadcastClient := cosmos.NewPeggyBroadcastClient(
-			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+			logger,
 			nil,
 			mockCosmos,
 			nil,
@@ -227,8 +226,9 @@ func TestCheckForEvents(t *testing.T) {
 		)
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
+
 		orch := NewPeggyOrchestrator(
-			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+			logger,
 			mockQClient,
 			peggyBroadcastClient,
 			peggyContract,
@@ -323,7 +323,7 @@ func TestCheckForEvents(t *testing.T) {
 		}
 
 		peggyBroadcastClient := cosmos.NewPeggyBroadcastClient(
-			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+			logger,
 			nil,
 			mockCosmos,
 			nil,
@@ -332,7 +332,7 @@ func TestCheckForEvents(t *testing.T) {
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
 		orch := NewPeggyOrchestrator(
-			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+			logger,
 			mockQClient,
 			peggyBroadcastClient,
 			peggyContract,
@@ -441,7 +441,7 @@ func TestCheckForEvents(t *testing.T) {
 		}
 
 		peggyBroadcastClient := cosmos.NewPeggyBroadcastClient(
-			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+			logger,
 			nil,
 			mockCosmos,
 			nil,
@@ -450,7 +450,7 @@ func TestCheckForEvents(t *testing.T) {
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
 		orch := NewPeggyOrchestrator(
-			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+			logger,
 			mockQClient,
 			peggyBroadcastClient,
 			peggyContract,
@@ -573,7 +573,7 @@ func TestCheckForEvents(t *testing.T) {
 		}
 
 		peggyBroadcastClient := cosmos.NewPeggyBroadcastClient(
-			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+			logger,
 			nil,
 			mockCosmos,
 			nil,
@@ -582,7 +582,7 @@ func TestCheckForEvents(t *testing.T) {
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
 		orch := NewPeggyOrchestrator(
-			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+			logger,
 			mockQClient,
 			peggyBroadcastClient,
 			peggyContract,
