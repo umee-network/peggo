@@ -238,8 +238,7 @@ func TestSendEthereumClaims(t *testing.T) {
 	mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 	mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
 
-	biggerNonceMatcher := HasBiggerNonce(0)
-	mockCosmos.EXPECT().SyncBroadcastMsg(biggerNonceMatcher).Return(&sdk.TxResponse{}, nil).Times(8)
+	mockCosmos.EXPECT().SyncBroadcastMsg(HasBiggerNonce(0)).Return(&sdk.TxResponse{}, nil).Times(8)
 
 	s := NewPeggyBroadcastClient(
 		zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
@@ -312,8 +311,7 @@ func TestSendEthereumClaimsIgnoreNonSequentialNonces(t *testing.T) {
 	mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 	mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
 
-	biggerNonceMatcher := HasBiggerNonce(0)
-	mockCosmos.EXPECT().SyncBroadcastMsg(biggerNonceMatcher).Return(&sdk.TxResponse{}, nil).Times(7)
+	mockCosmos.EXPECT().SyncBroadcastMsg(HasBiggerNonce(0)).Return(&sdk.TxResponse{}, nil).Times(7)
 
 	s := peggyBroadcastClient{
 		daemonQueryClient: nil,

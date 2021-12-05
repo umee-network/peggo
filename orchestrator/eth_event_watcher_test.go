@@ -2,11 +2,15 @@ package orchestrator
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"os"
 	"testing"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/common"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/golang/mock/gomock"
@@ -14,9 +18,11 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
+	"github.com/umee-network/peggo/orchestrator/cosmos"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
+	"github.com/umee-network/umee/x/peggy/types"
 )
 
 // TODO: This function will require quite some effort to get it tested.
@@ -33,7 +39,66 @@ func TestCheckForEvents(t *testing.T) {
 	ethProvider.EXPECT().HeaderByNumber(gomock.Any(), nil).Return(&ethtypes.Header{
 		Number: big.NewInt(100),
 	}, nil)
-	ethProvider.EXPECT().FilterLogs(gomock.Any(), gomock.Any()).Return([]ethtypes.Log{}, errors.New("some error")).AnyTimes()
+
+	// FilterERC20DeployedEvent
+	ethProvider.EXPECT().FilterLogs(
+		gomock.Any(),
+		MatchFilterQuery(ethereum.FilterQuery{
+			FromBlock: new(big.Int).SetUint64(1),
+			ToBlock:   new(big.Int).SetUint64(95),
+			Addresses: []ethcmn.Address{peggyAddress},
+			Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x82fe3a4fa49c6382d0c085746698ddbbafe6c2bf61285b19410644b5b26287c7")}, {}},
+		})).
+		Return(
+			[]ethtypes.Log{
+				{
+					Topics: []ethcmn.Hash{ethcmn.HexToHash("0x82fe3a4fa49c6382d0c085746698ddbbafe6c2bf61285b19410644b5b26287c7")},
+				},
+			},
+			nil,
+		).Times(1)
+
+	// FilterSendToCosmosEvent
+	ethProvider.EXPECT().FilterLogs(
+		gomock.Any(),
+		MatchFilterQuery(ethereum.FilterQuery{
+			FromBlock: new(big.Int).SetUint64(1),
+			ToBlock:   new(big.Int).SetUint64(95),
+			Addresses: []ethcmn.Address{peggyAddress},
+			Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0xd7767894d73c589daeca9643f445f03d7be61aad2950c117e7cbff4176fca7e4")}, {}, {}, {}},
+		})).
+		Return(
+			[]ethtypes.Log{},
+			nil,
+		).Times(1)
+
+	// FilterSendToCosmosEvent
+	ethProvider.EXPECT().FilterLogs(
+		gomock.Any(),
+		MatchFilterQuery(ethereum.FilterQuery{
+			FromBlock: new(big.Int).SetUint64(1),
+			ToBlock:   new(big.Int).SetUint64(95),
+			Addresses: []ethcmn.Address{peggyAddress},
+			Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x02c7e81975f8edb86e2a0c038b7b86a49c744236abf0f6177ff5afc6986ab708")}, {}, {}},
+		})).
+		Return(
+			[]ethtypes.Log{},
+			nil,
+		).Times(1)
+
+	// FilterValsetUpdatedEvent
+	ethProvider.EXPECT().FilterLogs(
+		gomock.Any(),
+		MatchFilterQuery(ethereum.FilterQuery{
+			FromBlock: new(big.Int).SetUint64(1),
+			ToBlock:   new(big.Int).SetUint64(95),
+			Addresses: []ethcmn.Address{peggyAddress},
+			Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x76d08978c024a4bf8cbb30c67fd78fcaa1827cbc533e4e175f36d07e64ccf96a")}, {}},
+		})).
+		Return(
+			[]ethtypes.Log{},
+			nil,
+		).Times(1)
 
 	ethGasPriceAdjustment := 1.0
 	ethCommitter, _ := committer.NewEthCommitter(
@@ -46,10 +111,34 @@ func TestCheckForEvents(t *testing.T) {
 
 	peggyContract, _ := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress, nil)
 
-	orch := NewPeggyOrchestrator(
+	mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
+	mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
+	mockPersonalSignFn := func(account common.Address, data []byte) (sig []byte, err error) {
+		return []byte{}, errors.New("some error during signing")
+	}
+
+	peggyBroadcastClient := cosmos.NewPeggyBroadcastClient(
 		zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 		nil,
+		mockCosmos,
 		nil,
+		mockPersonalSignFn,
+	)
+
+	mockQClient := mocks.NewMockQueryClient(mockCtrl)
+	mockQClient.EXPECT().LastEventByAddr(gomock.Any(), &types.QueryLastEventByAddrRequest{
+		Address: peggyBroadcastClient.AccFromAddress().String(),
+	}).Return(&types.QueryLastEventByAddrResponse{
+		LastClaimEvent: &types.LastClaimEvent{
+			EthereumEventNonce:  111,
+			EthereumEventHeight: 1111111,
+		},
+	}, nil)
+
+	orch := NewPeggyOrchestrator(
+		zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
+		mockQClient,
+		peggyBroadcastClient,
 		peggyContract,
 		fromAddress,
 		nil,
@@ -61,7 +150,8 @@ func TestCheckForEvents(t *testing.T) {
 		100,
 	)
 
-	orch.CheckForEvents(context.Background(), 0, 1)
+	_, err := orch.CheckForEvents(context.Background(), 1, 5)
+	assert.Nil(t, err)
 
 }
 
@@ -126,4 +216,59 @@ func TestIsUnknownBlockErr(t *testing.T) {
 
 	otherErr := errors.New("other error")
 	assert.False(t, isUnknownBlockErr(otherErr))
+}
+
+type matchFilterQuery struct {
+	q ethereum.FilterQuery
+}
+
+func (m *matchFilterQuery) Matches(input interface{}) bool {
+	q, ok := input.(ethereum.FilterQuery)
+	if ok {
+
+		if q.BlockHash != m.q.BlockHash {
+			return false
+		}
+
+		if q.FromBlock.Int64() != m.q.FromBlock.Int64() {
+			return false
+		}
+
+		if q.ToBlock.Int64() != m.q.ToBlock.Int64() {
+			return false
+		}
+
+		if !assert.ObjectsAreEqual(q.Addresses, m.q.Addresses) {
+			return false
+		}
+
+		// Comparing 2 slices of slices seems to be a bit tricky.
+
+		if len(q.Topics) != len(m.q.Topics) {
+			return false
+		}
+
+		for i := range q.Topics {
+			if len(q.Topics[i]) != len(m.q.Topics[i]) {
+				return false
+			}
+
+			for j := range q.Topics[i] {
+				if q.Topics[i][j] != m.q.Topics[i][j] {
+					return false
+				}
+			}
+		}
+		return true
+	}
+
+	return false
+}
+
+func (m *matchFilterQuery) String() string {
+	return fmt.Sprintf("is equal to %v (%T)", m.q, m.q)
+}
+
+func MatchFilterQuery(q ethereum.FilterQuery) gomock.Matcher {
+	return &matchFilterQuery{q: q}
 }
