@@ -44,7 +44,7 @@ func TestCheckForEvents(t *testing.T) {
 		ethProvider,
 	)
 
-	peggyContract, _ := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress)
+	peggyContract, _ := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress, nil)
 
 	orch := NewPeggyOrchestrator(
 		zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
