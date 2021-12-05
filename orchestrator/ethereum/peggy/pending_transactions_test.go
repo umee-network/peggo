@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
+	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
 )
 
 func TestAddPendingTxInput(t *testing.T) {
@@ -59,7 +60,10 @@ func TestIsPendingTxInput(t *testing.T) {
 		nil,
 		mockEvmProvider,
 	)
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, common.Address{})
+
+	ethPeggy, _ := wrappers.NewPeggy(common.Address{}, ethCommitter.Provider())
+
+	peggyContract, _ := NewPeggyContract(logger, ethCommitter, common.Address{}, ethPeggy)
 	peggyContract.IsPendingTxInput([]byte{}, time.Second)
 
 	// Add a TX
@@ -75,3 +79,26 @@ func TestIsPendingTxInput(t *testing.T) {
 	assert.False(t, peggyContract.IsPendingTxInput(hexutil.MustDecode("0xa5352f5b00000000"), time.Microsecond))
 
 }
+
+// TODO: check if we can actually test this. Maybe move the Fatal call to the caller.
+// func TestSubscribeToPendingTxs(t *testing.T) {
+// 	mockCtrl := gomock.NewController(t)
+// 	defer mockCtrl.Finish()
+// 	mockEvmProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
+// 	mockEvmProvider.EXPECT().PendingNonceAt(gomock.Any(), common.HexToAddress("0x0")).Return(uint64(0), nil)
+
+// 	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
+// 	ethCommitter, _ := committer.NewEthCommitter(
+// 		logger,
+// 		common.Address{},
+// 		1.0,
+// 		nil,
+// 		mockEvmProvider,
+// 	)
+// 	peggyContract, _ := NewPeggyContract(logger, ethCommitter, common.Address{})
+
+// 	err := peggyContract.SubscribeToPendingTxs(context.Background(), "invalidURL")
+
+// 	assert.NotNil(t, err)
+
+// }

@@ -23,6 +23,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	"github.com/umee-network/peggo/orchestrator/relayer"
+	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
 	peggytypes "github.com/umee-network/umee/x/peggy/types"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
@@ -134,7 +135,13 @@ func getOrchestratorCmd() *cobra.Command {
 			)
 
 			peggyAddress := ethcmn.HexToAddress(peggyParams.BridgeEthereumAddress)
-			peggyContract, err := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress)
+
+			ethPeggy, err := wrappers.NewPeggy(peggyAddress, ethCommitter.Provider())
+			if err != nil {
+				return fmt.Errorf("failed to create a new instance of Peggy: %w", err)
+			}
+
+			peggyContract, err := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress, ethPeggy)
 			if err != nil {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}

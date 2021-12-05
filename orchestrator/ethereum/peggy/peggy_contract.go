@@ -109,12 +109,8 @@ func NewPeggyContract(
 	logger zerolog.Logger,
 	ethCommitter committer.EVMCommitter,
 	peggyAddress common.Address,
+	ethPeggy *wrappers.Peggy,
 ) (Contract, error) {
-	ethPeggy, err := wrappers.NewPeggy(peggyAddress, ethCommitter.Provider())
-	if err != nil {
-		return nil, err
-	}
-
 	return &peggyContract{
 		logger:       logger.With().Str("module", "peggy_contract").Logger(),
 		EVMCommitter: ethCommitter,

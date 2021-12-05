@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
+	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
 	"github.com/umee-network/umee/x/peggy/types"
 )
 
@@ -85,7 +86,9 @@ func TestEncodeTransactionBatch(t *testing.T) {
 		},
 	}
 
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, common.Address{})
+	ethPeggy, _ := wrappers.NewPeggy(common.Address{}, ethCommitter.Provider())
+	peggyContract, _ := NewPeggyContract(logger, ethCommitter, common.Address{}, ethPeggy)
+
 	txData, err := peggyContract.EncodeTransactionBatch(
 		context.Background(),
 		valset,
