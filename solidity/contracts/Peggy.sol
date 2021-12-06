@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "./@openzeppelin/contracts/IERC20.sol";
 import "./@openzeppelin/contracts/SafeERC20.sol";
@@ -276,6 +276,21 @@ uint256 public state_powerThreshold;
       "Supplied current validators and powers do not match checkpoint."
     );
 
+    uint256 state_powerThreshold_ = state_powerThreshold;
+    uint256 cumulativePower;
+
+    for (uint256 i = 0; i < _newValset.powers.length; i++) {
+        cumulativePower = cumulativePower + _newValset.powers[i];
+        if (cumulativePower > state_powerThreshold_) {
+            break;
+        }
+    }
+
+    require(
+        cumulativePower > state_powerThreshold_,
+        "New validator set signatures do not have enough power." 
+    );
+
     // Check that enough current validators have signed off on the new validator set
     bytes32 newCheckpoint = makeCheckpoint(_newValset, state_peggyId);
     checkValidatorSignatures(
@@ -285,7 +300,7 @@ uint256 public state_powerThreshold;
       _r,
       _s,
       newCheckpoint,
-      state_powerThreshold
+      state_powerThreshold_
     );
 
     // ACTIONS
@@ -435,13 +450,19 @@ uint256 public state_powerThreshold;
     bytes32 _destination,
     uint256 _amount
   ) external whenNotPaused nonReentrant {
+    uint256 oldBalance = IERC20(_tokenContract).balanceOf(address(this));
     IERC20(_tokenContract).safeTransferFrom(msg.sender, address(this), _amount);
+    uint256 newBalance = IERC20(_tokenContract).balanceOf(address(this));
+    uint256 receivedAmount = newBalance - oldBalance;
+    require(receivedAmount <= _amount, "Incorrect transferred token amount");
+
     state_lastEventNonce = state_lastEventNonce + 1;
+
     emit SendToCosmosEvent(
       _tokenContract,
       msg.sender,
       _destination,
-      _amount,
+      receivedAmount,
       state_lastEventNonce
     );
   }
