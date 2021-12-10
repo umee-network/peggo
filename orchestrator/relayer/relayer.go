@@ -45,7 +45,8 @@ type peggyRelayer struct {
 
 	// Store locally the last tx this validator made to avoid sending duplicates
 	// or invalid txs
-	lastSentBatchNonce uint64
+	lastSentBatchNonce  uint64
+	lastSendValsetNonce uint64
 }
 
 func NewPeggyRelayer(
