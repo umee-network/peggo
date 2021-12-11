@@ -250,11 +250,11 @@ func (s *peggyBroadcastClient) broadcastEthereumEvents(events []sortableEvent) e
 	}
 
 	s.logger.Info().
-		Int("deposit", evCounter["deposit"]).
-		Int("withdraw", evCounter["withdraw"]).
-		Int("valset_update", evCounter["valset_update"]).
-		Int("erc20_deploy", evCounter["erc20_deploy"]).
-		Int("total_claims", len(events)).
+		Int("num_deposit", evCounter["deposit"]).
+		Int("num_withdraw", evCounter["withdraw"]).
+		Int("num_valset_update", evCounter["valset_update"]).
+		Int("num_erc20_deploy", evCounter["erc20_deploy"]).
+		Int("num_total_claims", len(events)).
 		Msg("oracle observed events. Sending claims")
 
 	txResponse, err := s.broadcastClient.SyncBroadcastMsg(msgs...)
