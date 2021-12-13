@@ -255,7 +255,7 @@ func (s *peggyBroadcastClient) broadcastEthereumEvents(events []sortableEvent) e
 		Int("num_valset_update", evCounter["valset_update"]).
 		Int("num_erc20_deploy", evCounter["erc20_deploy"]).
 		Int("num_total_claims", len(events)).
-		Msg("oracle observed events. Sending claims")
+		Msg("oracle observed events; sending claims")
 
 	txResponse, err := s.broadcastClient.SyncBroadcastMsg(msgs...)
 	if err != nil {
