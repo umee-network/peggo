@@ -85,6 +85,9 @@ mocks:
 	@go run github.com/golang/mock/mockgen -destination=mocks/peggy_queryclient.go \
 			 -package=mocks github.com/umee-network/umee/x/peggy/types \
 			  QueryClient
+	@go run github.com/golang/mock/mockgen -destination=mocks/peggy_contract.go \
+			 -package=mocks github.com/umee-network/peggo/orchestrator/ethereum/peggy \
+			  Contract
 
 .PHONY: test-integration lint mocks
 

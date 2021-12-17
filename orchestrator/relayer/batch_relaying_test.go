@@ -2,6 +2,7 @@ package relayer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"net/http"
@@ -123,4 +124,255 @@ func TestIsBatchProfitable(t *testing.T) {
 	)
 
 	assert.False(t, isNotProfitable)
+}
+
+func TestGetBatchesAndSignatures(t *testing.T) {
+	t.Run("ok", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
+		mockQClient := mocks.NewMockQueryClient(mockCtrl)
+		mockPeggyContract := mocks.NewMockContract(mockCtrl)
+
+		mockQClient.EXPECT().
+			OutgoingTxBatches(gomock.Any(), &types.QueryOutgoingTxBatchesRequest{}).
+			Return(&types.QueryOutgoingTxBatchesResponse{
+				Batches: []*types.OutgoingTxBatch{
+					{
+						BatchNonce:   11,
+						BatchTimeout: 111111,
+						Transactions: []*types.OutgoingTransferTx{
+							{
+								Id:          0,
+								Sender:      "0x1",
+								DestAddress: "0x2",
+								Erc20Token: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10000),
+								},
+								Erc20Fee: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10),
+								},
+							},
+						},
+						TokenContract: "0x0",
+						Block:         0,
+					},
+					{
+						BatchNonce:   11,
+						BatchTimeout: 111111,
+						Transactions: []*types.OutgoingTransferTx{
+							{
+								Id:          0,
+								Sender:      "0x1",
+								DestAddress: "0x2",
+								Erc20Token: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10000),
+								},
+								Erc20Fee: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10),
+								},
+							},
+						},
+						TokenContract: "0x0",
+						Block:         0,
+					},
+				},
+			}, nil)
+
+		mockQClient.EXPECT().BatchConfirms(gomock.Any(), &types.QueryBatchConfirmsRequest{
+			Nonce:           11,
+			ContractAddress: "0x0",
+		}).Return(&types.QueryBatchConfirmsResponse{
+			Confirms: []*types.MsgConfirmBatch{
+				{
+					Nonce:         11,
+					TokenContract: "0x0",
+					EthSigner:     "0x5",
+					Orchestrator:  "",
+					Signature:     "0x111",
+				},
+			},
+		}, nil).Times(2)
+
+		mockPeggyContract.EXPECT().
+			EncodeTransactionBatch(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(nil, nil).Times(2)
+
+		relayer := peggyRelayer{
+			logger:            logger,
+			cosmosQueryClient: mockQClient,
+			peggyContract:     mockPeggyContract,
+		}
+
+		submittableBatches, err := relayer.getBatchesAndSignatures(context.Background(), &types.Valset{})
+		assert.NoError(t, err)
+		assert.Len(t, submittableBatches[common.HexToAddress("0x0")], 2)
+
+	})
+
+	t.Run("not ready to be relayed, no error", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
+		mockQClient := mocks.NewMockQueryClient(mockCtrl)
+		mockPeggyContract := mocks.NewMockContract(mockCtrl)
+
+		mockQClient.EXPECT().
+			OutgoingTxBatches(gomock.Any(), &types.QueryOutgoingTxBatchesRequest{}).
+			Return(&types.QueryOutgoingTxBatchesResponse{
+				Batches: []*types.OutgoingTxBatch{
+					{
+						BatchNonce:   11,
+						BatchTimeout: 111111,
+						Transactions: []*types.OutgoingTransferTx{
+							{
+								Id:          0,
+								Sender:      "0x1",
+								DestAddress: "0x2",
+								Erc20Token: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10000),
+								},
+								Erc20Fee: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10),
+								},
+							},
+						},
+						TokenContract: "0x0",
+						Block:         0,
+					},
+					{
+						BatchNonce:   11,
+						BatchTimeout: 111111,
+						Transactions: []*types.OutgoingTransferTx{
+							{
+								Id:          0,
+								Sender:      "0x1",
+								DestAddress: "0x2",
+								Erc20Token: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10000),
+								},
+								Erc20Fee: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10),
+								},
+							},
+						},
+						TokenContract: "0x0",
+						Block:         0,
+					},
+				},
+			}, nil)
+
+		mockQClient.EXPECT().BatchConfirms(gomock.Any(), &types.QueryBatchConfirmsRequest{
+			Nonce:           11,
+			ContractAddress: "0x0",
+		}).Return(&types.QueryBatchConfirmsResponse{
+			Confirms: []*types.MsgConfirmBatch{
+				{
+					Nonce:         11,
+					TokenContract: "0x0",
+					EthSigner:     "0x5",
+					Orchestrator:  "",
+					Signature:     "0x111",
+				},
+			},
+		}, nil).Times(2)
+
+		mockPeggyContract.EXPECT().
+			EncodeTransactionBatch(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(nil, errors.New("not enough signatures")).Times(2)
+
+		relayer := peggyRelayer{
+			logger:            logger,
+			cosmosQueryClient: mockQClient,
+			peggyContract:     mockPeggyContract,
+		}
+
+		submittableBatches, err := relayer.getBatchesAndSignatures(context.Background(), &types.Valset{})
+		assert.NoError(t, err)
+		assert.Len(t, submittableBatches[common.HexToAddress("0x0")], 0)
+
+	})
+
+	t.Run("not ready to be relayed, no error", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
+		mockQClient := mocks.NewMockQueryClient(mockCtrl)
+		mockPeggyContract := mocks.NewMockContract(mockCtrl)
+
+		mockQClient.EXPECT().
+			OutgoingTxBatches(gomock.Any(), &types.QueryOutgoingTxBatchesRequest{}).
+			Return(&types.QueryOutgoingTxBatchesResponse{
+				Batches: []*types.OutgoingTxBatch{
+					{
+						BatchNonce:   11,
+						BatchTimeout: 111111,
+						Transactions: []*types.OutgoingTransferTx{
+							{
+								Id:          0,
+								Sender:      "0x1",
+								DestAddress: "0x2",
+								Erc20Token: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10000),
+								},
+								Erc20Fee: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10),
+								},
+							},
+						},
+						TokenContract: "0x0",
+						Block:         0,
+					},
+					{
+						BatchNonce:   11,
+						BatchTimeout: 111111,
+						Transactions: []*types.OutgoingTransferTx{
+							{
+								Id:          0,
+								Sender:      "0x1",
+								DestAddress: "0x2",
+								Erc20Token: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10000),
+								},
+								Erc20Fee: &types.ERC20Token{
+									Contract: "0x0",
+									Amount:   sdk.NewInt(10),
+								},
+							},
+						},
+						TokenContract: "0x0",
+						Block:         0,
+					},
+				},
+			}, nil)
+
+		mockQClient.EXPECT().BatchConfirms(gomock.Any(), &types.QueryBatchConfirmsRequest{
+			Nonce:           11,
+			ContractAddress: "0x0",
+		}).Return(nil, nil).Times(2)
+
+		mockPeggyContract.EXPECT().
+			EncodeTransactionBatch(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(nil, nil).Times(2)
+
+		relayer := peggyRelayer{
+			logger:            logger,
+			cosmosQueryClient: mockQClient,
+			peggyContract:     mockPeggyContract,
+		}
+
+		submittableBatches, err := relayer.getBatchesAndSignatures(context.Background(), &types.Valset{})
+		assert.NoError(t, err)
+		assert.Len(t, submittableBatches[common.HexToAddress("0x0")], 0)
+
+	})
+
 }
