@@ -18,6 +18,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
+	peggyMocks "github.com/umee-network/peggo/mocks/peggy"
 	"github.com/umee-network/peggo/orchestrator/coingecko"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
@@ -131,7 +132,7 @@ func TestGetBatchesAndSignatures(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
-		mockPeggyContract := mocks.NewMockContract(mockCtrl)
+		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
 
 		mockQClient.EXPECT().
 			OutgoingTxBatches(gomock.Any(), &types.QueryOutgoingTxBatchesRequest{}).
@@ -217,7 +218,7 @@ func TestGetBatchesAndSignatures(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
-		mockPeggyContract := mocks.NewMockContract(mockCtrl)
+		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
 
 		mockQClient.EXPECT().
 			OutgoingTxBatches(gomock.Any(), &types.QueryOutgoingTxBatchesRequest{}).
@@ -303,7 +304,6 @@ func TestGetBatchesAndSignatures(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
-		mockPeggyContract := mocks.NewMockContract(mockCtrl)
 
 		mockQClient.EXPECT().
 			OutgoingTxBatches(gomock.Any(), &types.QueryOutgoingTxBatchesRequest{}).
@@ -359,14 +359,9 @@ func TestGetBatchesAndSignatures(t *testing.T) {
 			ContractAddress: "0x0",
 		}).Return(nil, nil).Times(2)
 
-		mockPeggyContract.EXPECT().
-			EncodeTransactionBatch(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(nil, nil).Times(2)
-
 		relayer := peggyRelayer{
 			logger:            logger,
 			cosmosQueryClient: mockQClient,
-			peggyContract:     mockPeggyContract,
 		}
 
 		submittableBatches, err := relayer.getBatchesAndSignatures(context.Background(), &types.Valset{})
