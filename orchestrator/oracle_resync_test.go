@@ -7,7 +7,6 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/common"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
@@ -54,7 +53,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 
 	mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 	mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
-	mockPersonalSignFn := func(account common.Address, data []byte) (sig []byte, err error) {
+	mockPersonalSignFn := func(account ethcmn.Address, data []byte) (sig []byte, err error) {
 		return []byte{}, errors.New("some error during signing")
 	}
 

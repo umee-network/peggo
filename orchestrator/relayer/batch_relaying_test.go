@@ -12,7 +12,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
+	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/golang/mock/gomock"
 	"github.com/rs/zerolog"
@@ -29,9 +29,9 @@ func TestIsBatchProfitable(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
-	peggyAddress := common.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
-	fromAddress := common.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
-	erc20Address := common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7")
+	peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
+	fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
+	erc20Address := ethcmn.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7")
 
 	ethProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
 	ethProvider.EXPECT().PendingNonceAt(gomock.Any(), fromAddress).Return(uint64(0), nil)
@@ -81,7 +81,7 @@ func TestIsBatchProfitable(t *testing.T) {
 			TokenContract: erc20Address.Hex(),
 			Transactions: []*types.OutgoingTransferTx{
 				{
-					DestAddress: common.HexToAddress("0x2").Hex(),
+					DestAddress: ethcmn.HexToAddress("0x2").Hex(),
 					Erc20Token: &types.ERC20Token{
 						Contract: erc20Address.Hex(),
 						Amount:   sdk.NewInt(10000),
@@ -106,7 +106,7 @@ func TestIsBatchProfitable(t *testing.T) {
 			TokenContract: erc20Address.Hex(),
 			Transactions: []*types.OutgoingTransferTx{
 				{
-					DestAddress: common.HexToAddress("0x2").Hex(),
+					DestAddress: ethcmn.HexToAddress("0x2").Hex(),
 					Erc20Token: &types.ERC20Token{
 						Contract: erc20Address.Hex(),
 						Amount:   sdk.NewInt(10000),
@@ -209,7 +209,7 @@ func TestGetBatchesAndSignatures(t *testing.T) {
 
 		submittableBatches, err := relayer.getBatchesAndSignatures(context.Background(), &types.Valset{})
 		assert.NoError(t, err)
-		assert.Len(t, submittableBatches[common.HexToAddress("0x0")], 2)
+		assert.Len(t, submittableBatches[ethcmn.HexToAddress("0x0")], 2)
 
 	})
 
@@ -295,7 +295,7 @@ func TestGetBatchesAndSignatures(t *testing.T) {
 
 		submittableBatches, err := relayer.getBatchesAndSignatures(context.Background(), &types.Valset{})
 		assert.NoError(t, err)
-		assert.Len(t, submittableBatches[common.HexToAddress("0x0")], 0)
+		assert.Len(t, submittableBatches[ethcmn.HexToAddress("0x0")], 0)
 
 	})
 
@@ -371,7 +371,7 @@ func TestGetBatchesAndSignatures(t *testing.T) {
 
 		submittableBatches, err := relayer.getBatchesAndSignatures(context.Background(), &types.Valset{})
 		assert.NoError(t, err)
-		assert.Len(t, submittableBatches[common.HexToAddress("0x0")], 0)
+		assert.Len(t, submittableBatches[ethcmn.HexToAddress("0x0")], 0)
 
 	})
 

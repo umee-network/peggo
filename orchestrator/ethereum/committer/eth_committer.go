@@ -7,7 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
+	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
@@ -19,7 +19,7 @@ import (
 // can be used to submit txns into Ethereum, Matic, and other EVM-compatible networks.
 func NewEthCommitter(
 	logger zerolog.Logger,
-	fromAddress common.Address,
+	fromAddress ethcmn.Address,
 	ethGasPriceAdjustment float64,
 	fromSigner bind.SignerFn,
 	evmProvider provider.EVMProviderWithRet,
@@ -51,7 +51,7 @@ type ethCommitter struct {
 	logger        zerolog.Logger
 	committerOpts *options
 
-	fromAddress common.Address
+	fromAddress ethcmn.Address
 	fromSigner  bind.SignerFn
 
 	ethGasPriceAdjustment float64
@@ -59,7 +59,7 @@ type ethCommitter struct {
 	nonceCache            util.NonceCache
 }
 
-func (e *ethCommitter) FromAddress() common.Address {
+func (e *ethCommitter) FromAddress() ethcmn.Address {
 	return e.fromAddress
 }
 
@@ -69,7 +69,7 @@ func (e *ethCommitter) Provider() provider.EVMProvider {
 
 func (e *ethCommitter) EstimateGas(
 	ctx context.Context,
-	recipient common.Address,
+	recipient ethcmn.Address,
 	txData []byte,
 ) (gasCost uint64, gasPrice *big.Int, err error) {
 
@@ -105,9 +105,9 @@ func (e *ethCommitter) EstimateGas(
 
 func (e *ethCommitter) SendTx(
 	ctx context.Context,
-	recipient common.Address,
+	recipient ethcmn.Address,
 	txData []byte,
-) (txHash common.Hash, err error) {
+) (txHash ethcmn.Hash, err error) {
 	opts := &bind.TransactOpts{
 		From:   e.fromAddress,
 		Signer: e.fromSigner,
@@ -120,7 +120,7 @@ func (e *ethCommitter) SendTx(
 	// Figure out the gas price values
 	suggestedGasPrice, err := e.evmProvider.SuggestGasPrice(opts.Context)
 	if err != nil {
-		return common.Hash{}, errors.Errorf("failed to suggest gas price: %v", err)
+		return ethcmn.Hash{}, errors.Errorf("failed to suggest gas price: %v", err)
 	}
 
 	// Suggested gas price is not accurate. Increment by multiplying with gasprice adjustment factor
@@ -135,7 +135,7 @@ func (e *ethCommitter) SendTx(
 
 	opts.GasPrice = gasPrice
 
-	resyncNonces := func(from common.Address) {
+	resyncNonces := func(from ethcmn.Address) {
 		e.nonceCache.Sync(from, func() (uint64, error) {
 			nonce, err := e.evmProvider.PendingNonceAt(context.TODO(), from)
 			if err != nil {
@@ -223,7 +223,7 @@ func (e *ethCommitter) SendTx(
 			}
 		}
 	}); err != nil {
-		return common.Hash{}, err
+		return ethcmn.Hash{}, err
 	}
 
 	return txHash, nil
