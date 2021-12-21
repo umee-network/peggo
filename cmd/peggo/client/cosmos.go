@@ -36,6 +36,7 @@ func NewCosmosClient(
 	protoAddr string,
 	options ...CosmosClientOption,
 ) (CosmosClient, error) {
+
 	conn, err := grpc.Dial(protoAddr, grpc.WithInsecure(), grpc.WithContextDialer(dialerFunc))
 	if err != nil {
 		err := errors.Wrapf(err, "failed to connect to the gRPC: %s", protoAddr)
