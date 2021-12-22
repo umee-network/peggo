@@ -41,10 +41,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## [v0.1.0](https://github.com/umee-network/peggo/releases/tag/v0.1.0) - 2021-12-18
-### Features
-
-- Initial release!!!
 ### Bug Fixes
 
 - [#104] Claims are split into chunks of 10 to avoid hitting request limits.
@@ -52,3 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [#104] Changed timeout for broadcasting TXs to Umee to 60s to match that of the official Gravity Bridge.
+## [v0.1.0](https://github.com/umee-network/peggo/releases/tag/v0.1.0) - 2021-12-18
+### Features
+
+- Initial release!!!
