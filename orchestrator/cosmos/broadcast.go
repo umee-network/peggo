@@ -351,7 +351,8 @@ func (s *peggyBroadcastClient) broadcastEthereumEvents(events []sortableEvent) e
 		s.logger.Info().
 			Str("tx_hash", txResponse.TxHash).
 			Int("total_claims", len(events)).
-			Msg("oracle sent claims successfully")
+			Int("claims_sent", len(msgSet)).
+			Msg("oracle sent set of claims successfully")
 	}
 
 	return nil
