@@ -55,6 +55,7 @@ func TestIsBatchProfitable(t *testing.T) {
 		logger,
 		fromAddress,
 		1.0,
+		1.0,
 		nil,
 		ethProvider,
 	)

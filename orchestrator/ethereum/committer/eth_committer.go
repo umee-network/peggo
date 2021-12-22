@@ -21,6 +21,7 @@ func NewEthCommitter(
 	logger zerolog.Logger,
 	fromAddress ethcmn.Address,
 	ethGasPriceAdjustment float64,
+	ethGasLimitAdjustment float64,
 	fromSigner bind.SignerFn,
 	evmProvider provider.EVMProviderWithRet,
 	committerOpts ...EVMCommitterOption,
@@ -29,6 +30,7 @@ func NewEthCommitter(
 		logger:                logger.With().Str("module", "ethCommiter").Logger(),
 		committerOpts:         defaultOptions(),
 		ethGasPriceAdjustment: ethGasPriceAdjustment,
+		ethGasLimitAdjustment: ethGasLimitAdjustment,
 		fromAddress:           fromAddress,
 		fromSigner:            fromSigner,
 		evmProvider:           evmProvider,
@@ -55,6 +57,7 @@ type ethCommitter struct {
 	fromSigner  bind.SignerFn
 
 	ethGasPriceAdjustment float64
+	ethGasLimitAdjustment float64
 	evmProvider           provider.EVMProviderWithRet
 	nonceCache            util.NonceCache
 }
@@ -100,6 +103,9 @@ func (e *ethCommitter) EstimateGas(
 
 	gasCost, err = e.evmProvider.EstimateGas(ctx, msg)
 
+	// Estimated gas cost may not be accurate, so we multiply the result by the gas limit adjustment factor.
+	gasCost = uint64(float64(gasCost) * e.ethGasLimitAdjustment)
+
 	return gasCost, gasPrice, err
 }
 
@@ -107,33 +113,17 @@ func (e *ethCommitter) SendTx(
 	ctx context.Context,
 	recipient ethcmn.Address,
 	txData []byte,
+	gasCost uint64,
+	gasPrice *big.Int,
 ) (txHash ethcmn.Hash, err error) {
 	opts := &bind.TransactOpts{
 		From:   e.fromAddress,
 		Signer: e.fromSigner,
 
-		GasPrice: e.committerOpts.GasPrice.BigInt(),
-		GasLimit: e.committerOpts.GasLimit,
+		GasPrice: gasPrice,
+		GasLimit: gasCost,
 		Context:  ctx, // with RPC timeout
 	}
-
-	// Figure out the gas price values
-	suggestedGasPrice, err := e.evmProvider.SuggestGasPrice(opts.Context)
-	if err != nil {
-		return ethcmn.Hash{}, errors.Errorf("failed to suggest gas price: %v", err)
-	}
-
-	// Suggested gas price is not accurate. Increment by multiplying with gasprice adjustment factor
-	incrementedPrice := big.NewFloat(0).Mul(
-		new(big.Float).SetInt(suggestedGasPrice),
-		big.NewFloat(e.ethGasPriceAdjustment),
-	)
-
-	// set gasprice to incremented gas price.
-	gasPrice := new(big.Int)
-	incrementedPrice.Int(gasPrice)
-
-	opts.GasPrice = gasPrice
 
 	resyncNonces := func(from ethcmn.Address) {
 		e.nonceCache.Sync(from, func() (uint64, error) {
