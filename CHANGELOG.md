@@ -29,7 +29,7 @@ To release a new version, ensure an appropriate release branch exists. Add a
 release version and date to the existing Unreleased section which takes the form
 of:
 
-## [<version>](https://github.com/umee-network/peggo/releases/<version>) - YYYY-MM-DD
+## [<version>](https://github.com/umee-network/peggo/releases/tag/<version>) - YYYY-MM-DD
 
 Once the version is tagged and released, a PR should be made against the main
 branch to incorporate the new changelog updates.
@@ -40,3 +40,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 # Changelog
 
 ## [Unreleased]
+
+## [v0.1.0](https://github.com/umee-network/peggo/releases/tag/v0.1.0) - 2021-12-18
+
+### Features
+
+- Initial release!!!
