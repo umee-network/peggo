@@ -44,7 +44,7 @@ func defaultOptions() *options {
 	v, _ := decimal.NewFromString("20")
 	return &options{
 		GasPrice:   v.Shift(9), // 20 gwei
-		GasLimit:   1500000,    // 1,500,000 | 1,372,043 (91.47%) ->https://goerli.etherscan.io/tx/0xe969496e7fd5786bd1339c358e85d32cd20883501cac22de4239741321a5b186
+		GasLimit:   1500000,
 		RPCTimeout: 10 * time.Second,
 	}
 }
