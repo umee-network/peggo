@@ -41,6 +41,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [#105] Added a gas limit adjustment flag for Ethereum transactions.
+
 ## [v0.1.0](https://github.com/umee-network/peggo/releases/tag/v0.1.0) - 2021-12-18
 
 ### Features
