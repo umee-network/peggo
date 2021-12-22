@@ -48,10 +48,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [#104](https://github.com/umee-network/peggo/pull/104) Chunk claims messages
 
-### Bug Fixes:
+### Bug Fixes
 
 - Claims are split into chunks of 10 to avoid hitting request limits.
 
-### Improvements:
+### Improvements
 
 - Changed timeout for broadcasting TXs to Umee to 60s to match that of the official Gravity Bridge.
