@@ -1,5 +1,9 @@
 # Release Notes
 
+## Bug Fixes
+
+- Use Ethereum gas cost estimation instead of a hardcoded value.
+
 ## Features
 
 - Add support for fee grant utilization. Operators may populate a `cosmos-fee-granter`
