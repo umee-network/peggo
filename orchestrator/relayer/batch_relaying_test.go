@@ -383,16 +383,28 @@ func TestRelayBatches(t *testing.T) {
 		ethProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
 		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
 
-		// peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
+		peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
 
 		ethProvider.EXPECT().HeaderByNumber(gomock.Any(), nil).Return(&ethtypes.Header{
-			Number: big.NewInt(100),
+			Number: big.NewInt(112),
 		}, nil)
 		ethProvider.EXPECT().PendingNonceAt(gomock.Any(), fromAddress).Return(uint64(0), nil).AnyTimes()
 
 		mockPeggyContract.EXPECT().FromAddress().Return(fromAddress).AnyTimes()
-		mockPeggyContract.EXPECT().GetTxBatchNonce(gomock.Any(), gomock.Any(), gomock.Any()).Return(big.NewInt(111), nil)
+		mockPeggyContract.EXPECT().GetTxBatchNonce(gomock.Any(), gomock.Any(), gomock.Any()).Return(big.NewInt(1), nil)
+		mockPeggyContract.EXPECT().EncodeTransactionBatch(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return([]byte{}, nil)
+		mockPeggyContract.EXPECT().Address().Return(peggyAddress).AnyTimes()
+		mockPeggyContract.EXPECT().EstimateGas(gomock.Any(), gomock.Any(), gomock.Any()).Return(uint64(99999), big.NewInt(1), nil)
+		mockPeggyContract.EXPECT().IsPendingTxInput(gomock.Any(), gomock.Any()).Return(false)
+
+		mockPeggyContract.EXPECT().SendTx(
+			gomock.Any(),
+			peggyAddress,
+			[]byte{},
+			uint64(99999),
+			big.NewInt(1),
+		).Return(ethcmn.HexToHash("0x01010101"), nil)
 
 		relayer := peggyRelayer{
 			logger:            logger,
@@ -404,7 +416,10 @@ func TestRelayBatches(t *testing.T) {
 		possibleBatches := map[ethcmn.Address][]SubmittableBatch{
 			ethcmn.HexToAddress("0x0"): {
 				{
-					Batch:      &types.OutgoingTxBatch{},
+					Batch: &types.OutgoingTxBatch{
+						BatchTimeout: 113,
+						BatchNonce:   2,
+					},
 					Signatures: []*types.MsgConfirmBatch{},
 				},
 			},
