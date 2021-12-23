@@ -169,7 +169,7 @@ func (s *peggyRelayer) RelayBatches(
 			// Checking in pending txs(mempool) if tx with same input is already submitted
 			// We have to check this at the last moment because any other relayer could have submitted.
 			if s.peggyContract.IsPendingTxInput(txData, s.pendingTxWait) {
-				s.logger.Error().
+				s.logger.Debug().
 					Msg("Transaction with same batch input data is already present in mempool")
 				continue
 			}

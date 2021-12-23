@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/golang/mock/gomock"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -371,4 +372,47 @@ func TestGetBatchesAndSignatures(t *testing.T) {
 
 	})
 
+}
+
+func TestRelayBatches(t *testing.T) {
+
+	t.Run("not ready to be relayed, no error", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
+		mockQClient := mocks.NewMockQueryClient(mockCtrl)
+		ethProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
+		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
+
+		// peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
+		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
+
+		ethProvider.EXPECT().HeaderByNumber(gomock.Any(), nil).Return(&ethtypes.Header{
+			Number: big.NewInt(100),
+		}, nil)
+		ethProvider.EXPECT().PendingNonceAt(gomock.Any(), fromAddress).Return(uint64(0), nil).AnyTimes()
+
+		mockPeggyContract.EXPECT().FromAddress().Return(fromAddress).AnyTimes()
+		mockPeggyContract.EXPECT().GetTxBatchNonce(gomock.Any(), gomock.Any(), gomock.Any()).Return(big.NewInt(111), nil)
+
+		relayer := peggyRelayer{
+			logger:            logger,
+			cosmosQueryClient: mockQClient,
+			peggyContract:     mockPeggyContract,
+			ethProvider:       ethProvider,
+		}
+
+		possibleBatches := map[ethcmn.Address][]SubmittableBatch{
+			ethcmn.HexToAddress("0x0"): {
+				{
+					Batch:      &types.OutgoingTxBatch{},
+					Signatures: []*types.MsgConfirmBatch{},
+				},
+			},
+		}
+
+		err := relayer.RelayBatches(context.Background(), &types.Valset{}, possibleBatches)
+		assert.NoError(t, err)
+		// assert.Len(t, submittableBatches[ethcmn.HexToAddress("0x0")], 0)
+
+	})
 }
