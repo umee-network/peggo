@@ -427,7 +427,47 @@ func TestRelayBatches(t *testing.T) {
 
 		err := relayer.RelayBatches(context.Background(), &types.Valset{}, possibleBatches)
 		assert.NoError(t, err)
-		// assert.Len(t, submittableBatches[ethcmn.HexToAddress("0x0")], 0)
+		assert.Equal(t, uint64(2), relayer.lastSentBatchNonce)
+	})
 
+	t.Run("batch timeout, no error", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
+		mockQClient := mocks.NewMockQueryClient(mockCtrl)
+		ethProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
+		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
+
+		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
+
+		ethProvider.EXPECT().HeaderByNumber(gomock.Any(), nil).Return(&ethtypes.Header{
+			Number: big.NewInt(112),
+		}, nil)
+		ethProvider.EXPECT().PendingNonceAt(gomock.Any(), fromAddress).Return(uint64(0), nil).AnyTimes()
+
+		mockPeggyContract.EXPECT().FromAddress().Return(fromAddress).AnyTimes()
+		mockPeggyContract.EXPECT().GetTxBatchNonce(gomock.Any(), gomock.Any(), gomock.Any()).Return(big.NewInt(1), nil)
+
+		relayer := peggyRelayer{
+			logger:            logger,
+			cosmosQueryClient: mockQClient,
+			peggyContract:     mockPeggyContract,
+			ethProvider:       ethProvider,
+		}
+
+		possibleBatches := map[ethcmn.Address][]SubmittableBatch{
+			ethcmn.HexToAddress("0x0"): {
+				{
+					Batch: &types.OutgoingTxBatch{
+						BatchTimeout: 100,
+						BatchNonce:   2,
+					},
+					Signatures: []*types.MsgConfirmBatch{},
+				},
+			},
+		}
+
+		err := relayer.RelayBatches(context.Background(), &types.Valset{}, possibleBatches)
+		assert.NoError(t, err)
+		assert.Equal(t, uint64(0), relayer.lastSentBatchNonce)
 	})
 }
