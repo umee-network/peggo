@@ -55,7 +55,7 @@ func TestFindLatestValset(t *testing.T) {
 				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x76d08978c024a4bf8cbb30c67fd78fcaa1827cbc533e4e175f36d07e64ccf96a")}, {}},
 			})).
 			Return(
-				// The test data if from a real tx: https://goerli.etherscan.io/tx/0x79a63e4fdcadb35bc89d6aab9ca2a2c80916817744f472901375290c548e0022#eventlog
+				// The test data is from a real tx: https://goerli.etherscan.io/tx/0x79a63e4fdcadb35bc89d6aab9ca2a2c80916817744f472901375290c548e0022#eventlog
 				[]ethtypes.Log{
 					{
 						Address:     peggyAddress,
@@ -120,7 +120,7 @@ func TestFindLatestValset(t *testing.T) {
 				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x76d08978c024a4bf8cbb30c67fd78fcaa1827cbc533e4e175f36d07e64ccf96a")}, {}},
 			})).
 			Return(
-				// The test data if from a real tx: https://goerli.etherscan.io/tx/0x4714abe3e48c4f730dd6e851cff83ab4baed33f7ef1991e504722ef4d28fd30f#eventlog
+				// The test data is from a real tx: https://goerli.etherscan.io/tx/0x4714abe3e48c4f730dd6e851cff83ab4baed33f7ef1991e504722ef4d28fd30f#eventlog
 				[]ethtypes.Log{
 					{
 						Address:     peggyAddress,

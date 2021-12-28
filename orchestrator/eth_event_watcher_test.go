@@ -55,7 +55,7 @@ func TestCheckForEvents(t *testing.T) {
 				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x82fe3a4fa49c6382d0c085746698ddbbafe6c2bf61285b19410644b5b26287c7")}, {}},
 			})).
 			Return(
-				// The test data if from a real tx: https://goerli.etherscan.io/tx/0x09310b8dcc615b0baab5c0c41e9e7633f513c23532d0f191509d65e5a28b4ed7#eventlog
+				// The test data is from a real tx: https://goerli.etherscan.io/tx/0x09310b8dcc615b0baab5c0c41e9e7633f513c23532d0f191509d65e5a28b4ed7#eventlog
 				[]ethtypes.Log{
 					{
 						Address:     peggyAddress,
@@ -278,7 +278,7 @@ func TestCheckForEvents(t *testing.T) {
 				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x82fe3a4fa49c6382d0c085746698ddbbafe6c2bf61285b19410644b5b26287c7")}, {}},
 			})).
 			Return(
-				// The test data if from a real tx: https://goerli.etherscan.io/tx/0x09310b8dcc615b0baab5c0c41e9e7633f513c23532d0f191509d65e5a28b4ed7#eventlog
+				// The test data is from a real tx: https://goerli.etherscan.io/tx/0x09310b8dcc615b0baab5c0c41e9e7633f513c23532d0f191509d65e5a28b4ed7#eventlog
 				[]ethtypes.Log{
 					{
 						Address:     peggyAddress,
@@ -383,7 +383,7 @@ func TestCheckForEvents(t *testing.T) {
 				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x82fe3a4fa49c6382d0c085746698ddbbafe6c2bf61285b19410644b5b26287c7")}, {}},
 			})).
 			Return(
-				// The test data if from a real tx: https://goerli.etherscan.io/tx/0x09310b8dcc615b0baab5c0c41e9e7633f513c23532d0f191509d65e5a28b4ed7#eventlog
+				// The test data is from a real tx: https://goerli.etherscan.io/tx/0x09310b8dcc615b0baab5c0c41e9e7633f513c23532d0f191509d65e5a28b4ed7#eventlog
 				[]ethtypes.Log{
 					{
 						Address:     peggyAddress,
@@ -502,7 +502,7 @@ func TestCheckForEvents(t *testing.T) {
 				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x82fe3a4fa49c6382d0c085746698ddbbafe6c2bf61285b19410644b5b26287c7")}, {}},
 			})).
 			Return(
-				// The test data if from a real tx: https://goerli.etherscan.io/tx/0x09310b8dcc615b0baab5c0c41e9e7633f513c23532d0f191509d65e5a28b4ed7#eventlog
+				// The test data is from a real tx: https://goerli.etherscan.io/tx/0x09310b8dcc615b0baab5c0c41e9e7633f513c23532d0f191509d65e5a28b4ed7#eventlog
 				[]ethtypes.Log{
 					{
 						Address:     peggyAddress,
