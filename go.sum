@@ -480,6 +480,8 @@ github.com/cosmos/ibc-go v1.2.2 h1:bs6TZ8Es1kycIu2AHlRZ9dzJ+mveqlLN/0sjWtRH88o=
 github.com/cosmos/ibc-go v1.2.2/go.mod h1:XmYjsRFOs6Q9Cz+CSsX21icNoH27vQKb3squgnCOCbs=
 github.com/cosmos/ibc-go/v2 v2.0.1 h1:9UqlTV/3M3JO4x71Hm26yzzYnUryMecvvX+gXyAtXic=
 github.com/cosmos/ibc-go/v2 v2.0.1/go.mod h1:ZfePiHyAVzWvRafjDCI00huUnPjRgOn1FsOklO68AF0=
+github.com/cosmos/ibc-go/v2 v2.0.2 h1:y7eUgggMEVe43wHLw9XrGbeaTWtfkJYMoL3m6YW4fIY=
+github.com/cosmos/ibc-go/v2 v2.0.2/go.mod h1:XUmW7wmubCRhIEAGtMGS+5IjiSSmcAwihoN/yPGd6Kk=
 github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76 h1:DdzS1m6o/pCqeZ8VOAit/gyATedRgjvkVI+UCrLpyuU=
 github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76/go.mod h1:0mkLWIoZuQ7uBoospo5Q9zIpqq6rYCPJDSUdeCJvPM8=
 github.com/cosmos/ledger-cosmos-go v0.11.1 h1:9JIYsGnXP613pb2vPjFeMMjBI5lEDsEaF6oYorTy6J4=
@@ -1843,6 +1845,8 @@ github.com/ultraware/funlen v0.0.3 h1:5ylVWm8wsNwH5aWo9438pwvsK0QiqVuUrt9bn7S/iL
 github.com/ultraware/funlen v0.0.3/go.mod h1:Dp4UiAus7Wdb9KUZsYWZEWiRzGuM2kXM1lPbfaF6xhA=
 github.com/ultraware/whitespace v0.0.4 h1:If7Va4cM03mpgrNH9k49/VOicWpGoG70XPBFFODYDsg=
 github.com/ultraware/whitespace v0.0.4/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
+github.com/umee-network/umee v0.0.0-20211230165432-e5e35faf8f29 h1:vTXNrFa9AqqoBVfhh+8ZkwE4JNSozHF4A52/RXa98dA=
+github.com/umee-network/umee v0.0.0-20211230165432-e5e35faf8f29/go.mod h1:4pvAfOqd9mLH16v6OAoj1fvmQmTfXaP83V92bkZDOLk=
 github.com/umee-network/umee v0.5.0-rc2 h1:BnYxcjzJ4sgyV9xZ508PIk9e5uOtKxCRgBF3Hikh0Zs=
 github.com/umee-network/umee v0.5.0-rc2/go.mod h1:BRkC5jPRh/rQVWD54cKZWlIhRCNj/WIAQfwEFdBXBkU=
 github.com/urfave/cli v0.0.0-20171014202726-7bc6a0acffa5/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
