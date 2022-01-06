@@ -463,6 +463,10 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 				ethMinerPK[2:], // remove 0x prefix
 				"--eth-rpc",
 				fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
+				"--cosmos-grpc",
+				fmt.Sprintf("tcp://%s:9090", s.valResources[0].Container.Name[1:]),
+				"--tendermint-rpc",
+				fmt.Sprintf("http://%s:26657", s.valResources[0].Container.Name[1:]),
 			},
 		},
 		noRestart,
