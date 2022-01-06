@@ -72,8 +72,6 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 		"failed to get ERC20 deployment logs; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
 	)
 
-	// panic(errBuf.String() + "  ----  " + outBuf.String())
-
 	re := regexp.MustCompile(`Transaction: (0x.+)`)
 	tokens := re.FindStringSubmatch(errBuf.String())
 	s.Require().Lenf(tokens, 2, "stderr: %s", errBuf.String())
@@ -92,7 +90,7 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 
 			return true
 		},
-		2*time.Minute,
+		6*time.Minute,
 		time.Second,
 		"failed to confirm ERC20 deployment transaction",
 	)
@@ -242,7 +240,7 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 		func() bool {
 			return queryUmeeTx(endpoint, txHash) == nil
 		},
-		time.Minute,
+		2*time.Minute,
 		5*time.Second,
 		"stdout: %s, stderr: %s",
 		outBuf.String(), errBuf.String(),
@@ -309,7 +307,7 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 		func() bool {
 			return queryEthTx(ctx, s.ethClient, txHash) == nil
 		},
-		2*time.Minute,
+		5*time.Minute,
 		5*time.Second,
 		"stdout: %s, stderr: %s",
 		outBuf.String(), errBuf.String(),
@@ -390,7 +388,7 @@ func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
 }
 
 func queryDenomToERC20(endpoint, denom string) (string, bool, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/peggy/v1/cosmos_originated/denom_to_erc20?denom=%s", endpoint, denom))
+	resp, err := http.Get(fmt.Sprintf("%s/gravity/v1beta/cosmos_originated/denom_to_erc20?denom=%s", endpoint, denom))
 	if err != nil {
 		return "", false, fmt.Errorf("failed to execute HTTP request: %w", err)
 	}
