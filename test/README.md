@@ -1,4 +1,4 @@
-## Peggo Testsuite
+# Peggo Testsuite
 
 Welcome to the PegGo testing framework. The goal of this suite is aligned with the overall project goal - to move stuff onto common ground and iterate faster.
 By using the same lang for module, orchestrator and test we can achieve the full test coverage of all logical branches.
@@ -23,7 +23,7 @@ We care about:
 You can specify any remote EVM endpoint to run the test against, but the best and most stable way to test the stuff is to run a Ganache or Hardhat instance. Hardhat is used solely as a JSON-RPC node provider.
 
 Preferred Solc compiler toolkit:
-* https://github.com/crytic/solc-select
+* [solc-select](https://github.com/crytic/solc-select)
 
 Run `solc-select use 0.8.2` before starting any tests.
 
@@ -107,7 +107,9 @@ The script imports 3 validator accounts and 1 user account, specified by mnemoni
 
 ### Misc: Patching Geth
 
-Geth by default scales difficulty of the blocks to hit the target block pace. So even if your network starts with `difficulty=1` in genesis, the difficulty will be higher in the next blocks and waiting times would be very high. Especially that DAG regeneration phases. A solution to this in local setup would be to either use `clique` consensus for PoA-style block producing, or just patch the Geth code, so the difficulty won't grow.
+Geth by default scales difficulty of the blocks to hit the target block pace. So even if your network starts with `difficulty=1` in genesis, the difficulty will be higher in the next blocks and waiting
+times would be very high. Especially that DAG regeneration phases. A solution to this in local setup would be to either use `clique` consensus for PoA-style block producing, or just patch the Geth
+code, so the difficulty won't grow.
 
 Just clone the `go-ethereum` repo, apply this patch:
 
