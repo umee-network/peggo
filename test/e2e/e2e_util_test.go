@@ -202,7 +202,7 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 		Cmd: []string{
 			"umeed",
 			"tx",
-			"peggy",
+			"gravity",
 			"send-to-eth",
 			ethDest,
 			amount,
