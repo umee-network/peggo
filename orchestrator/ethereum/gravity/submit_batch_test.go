@@ -101,7 +101,7 @@ func TestEncodeTransactionBatch(t *testing.T) {
 
 	// Let's check the hash of the TX data instead of the entire thing
 	txDataHash := sha256.Sum256(txData)
-	assert.Equal(t, "98523ac4d387f9cfd4483a0ba70cfde4f303943d540b27fa6c07b161b556124c", hex.EncodeToString(txDataHash[:]))
+	assert.Equal(t, "86244d2ed48753a4a08797cec89af96e9aa9e858e328c92b9d0a242a3778d883", hex.EncodeToString(txDataHash[:]))
 }
 
 func TestGetBatchCheckpointValues(t *testing.T) {

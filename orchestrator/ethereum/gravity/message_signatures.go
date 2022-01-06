@@ -78,7 +78,7 @@ func EncodeValsetConfirm(gravityID string, valset types.Valset) ethcmn.Hash {
 // signature to confirm a transaction batch on the Gravity Ethereum contract.
 // This value will then be signed before being submitted to Cosmos, verified,
 // and then relayed to Ethereum.
-func EncodeTxBatchConfirm(gravityID string, batch types.OutgoingTxBatch) []byte {
+func EncodeTxBatchConfirm(gravityID string, batch types.OutgoingTxBatch) ethcmn.Hash {
 	abi, err := abi.JSON(strings.NewReader(types.OutgoingBatchTxCheckpointABIJSON))
 	if err != nil {
 		panic(fmt.Sprintf("failed to JSON parse ABI: %s", err))
@@ -120,8 +120,9 @@ func EncodeTxBatchConfirm(gravityID string, batch types.OutgoingTxBatch) []byte 
 	if err != nil {
 		// This should never happen outside of test since any case that could crash on
 		// encoding should be filtered above.
-		return []byte{}
+		return ethcmn.Hash{}
 	}
 
-	return crypto.Keccak256Hash(abiEncodedBatch[4:]).Bytes()
+	hash := crypto.Keccak256Hash(abiEncodedBatch[4:])
+	return hash
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +25,7 @@ func TestEncodeValsetConfirm(t *testing.T) {
 	result := EncodeValsetConfirm(gravityID, valset)
 
 	// Check the result with a previously calculated one.
-	assert.Equal(t, "0x530516ded1a45852c4000d36e5da715a934b8f272ed09e70b049c78474f8343b", result.Hex())
+	assert.Equal(t, "0xacfb0f575bd6e7ecbd77424461aa89340c2e876b1c4b177e9f9c6f92529d27ab", result.Hex())
 }
 
 func TestEncodeTxBatchConfirm(t *testing.T) {
@@ -51,5 +50,5 @@ func TestEncodeTxBatchConfirm(t *testing.T) {
 	result := EncodeTxBatchConfirm(gravityID, txBatch)
 
 	// Check the result with a previously calculated one.
-	assert.Equal(t, "0x2c8418bc8093a21b04e82d0527b039084bca48cbbb6d413011a98181f7af5081", ethcmn.Bytes2Hex(result))
+	assert.Equal(t, "0xf78189166c4bf48863f7765ba1b29afe15c45c0e48b2fbdeaf43b15ed09c138c", result.Hex())
 }

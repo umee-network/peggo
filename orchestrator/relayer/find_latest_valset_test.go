@@ -173,20 +173,20 @@ func TestCheckIfValsetsDiffer(t *testing.T) {
 func TestBridgeValidator(t *testing.T) {
 	var bridgeValidators BridgeValidators = []types.BridgeValidator{
 		{
-			EthereumAddress: "0x0",
+			EthereumAddress: "0x0000000000000000000000000000000000000000",
 			Power:           10000,
 		},
 		{
-			EthereumAddress: "0x1",
+			EthereumAddress: "0x1111111111111111111111111111111111111111",
 			Power:           20000,
 		},
 		{
-			EthereumAddress: "0x2",
+			EthereumAddress: "0x2222222222222222222222222222222222222222",
 			Power:           20000,
 		},
 	}
 	bridgeValidators.Sort()
-	assert.Equal(t, bridgeValidators[0].EthereumAddress, "0x1")
+	assert.Equal(t, bridgeValidators[0].EthereumAddress, "0x1111111111111111111111111111111111111111")
 	assert.False(t, bridgeValidators.HasDuplicates())
 	assert.Equal(t, []uint64{20000, 20000, 10000}, bridgeValidators.GetPowers())
 

@@ -106,6 +106,9 @@ func TestGetGetGravityID(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	gravityID := "defaultgravityid"
+	gravityIDBytes := []uint8(gravityID)
+	var gravityIDBytes32 [32]uint8
+	copy(gravityIDBytes32[:], gravityIDBytes)
 
 	mockEvmProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
 	mockEvmProvider.EXPECT().PendingNonceAt(gomock.Any(), ethcmn.HexToAddress("0x0")).Return(uint64(0), nil)
@@ -116,7 +119,7 @@ func TestGetGetGravityID(t *testing.T) {
 			nil,
 		).
 		Return(
-			gravityID,
+			gravityIDBytes32[:],
 			nil,
 		)
 
@@ -135,7 +138,7 @@ func TestGetGetGravityID(t *testing.T) {
 	res, err := gravityContract.GetGravityID(context.Background(), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
-	assert.Equal(t, gravityID, res)
+	assert.Equal(t, "defaultgravityid\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", res)
 
 }
 

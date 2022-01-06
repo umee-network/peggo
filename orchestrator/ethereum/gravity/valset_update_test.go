@@ -97,7 +97,7 @@ func TestEncodeValsetUpdate(t *testing.T) {
 
 	// Let's check the hash of the TX data instead of the entire thing
 	txDataHash := sha256.Sum256(txData)
-	assert.Equal(t, "9660c5094ac2015c1ff2ce2d6e96a0705307014c5d04b33dc6c59ec861323edc", hex.EncodeToString(txDataHash[:]))
+	assert.Equal(t, "f22e880adca043d34ea5af87cb0024e28c0cc0b5767b478ec6eb949705765015", hex.EncodeToString(txDataHash[:]))
 
 }
 

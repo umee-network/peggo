@@ -144,7 +144,7 @@ func (s *gravityBroadcastClient) SendBatchConfirm(
 ) error {
 
 	confirmHash := gravity.EncodeTxBatchConfirm(gravityID, batch)
-	signature, err := s.ethPersonalSignFn(ethFrom, confirmHash)
+	signature, err := s.ethPersonalSignFn(ethFrom, confirmHash.Bytes())
 	if err != nil {
 		err = errors.New("failed to sign validator address")
 		return err

@@ -20,17 +20,17 @@ func TestAddPendingTxInput(t *testing.T) {
 
 	// add a submitBatch tx
 	txList.AddPendingTxInput(&RPCTransaction{
-		Input: hexutil.MustDecode("0x8174741800000000"),
+		Input: hexutil.MustDecode("0x8690ff9800000000"),
 	})
 
 	// add a updateValset tx
 	txList.AddPendingTxInput(&RPCTransaction{
-		Input: hexutil.MustDecode("0xa5352f5b00000000"),
+		Input: hexutil.MustDecode("0xaca6b1c100000000"),
 	})
 
 	// try to add a sendToCosmos tx
 	txList.AddPendingTxInput(&RPCTransaction{
-		Input: hexutil.MustDecode("0x1ffbe7f900000000"),
+		Input: hexutil.MustDecode("0x0f21235700000000"),
 	})
 
 	// Only the first 2 TXs should have been added
@@ -38,7 +38,7 @@ func TestAddPendingTxInput(t *testing.T) {
 
 	for i := 0; i < 110; i++ {
 		txList.AddPendingTxInput(&RPCTransaction{
-			Input: hexutil.MustDecode("0x8174741800000000"),
+			Input: hexutil.MustDecode("0x8690ff9880000000"),
 		})
 	}
 
@@ -69,15 +69,15 @@ func TestIsPendingTxInput(t *testing.T) {
 
 	// Add a TX
 	gravityContract.GetPendingTxInputList().AddPendingTxInput(&RPCTransaction{
-		Input: hexutil.MustDecode("0xa5352f5b00000000"),
+		Input: hexutil.MustDecode("0xaca6b1c100000000"),
 	})
 
 	// Check if the tx is pending (with a generous 1m timeout)
-	assert.True(t, gravityContract.IsPendingTxInput(hexutil.MustDecode("0xa5352f5b00000000"), time.Minute))
+	assert.True(t, gravityContract.IsPendingTxInput(hexutil.MustDecode("0xaca6b1c100000000"), time.Minute))
 	time.Sleep(time.Millisecond * 1)
 
 	// Now let's check back again with only a 1µs timeout after having waited 1ms. Should be marked as timed out
-	assert.False(t, gravityContract.IsPendingTxInput(hexutil.MustDecode("0xa5352f5b00000000"), time.Microsecond))
+	assert.False(t, gravityContract.IsPendingTxInput(hexutil.MustDecode("0xaca6b1c100000000"), time.Microsecond))
 
 }
 

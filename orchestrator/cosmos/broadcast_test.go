@@ -195,7 +195,7 @@ func (m *hasBiggerNonce) Matches(input interface{}) bool {
 		return false
 	}
 
-	withdraw, ok := input.(types.MsgBatchSendToEthClaim)
+	withdraw, ok := input.(*types.MsgBatchSendToEthClaim)
 	if ok {
 		if withdraw.EventNonce > m.currentNonce {
 			m.currentNonce = withdraw.EventNonce
@@ -203,7 +203,7 @@ func (m *hasBiggerNonce) Matches(input interface{}) bool {
 		}
 	}
 
-	valsetUpdate, ok := input.(types.MsgValsetUpdatedClaim)
+	valsetUpdate, ok := input.(*types.MsgValsetUpdatedClaim)
 	if ok {
 		if valsetUpdate.EventNonce > m.currentNonce {
 			m.currentNonce = valsetUpdate.EventNonce
@@ -211,7 +211,7 @@ func (m *hasBiggerNonce) Matches(input interface{}) bool {
 		}
 	}
 
-	erc20Deployed, ok := input.(types.MsgERC20DeployedClaim)
+	erc20Deployed, ok := input.(*types.MsgERC20DeployedClaim)
 	if ok {
 		if erc20Deployed.EventNonce > m.currentNonce {
 			m.currentNonce = erc20Deployed.EventNonce

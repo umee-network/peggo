@@ -79,7 +79,7 @@ func TestCheckForEvents(t *testing.T) {
 				FromBlock: new(big.Int).SetUint64(1),
 				ToBlock:   new(big.Int).SetUint64(95),
 				Addresses: []ethcmn.Address{gravityAddress},
-				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0xd7767894d73c589daeca9643f445f03d7be61aad2950c117e7cbff4176fca7e4")}, {}, {}, {}},
+				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x9e9794dbf94b0a0aa31a480f5b38550eda7f89115ac8fbf4953fa4dd219900c9")}, {}, {}},
 			})).
 			Return(
 				[]ethtypes.Log{},
@@ -299,7 +299,7 @@ func TestCheckForEvents(t *testing.T) {
 				FromBlock: new(big.Int).SetUint64(1),
 				ToBlock:   new(big.Int).SetUint64(95),
 				Addresses: []ethcmn.Address{gravityAddress},
-				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0xd7767894d73c589daeca9643f445f03d7be61aad2950c117e7cbff4176fca7e4")}, {}, {}, {}},
+				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x9e9794dbf94b0a0aa31a480f5b38550eda7f89115ac8fbf4953fa4dd219900c9")}, {}, {}},
 			})).
 			Return(
 				nil,
@@ -404,7 +404,7 @@ func TestCheckForEvents(t *testing.T) {
 				FromBlock: new(big.Int).SetUint64(1),
 				ToBlock:   new(big.Int).SetUint64(95),
 				Addresses: []ethcmn.Address{gravityAddress},
-				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0xd7767894d73c589daeca9643f445f03d7be61aad2950c117e7cbff4176fca7e4")}, {}, {}, {}},
+				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x9e9794dbf94b0a0aa31a480f5b38550eda7f89115ac8fbf4953fa4dd219900c9")}, {}, {}},
 			})).
 			Return(
 				[]ethtypes.Log{},
@@ -523,7 +523,7 @@ func TestCheckForEvents(t *testing.T) {
 				FromBlock: new(big.Int).SetUint64(1),
 				ToBlock:   new(big.Int).SetUint64(95),
 				Addresses: []ethcmn.Address{gravityAddress},
-				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0xd7767894d73c589daeca9643f445f03d7be61aad2950c117e7cbff4176fca7e4")}, {}, {}, {}},
+				Topics:    [][]ethcmn.Hash{{ethcmn.HexToHash("0x9e9794dbf94b0a0aa31a480f5b38550eda7f89115ac8fbf4953fa4dd219900c9")}, {}, {}},
 			})).
 			Return(
 				[]ethtypes.Log{},
