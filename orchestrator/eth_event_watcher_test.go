@@ -25,7 +25,6 @@ import (
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
-// TODO: This function will require quite some effort to get it tested.
 func TestCheckForEvents(t *testing.T) {
 
 	t.Run("ok", func(t *testing.T) {
@@ -132,7 +131,6 @@ func TestCheckForEvents(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		// TODO: making this more specific might be useful for testing?
 		mockCosmos.EXPECT().SyncBroadcastMsg(gomock.Any()).Return(&sdk.TxResponse{}, nil).AnyTimes()
 
 		gravityBroadcastClient := cosmos.NewGravityBroadcastClient(

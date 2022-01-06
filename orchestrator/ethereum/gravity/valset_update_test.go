@@ -132,8 +132,6 @@ func TestValidatorsAndPowers(t *testing.T) {
 }
 
 func TestCheckValsetSigsAndRepack(t *testing.T) {
-	// TODO: These are not real signatures. Would be cool to use real data here.
-
 	valset := types.Valset{
 		Members: []types.BridgeValidator{
 			{

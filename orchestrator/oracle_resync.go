@@ -112,7 +112,6 @@ func (p *gravityOrchestrator) GetLastCheckedBlock(
 		// we will encounter the first validator sets first and exit early and incorrectly.
 		// note that reversing everything won't actually get you that much of a performance gain
 		// because this only involves events within the searching block range.
-		// TODO: Facu doesn't understand this comment.
 		var valsetUpdatedEvents []*wrappers.GravityValsetUpdatedEvent
 		{
 			iter, err := gravityFilterer.FilterValsetUpdatedEvent(&bind.FilterOpts{
