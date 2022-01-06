@@ -33,13 +33,13 @@ Hardhat is a newer alternative to Ganache that has convenient initialization via
 
 Running the init script will install node_modules inside `./test/ethereum` dir.
 
-```
+```shell
 $ ./test/ethereum/hardhat-init.sh
 ```
 
 After init is done, the following command can be used to launch a Hardhat server instance:
 
-```
+```shell
 $ ./test/ethereum/hardhat.sh
 ```
 
@@ -56,7 +56,7 @@ also check different blocktime conditions, one might want to run Geth itself.
 
 Running this script will init a persistent data storage for the private network.
 
-```
+```shell
 $ ./test/ethereum/geth-init.sh
 ```
 
@@ -70,7 +70,7 @@ Chain options can be tweaked in `./test/ethereum/geth/genesis.json`
 
 After init is done, the following command can be used to launch a full Geth node instance:
 
-```
+```shell
 $ ./test/ethereum/geth.sh
 ```
 
@@ -85,7 +85,7 @@ Running options can be set via ENV variables:
 
 This testsuite supports different Cosmos backends, basically any app that has `gravity` module built-in will do. We expect that the generic app is Cosmos-SDK compatible and has very similar CLI interface to `gaiad`. There is a script that would launch an isolated full 3-node network, running natively on the host machine. Just make sure to provide the target executable as an argument.
 
-```
+```shell
 $ CHAIN_ID=888 DENOM=inj ./test/cosmos/multinode.sh injectived
 $ CHAIN_ID=somm DENOM=samoleans STAKE_DENOM=stake SCALE_FACTOR=000000 ./test/cosmos/multinode.sh sommelier
 ```

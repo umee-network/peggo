@@ -22,7 +22,7 @@ func (s *gravityRelayer) RelayValsets(ctx context.Context, currentValset types.V
 
 	var latestCosmosSigs []types.MsgValsetConfirm
 	var latestCosmosConfirmed *types.Valset
-	for _, set := range latestValsets.Valsets {
+	for i, set := range latestValsets.Valsets {
 		sigs, err := s.cosmosQueryClient.ValsetConfirmsByNonce(ctx, &types.QueryValsetConfirmsByNonceRequest{
 			Nonce: set.Nonce,
 		})
@@ -40,7 +40,7 @@ func (s *gravityRelayer) RelayValsets(ctx context.Context, currentValset types.V
 		}
 
 		latestCosmosSigs = sigs.Confirms
-		latestCosmosConfirmed = &set
+		latestCosmosConfirmed = &latestValsets.Valsets[i]
 		break
 	}
 

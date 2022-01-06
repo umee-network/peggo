@@ -227,6 +227,7 @@ func (p *gravityOrchestrator) EthSignerMainLoop(ctx context.Context) (err error)
 		}
 
 		for _, batch := range oldestUnsignedTransactionBatch {
+			batch := batch
 			logger.Info().
 				Uint64("batch_nonce", batch.BatchNonce).
 				Msg("sending TransactionBatch confirm for BatchNonce")

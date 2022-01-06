@@ -10,16 +10,6 @@ import (
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
-// type ValsetArgs struct {
-// 	Validators   []ethcmn.Address `protobuf:"bytes,2,rep,name=validators,proto3" json:"validators,omitempty"`
-// 	Powers       []*big.Int       `protobuf:"varint,1,opt,name=powers,proto3" json:"powers,omitempty"`
-// 	ValsetNonce  *big.Int         `protobuf:"varint,3,opt,name=valsetNonce,proto3" json:"valsetNonce,omitempty"`
-// 	RewardAmount *big.Int         `protobuf:"bytes,4,opt,name=rewardAmount,json=rewardAmount,proto3" json:"rewardAmount"`
-// 	// the reward token in it's Ethereum hex address representation
-// 	// nolint: lll
-// 	RewardToken ethcmn.Address `protobuf:"bytes,5,opt,name=rewardToken,json=rewardToken,proto3" json:"rewardToken,omitempty"`
-// }
-
 func (s *gravityContract) EncodeValsetUpdate(
 	ctx context.Context,
 	oldValset types.Valset,
