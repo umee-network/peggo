@@ -279,6 +279,8 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 			fmt.Sprintf("tcp://%s:9090", s.valResources[valIdx].Container.Name[1:]),
 			"--tendermint-rpc",
 			fmt.Sprintf("http://%s:26657", s.valResources[valIdx].Container.Name[1:]),
+			"--contract-address",
+			s.gravityContractAddr,
 		},
 	})
 	s.Require().NoError(err)
