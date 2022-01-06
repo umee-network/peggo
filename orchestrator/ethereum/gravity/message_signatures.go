@@ -15,7 +15,7 @@ import (
 // signature to confirm a validator set update on the Peggy Ethereum contract.
 // This value will then be signed before being submitted to Cosmos, verified,
 // and then relayed to Ethereum.
-func EncodeValsetConfirm(peggyID string, valset types.Valset) ethcmn.Hash {
+func EncodeValsetConfirm(gravityID string, valset types.Valset) ethcmn.Hash {
 	// error case here should not occur outside of testing since the above is a constant
 	contractAbi, err := abi.JSON(strings.NewReader(types.ValsetCheckpointABIJSON))
 	if err != nil {
@@ -26,9 +26,9 @@ func EncodeValsetConfirm(peggyID string, valset types.Valset) ethcmn.Hash {
 	var checkpoint [32]uint8
 	copy(checkpoint[:], checkpointBytes)
 
-	peggyIDBytes := []uint8(peggyID)
-	var peggyIDBytes32 [32]uint8
-	copy(peggyIDBytes32[:], peggyIDBytes)
+	gravityIDBytes := []uint8(gravityID)
+	var gravityIDBytes32 [32]uint8
+	copy(gravityIDBytes32[:], gravityIDBytes)
 
 	memberAddresses := make([]ethcmn.Address, len(valset.Members))
 	convertedPowers := make([]*big.Int, len(valset.Members))
@@ -52,7 +52,7 @@ func EncodeValsetConfirm(peggyID string, valset types.Valset) ethcmn.Hash {
 	// then discard.
 	bytes, err := contractAbi.Pack(
 		"checkpoint",
-		peggyIDBytes32,
+		gravityIDBytes32,
 		checkpoint,
 		big.NewInt(int64(valset.Nonce)),
 		memberAddresses,
@@ -78,7 +78,7 @@ func EncodeValsetConfirm(peggyID string, valset types.Valset) ethcmn.Hash {
 // signature to confirm a transaction batch on the Peggy Ethereum contract. This
 // value will then be signed before being submitted to Cosmos, verified, and
 // then relayed to Ethereum.
-func EncodeTxBatchConfirm(peggyID string, batch types.OutgoingTxBatch) []byte {
+func EncodeTxBatchConfirm(gravityID string, batch types.OutgoingTxBatch) []byte {
 	abi, err := abi.JSON(strings.NewReader(types.OutgoingBatchTxCheckpointABIJSON))
 	if err != nil {
 		panic(fmt.Sprintf("failed to JSON parse ABI: %s", err))
@@ -89,9 +89,9 @@ func EncodeTxBatchConfirm(peggyID string, batch types.OutgoingTxBatch) []byte {
 	var batchMethodName [32]uint8
 	copy(batchMethodName[:], methodNameBytes)
 
-	peggyIDBytes := []uint8(peggyID)
-	var peggyIDBytes32 [32]uint8
-	copy(peggyIDBytes32[:], peggyIDBytes)
+	gravityIDBytes := []uint8(gravityID)
+	var gravityIDBytes32 [32]uint8
+	copy(gravityIDBytes32[:], gravityIDBytes)
 
 	// Run through the elements of the batch and serialize them
 	txAmounts := make([]*big.Int, len(batch.Transactions))
@@ -108,7 +108,7 @@ func EncodeTxBatchConfirm(peggyID string, batch types.OutgoingTxBatch) []byte {
 	// the output. This is because it gets encoded as a function name which we must
 	// then discard.
 	abiEncodedBatch, err := abi.Pack("submitBatch",
-		peggyIDBytes32,
+		gravityIDBytes32,
 		batchMethodName,
 		txAmounts,
 		txDestinations,

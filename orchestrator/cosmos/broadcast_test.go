@@ -313,7 +313,7 @@ func TestSendEthereumClaimsIgnoreNonSequentialNonces(t *testing.T) {
 
 	mockCosmos.EXPECT().SyncBroadcastMsg(HasBiggerNonce(0)).Return(&sdk.TxResponse{}, nil).Times(1)
 
-	s := peggyBroadcastClient{
+	s := gravityBroadcastClient{
 		daemonQueryClient: nil,
 		broadcastClient:   mockCosmos,
 	}

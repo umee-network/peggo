@@ -26,13 +26,13 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 	}
 	currentBlock := latestHeader.Number.Uint64()
 
-	peggyFilterer, err := wrappers.NewGravityFilterer(s.peggyContract.Address(), s.ethProvider)
+	peggyFilterer, err := wrappers.NewGravityFilterer(s.gravityContract.Address(), s.ethProvider)
 	if err != nil {
 		err = errors.Wrap(err, "failed to init Peggy events filterer")
 		return nil, err
 	}
 
-	latestEthereumValsetNonce, err := s.peggyContract.GetValsetNonce(ctx, s.peggyContract.FromAddress())
+	latestEthereumValsetNonce, err := s.gravityContract.GetValsetNonce(ctx, s.gravityContract.FromAddress())
 	if err != nil {
 		err = errors.Wrap(err, "failed to get latest Valset nonce")
 		return nil, err

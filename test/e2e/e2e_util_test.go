@@ -19,7 +19,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3/docker"
 
-	peggytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	peggycli "github.com/umee-network/umee/x/peggy/client/cli"
 )
 
@@ -398,7 +398,7 @@ func queryDenomToERC20(endpoint, denom string) (string, bool, error) {
 		return "", false, err
 	}
 
-	var denomToERC20Resp peggytypes.QueryDenomToERC20Response
+	var denomToERC20Resp gravitytypes.QueryDenomToERC20Response
 	if err := cdc.UnmarshalJSON(bz, &denomToERC20Resp); err != nil {
 		return "", false, err
 	}

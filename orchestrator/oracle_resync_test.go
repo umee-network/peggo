@@ -26,7 +26,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 
 		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
-		peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
+		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
 		mockQClient.EXPECT().LastEventByAddr(gomock.Any(), &types.QueryLastEventByAddrRequest{
@@ -51,7 +51,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			ethProvider,
 		)
 
-		peggyContract, _ := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress, nil)
+		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -59,7 +59,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		peggyBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,
@@ -70,8 +70,8 @@ func TestGetLastCheckedBlock(t *testing.T) {
 		orch := NewPeggyOrchestrator(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			mockQClient,
-			peggyBroadcastClient,
-			peggyContract,
+			gravityBroadcastClient,
+			gravityContract,
 			fromAddress,
 			nil,
 			nil,
@@ -93,7 +93,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 
 		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
-		peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
+		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
 		mockQClient.EXPECT().LastEventByAddr(gomock.Any(), &types.QueryLastEventByAddrRequest{
@@ -118,7 +118,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			ethProvider,
 		)
 
-		peggyContract, _ := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress, nil)
+		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -126,7 +126,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		peggyBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,
@@ -137,8 +137,8 @@ func TestGetLastCheckedBlock(t *testing.T) {
 		orch := NewPeggyOrchestrator(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			mockQClient,
-			peggyBroadcastClient,
-			peggyContract,
+			gravityBroadcastClient,
+			gravityContract,
 			fromAddress,
 			nil,
 			nil,
@@ -160,7 +160,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 
 		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
-		peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
+		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
 		mockQClient.EXPECT().LastEventByAddr(gomock.Any(), &types.QueryLastEventByAddrRequest{
@@ -180,7 +180,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			ethProvider,
 		)
 
-		peggyContract, _ := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress, nil)
+		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -188,7 +188,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		peggyBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,
@@ -199,8 +199,8 @@ func TestGetLastCheckedBlock(t *testing.T) {
 		orch := NewPeggyOrchestrator(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			mockQClient,
-			peggyBroadcastClient,
-			peggyContract,
+			gravityBroadcastClient,
+			gravityContract,
 			fromAddress,
 			nil,
 			nil,

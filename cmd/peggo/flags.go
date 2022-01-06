@@ -90,7 +90,6 @@ func ethereumOptsFlagSet() *pflag.FlagSet {
 	fs.String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
 	fs.Float64(flagEthGasAdjustment, float64(1.3), "Specify a gas price adjustment for Ethereum transactions")
 	fs.Float64(flagEthGasLimitAdjustment, float64(1.2), "Specify a gas limit adjustment for Ethereum transactions")
-	fs.String(flagContractAddress, "0x4ecE7B277E26729F1934e4f080a502312d358F57", "Specify the Gravity Ethereum contract address")
 
 	return fs
 }
@@ -102,6 +101,14 @@ func bridgeFlagSet() *pflag.FlagSet {
 	fs.String(flagEthPK, "", "Provide the Ethereum private key of the validator in hex")
 	fs.Int64(flagEthGasPrice, 0, "The Ethereum gas price to include in the transaction; If zero, gas price will be estimated")
 	fs.Int64(flagEthGasLimit, 6000000, "The Ethereum gas limit to include in the transaction")
+
+	return fs
+}
+
+func bridgeAddrFlagSet() *pflag.FlagSet {
+	fs := pflag.NewFlagSet("", pflag.PanicOnError)
+	// TODO: make this flag required
+	fs.String(flagContractAddress, "", "Specify the Gravity Ethereum contract address (required)")
 
 	return fs
 }

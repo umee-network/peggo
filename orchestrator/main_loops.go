@@ -54,16 +54,16 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 
 	var (
 		lastCheckedBlock uint64
-		peggyParams      types.Params
+		gravityParams    types.Params
 	)
 
 	if err := retry.Do(func() (err error) {
-		peggyParamsResp, err := p.cosmosQueryClient.Params(ctx, &types.QueryParamsRequest{})
-		if err != nil || peggyParamsResp == nil {
+		gravityParamsResp, err := p.cosmosQueryClient.Params(ctx, &types.QueryParamsRequest{})
+		if err != nil || gravityParamsResp == nil {
 			logger.Fatal().Err(err).Msg("failed to query peggy params, is umeed running?")
 		}
 
-		peggyParams = peggyParamsResp.Params
+		gravityParams = gravityParamsResp.Params
 
 		return err
 	}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
@@ -74,7 +74,7 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 	}
 
 	if err := retry.Do(func() (err error) {
-		lastCheckedBlock, err = p.GetLastCheckedBlock(ctx, getEthBlockDelay(peggyParams.BridgeChainId))
+		lastCheckedBlock, err = p.GetLastCheckedBlock(ctx, getEthBlockDelay(gravityParams.BridgeChainId))
 		if lastCheckedBlock == 0 {
 			lastCheckedBlock = p.startingEthBlock
 		}
@@ -93,7 +93,7 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 		// Relays events from Ethereum -> Cosmos
 		var currentBlock uint64
 		if err := retry.Do(func() (err error) {
-			currentBlock, err = p.CheckForEvents(ctx, lastCheckedBlock, getEthBlockDelay(peggyParams.BridgeChainId))
+			currentBlock, err = p.CheckForEvents(ctx, lastCheckedBlock, getEthBlockDelay(gravityParams.BridgeChainId))
 			return err
 		}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 			logger.Err(err).Uint("retry", n).Msg("error during Eth event checking; retrying...")
@@ -113,7 +113,7 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 		//	   last iteration.
 		if time.Since(lastResync) >= 48*time.Hour {
 			if err := retry.Do(func() (err error) {
-				lastCheckedBlock, err = p.GetLastCheckedBlock(ctx, getEthBlockDelay(peggyParams.BridgeChainId))
+				lastCheckedBlock, err = p.GetLastCheckedBlock(ctx, getEthBlockDelay(gravityParams.BridgeChainId))
 				return err
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 				logger.Err(err).Uint("retry", n).Msg("failed to get last checked block; retrying...")
@@ -139,9 +139,9 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "EthSignerMainLoop").Logger()
 
-	var peggyID string
+	var gravityID string
 	if err := retry.Do(func() (err error) {
-		peggyID, err = p.peggyContract.GetPeggyID(ctx, p.peggyContract.FromAddress())
+		gravityID, err = p.gravityContract.GetPeggyID(ctx, p.gravityContract.FromAddress())
 		return err
 	}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 		logger.Err(err).Uint("retry", n).Msg("failed to get PeggyID from Ethereum contract; retrying...")
@@ -150,7 +150,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 		return err
 	}
 
-	logger.Debug().Str("peggyID", peggyID).Msg("received peggyID")
+	logger.Debug().Str("gravityID", gravityID).Msg("received gravityID")
 
 	return loops.RunLoop(ctx, p.logger, p.cosmosBlockTime*ethSignerLoopMultiplier, func() error {
 		var oldestUnsignedValsets []types.Valset
@@ -158,7 +158,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 			oldestValsets, err := p.cosmosQueryClient.LastPendingValsetRequestByAddr(
 				ctx,
 				&types.QueryLastPendingValsetRequestByAddrRequest{
-					Address: p.peggyBroadcastClient.AccFromAddress().String(),
+					Address: p.gravityBroadcastClient.AccFromAddress().String(),
 				},
 			)
 
@@ -185,7 +185,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 			valset := oldestValset
 
 			if err := retry.Do(func() error {
-				return p.peggyBroadcastClient.SendValsetConfirm(ctx, p.ethFrom, peggyID, valset)
+				return p.gravityBroadcastClient.SendValsetConfirm(ctx, p.ethFrom, gravityID, valset)
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 				logger.Err(err).
 					Uint("retry", n).
@@ -202,7 +202,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 			txBatch, err := p.cosmosQueryClient.LastPendingBatchRequestByAddr(
 				ctx,
 				&types.QueryLastPendingBatchRequestByAddrRequest{
-					Address: p.peggyBroadcastClient.AccFromAddress().String(),
+					Address: p.gravityBroadcastClient.AccFromAddress().String(),
 				},
 			)
 
@@ -231,7 +231,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 				Uint64("batch_nonce", batch.BatchNonce).
 				Msg("sending TransactionBatch confirm for BatchNonce")
 			if err := retry.Do(func() error {
-				return p.peggyBroadcastClient.SendBatchConfirm(ctx, p.ethFrom, peggyID, batch)
+				return p.gravityBroadcastClient.SendBatchConfirm(ctx, p.ethFrom, gravityID, batch)
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 				logger.Err(err).
 					Uint("retry", n).
@@ -290,7 +290,7 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 
 				logger.Info().Str("token_contract", tokenAddr.String()).Str("denom", denom).Msg("sending batch request")
 
-				if err := p.peggyBroadcastClient.SendRequestBatch(ctx, denom); err != nil {
+				if err := p.gravityBroadcastClient.SendRequestBatch(ctx, denom); err != nil {
 					logger.Err(err).Msg("failed to send batch request")
 				}
 			}

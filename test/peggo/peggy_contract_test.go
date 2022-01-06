@@ -13,30 +13,30 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
+	peggy "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
 var _ = Describe("Contract Tests", func() {
 	_ = Describe("Peggy", func() {
 		var (
-			peggyTxOpts   deployer.ContractTxOpts
-			peggyCallOpts deployer.ContractCallOpts
-			peggyLogsOpts deployer.ContractLogsOpts
-			peggyContract *sol.Contract
+			peggyTxOpts     deployer.ContractTxOpts
+			peggyCallOpts   deployer.ContractCallOpts
+			peggyLogsOpts   deployer.ContractLogsOpts
+			gravityContract *sol.Contract
 
 			deployArgs   deployer.AbiMethodInputMapperFunc
 			deployErr    error
 			deployTxHash ethcmn.Hash
 
-			peggyID    ethcmn.Hash
+			gravityID  ethcmn.Hash
 			minPower   *big.Int
 			validators []ethcmn.Address
 			powers     []*big.Int
 		)
 
 		BeforeEach(func() {
-			peggyID = formatBytes32String("foo")
+			gravityID = formatBytes32String("foo")
 			validators = getEthAddresses(CosmosAccounts[:3]...)
 			minPower = big.NewInt(3500)
 			powers = []*big.Int{
@@ -46,7 +46,7 @@ var _ = Describe("Contract Tests", func() {
 			}
 
 			deployArgs = withArgsFn(
-				peggyID,
+				gravityID,
 				minPower,
 				validators,
 				powers,
@@ -55,7 +55,7 @@ var _ = Describe("Contract Tests", func() {
 
 		JustBeforeEach(func() {
 			// don't redeploy if already deployed
-			if peggyContract != nil {
+			if gravityContract != nil {
 				return
 			}
 
@@ -68,7 +68,7 @@ var _ = Describe("Contract Tests", func() {
 				CoverageAgent: CoverageAgent,
 			}
 
-			_, peggyContract, deployErr = ContractDeployer.Deploy(context.Background(), peggyDeployOpts, noArgs)
+			_, gravityContract, deployErr = ContractDeployer.Deploy(context.Background(), peggyDeployOpts, noArgs)
 			orFail(deployErr)
 
 			peggyTxOpts = deployer.ContractTxOpts{
@@ -76,7 +76,7 @@ var _ = Describe("Contract Tests", func() {
 				FromPk:        EthAccounts[0].EthPrivKey,
 				SolSource:     "../../solidity/contracts/Peggy.sol",
 				ContractName:  "Peggy",
-				Contract:      peggyContract.Address,
+				Contract:      gravityContract.Address,
 				Await:         true,
 				CoverageAgent: CoverageAgent,
 			}
@@ -87,20 +87,20 @@ var _ = Describe("Contract Tests", func() {
 		_ = Context("Contract fails to initialize", func() {
 			AfterEach(func() {
 				deployArgs = withArgsFn(
-					peggyID,
+					gravityID,
 					minPower,
 					validators,
 					powers,
 				)
 
 				// force redeployment
-				peggyContract = nil
+				gravityContract = nil
 			})
 
 			_ = When("Throws on malformed valset", func() {
 				BeforeEach(func() {
 					deployArgs = withArgsFn(
-						peggyID,
+						gravityID,
 						minPower,
 						validators,
 						powers[:1], // only one
@@ -116,7 +116,7 @@ var _ = Describe("Contract Tests", func() {
 			_ = When("Throws on insufficient power", func() {
 				BeforeEach(func() {
 					deployArgs = withArgsFn(
-						peggyID,
+						gravityID,
 						big.NewInt(10000),
 						validators,
 						powers,
@@ -147,7 +147,7 @@ var _ = Describe("Contract Tests", func() {
 					FromPk:        peggyOwner.EthPrivKey,
 					SolSource:     "../../solidity/contracts/Peggy.sol",
 					ContractName:  "Peggy",
-					Contract:      peggyContract.Address,
+					Contract:      gravityContract.Address,
 					Await:         true,
 					CoverageAgent: CoverageAgent,
 				}
@@ -156,7 +156,7 @@ var _ = Describe("Contract Tests", func() {
 					From:          peggyOwner.EthAddress,
 					SolSource:     "../../solidity/contracts/Peggy.sol",
 					ContractName:  "Peggy",
-					Contract:      peggyContract.Address,
+					Contract:      gravityContract.Address,
 					CoverageAgent: CoverageAgent,
 					CoverageCall: deployer.ContractCoverageCallOpts{
 						FromPk: peggyOwner.EthPrivKey,
@@ -166,7 +166,7 @@ var _ = Describe("Contract Tests", func() {
 				peggyLogsOpts = deployer.ContractLogsOpts{
 					SolSource:     "../../solidity/contracts/Peggy.sol",
 					ContractName:  "Peggy",
-					Contract:      peggyContract.Address,
+					Contract:      gravityContract.Address,
 					CoverageAgent: CoverageAgent,
 				}
 			})
@@ -200,7 +200,7 @@ var _ = Describe("Contract Tests", func() {
 
 					err = outAbi.Copy(&state_peggyId, out)
 					Ω(err).Should(BeNil())
-					Ω(state_peggyId).Should(Equal(peggyID))
+					Ω(state_peggyId).Should(Equal(gravityID))
 				})
 
 				It("Should have generated a valid checkpoint", func() {
@@ -211,7 +211,7 @@ var _ = Describe("Contract Tests", func() {
 					)
 					Ω(err).Should(BeNil())
 
-					offchainCheckpoint := makeValsetCheckpoint(peggyID, validators, powers, big.NewInt(0), big.NewInt(0), zeroAddress)
+					offchainCheckpoint := makeValsetCheckpoint(gravityID, validators, powers, big.NewInt(0), big.NewInt(0), zeroAddress)
 
 					err = outAbi.Copy(&state_lastValsetCheckpoint, out)
 					Ω(err).Should(BeNil())
@@ -292,7 +292,7 @@ var _ = Describe("Contract Tests", func() {
 						nextValsetNonce = new(big.Int).Add(state_lastValsetNonce, big.NewInt(1))
 
 						valsetCheckpointHash = makeValsetCheckpoint(
-							peggyID,
+							gravityID,
 							newValidators,
 							newPowers,
 							nextValsetNonce,
@@ -419,7 +419,7 @@ var _ = Describe("Contract Tests", func() {
 						nextValsetNonce = new(big.Int).Add(state_lastValsetNonce, big.NewInt(1))
 
 						valsetCheckpointHash = makeValsetCheckpoint(
-							peggyID,
+							gravityID,
 							validators,
 							powers,
 							nextValsetNonce,
@@ -629,7 +629,7 @@ var _ = Describe("Contract Tests", func() {
 							var peggyBalance *big.Int
 
 							out, outAbi, err := ContractDeployer.Call(context.Background(), erc20CallOpts,
-								"balanceOf", withArgsFn(peggyContract.Address))
+								"balanceOf", withArgsFn(gravityContract.Address))
 							Ω(err).Should(BeNil())
 
 							err = outAbi.Copy(&peggyBalance, out)
@@ -675,7 +675,7 @@ var _ = Describe("Contract Tests", func() {
 								}
 
 								transactionBatchHash := prepareOutgoingTransferBatch(
-									peggyID,
+									gravityID,
 									erc20DeployedEvent.TokenContract,
 									txAmounts,
 									txDestinations,
@@ -744,7 +744,7 @@ var _ = Describe("Contract Tests", func() {
 									var peggyBalance *big.Int
 
 									out, outAbi, err := ContractDeployer.Call(context.Background(), erc20CallOpts,
-										"balanceOf", withArgsFn(peggyContract.Address))
+										"balanceOf", withArgsFn(gravityContract.Address))
 									Ω(err).Should(BeNil())
 
 									err = outAbi.Copy(&peggyBalance, out)
@@ -835,7 +835,7 @@ var _ = Describe("Contract Tests", func() {
 var outgoingBatchTxConfirmABI, _ = abi.JSON(strings.NewReader(peggy.OutgoingBatchTxConfirmABIJSON))
 
 func prepareOutgoingTransferBatch(
-	peggyID ethcmn.Hash,
+	gravityID ethcmn.Hash,
 	tokenContract ethcmn.Address,
 	txAmounts []*big.Int,
 	txDestinations []ethcmn.Address,
@@ -844,7 +844,7 @@ func prepareOutgoingTransferBatch(
 	batchTimeout *big.Int,
 ) ethcmn.Hash {
 	abiEncodedBatch, err := outgoingBatchTxConfirmABI.Pack("transactionBatch",
-		peggyID,
+		gravityID,
 		formatBytes32String("transactionBatch"),
 		txAmounts,
 		txDestinations,

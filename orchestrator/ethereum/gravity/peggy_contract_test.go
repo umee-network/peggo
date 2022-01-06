@@ -54,8 +54,8 @@ func TestGetTxBatchNonce(t *testing.T) {
 	)
 
 	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
-	nonce, err := peggyContract.GetTxBatchNonce(context.Background(), ethcmn.HexToAddress("0x0"), ethcmn.HexToAddress("0x0"))
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	nonce, err := gravityContract.GetTxBatchNonce(context.Background(), ethcmn.HexToAddress("0x0"), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
 	assert.Equal(t, nonce, nonceBigInt)
@@ -93,8 +93,8 @@ func TestGetValsetNonce(t *testing.T) {
 	)
 
 	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
-	nonce, err := peggyContract.GetValsetNonce(context.Background(), ethcmn.HexToAddress("0x0"))
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	nonce, err := gravityContract.GetValsetNonce(context.Background(), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
 	assert.Equal(t, nonce, nonceBigInt)
@@ -105,7 +105,7 @@ func TestGetGetPeggyID(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	peggyID := ethcmn.HexToHash("0x756d65652d706567677969640000000000000000000000000000000000000000")
+	gravityID := ethcmn.HexToHash("0x756d65652d706567677969640000000000000000000000000000000000000000")
 
 	mockEvmProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
 	mockEvmProvider.EXPECT().PendingNonceAt(gomock.Any(), ethcmn.HexToAddress("0x0")).Return(uint64(0), nil)
@@ -116,7 +116,7 @@ func TestGetGetPeggyID(t *testing.T) {
 			nil,
 		).
 		Return(
-			peggyID.Bytes(),
+			gravityID.Bytes(),
 			nil,
 		)
 
@@ -131,11 +131,11 @@ func TestGetGetPeggyID(t *testing.T) {
 	)
 
 	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
-	res, err := peggyContract.GetPeggyID(context.Background(), ethcmn.HexToAddress("0x0"))
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	res, err := gravityContract.GetPeggyID(context.Background(), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
-	assert.Equal(t, peggyID, res)
+	assert.Equal(t, gravityID, res)
 
 }
 
@@ -176,8 +176,8 @@ func TestGetERC20Symbol(t *testing.T) {
 	)
 
 	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
-	symbol, err := peggyContract.GetERC20Symbol(context.Background(), ethcmn.HexToAddress("0x1"), ethcmn.HexToAddress("0x0"))
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	symbol, err := gravityContract.GetERC20Symbol(context.Background(), ethcmn.HexToAddress("0x1"), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
 	assert.Equal(t, "USDC", symbol)
@@ -220,8 +220,8 @@ func TestGetERC20Decimals(t *testing.T) {
 	)
 
 	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
-	decimals, err := peggyContract.GetERC20Decimals(context.Background(), ethcmn.HexToAddress("0x1"), ethcmn.HexToAddress("0x0"))
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	decimals, err := gravityContract.GetERC20Decimals(context.Background(), ethcmn.HexToAddress("0x1"), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
 	assert.Equal(t, uint8(18), decimals)
@@ -246,7 +246,7 @@ func TestAddress(t *testing.T) {
 	)
 
 	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
 
-	assert.Equal(t, ethcmn.Address{}, peggyContract.Address())
+	assert.Equal(t, ethcmn.Address{}, gravityContract.Address())
 }

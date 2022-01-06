@@ -93,11 +93,11 @@ type Contract interface {
 	GetPendingTxInputList() *PendingTxInputList
 }
 
-type peggyContract struct {
+type gravityContract struct {
 	committer.EVMCommitter
 
 	logger             zerolog.Logger
-	peggyAddress       ethcmn.Address
+	gravityAddress     ethcmn.Address
 	ethPeggy           *wrappers.Gravity
 	pendingTxInputList PendingTxInputList
 
@@ -105,26 +105,26 @@ type peggyContract struct {
 	erc20DecimalCache map[string]uint8
 }
 
-func NewPeggyContract(
+func NewGravityContract(
 	logger zerolog.Logger,
 	ethCommitter committer.EVMCommitter,
-	peggyAddress ethcmn.Address,
+	gravityAddress ethcmn.Address,
 	ethPeggy *wrappers.Gravity,
 ) (Contract, error) {
-	return &peggyContract{
-		logger:       logger.With().Str("module", "peggy_contract").Logger(),
-		EVMCommitter: ethCommitter,
-		peggyAddress: peggyAddress,
-		ethPeggy:     ethPeggy,
+	return &gravityContract{
+		logger:         logger.With().Str("module", "peggy_contract").Logger(),
+		EVMCommitter:   ethCommitter,
+		gravityAddress: gravityAddress,
+		ethPeggy:       ethPeggy,
 	}, nil
 }
 
-func (s *peggyContract) Address() ethcmn.Address {
-	return s.peggyAddress
+func (s *gravityContract) Address() ethcmn.Address {
+	return s.gravityAddress
 }
 
 // Gets the latest transaction batch nonce
-func (s *peggyContract) GetTxBatchNonce(
+func (s *gravityContract) GetTxBatchNonce(
 	ctx context.Context,
 	erc20ContractAddress ethcmn.Address,
 	callerAddress ethcmn.Address,
@@ -143,7 +143,7 @@ func (s *peggyContract) GetTxBatchNonce(
 }
 
 // Gets the latest validator set nonce
-func (s *peggyContract) GetValsetNonce(
+func (s *gravityContract) GetValsetNonce(
 	ctx context.Context,
 	callerAddress ethcmn.Address,
 ) (*big.Int, error) {
@@ -160,13 +160,13 @@ func (s *peggyContract) GetValsetNonce(
 	return nonce, nil
 }
 
-// Gets the peggyID
-func (s *peggyContract) GetPeggyID(
+// Gets the gravityID
+func (s *gravityContract) GetPeggyID(
 	ctx context.Context,
 	callerAddress ethcmn.Address,
 ) (string, error) {
 
-	peggyID, err := s.ethPeggy.StateGravityId(&bind.CallOpts{
+	gravityID, err := s.ethPeggy.StateGravityId(&bind.CallOpts{
 		From:    callerAddress,
 		Context: ctx,
 	})
@@ -176,10 +176,10 @@ func (s *peggyContract) GetPeggyID(
 		return "", err
 	}
 
-	return string(peggyID[:]), nil
+	return string(gravityID[:]), nil
 }
 
-func (s *peggyContract) GetERC20Symbol(
+func (s *gravityContract) GetERC20Symbol(
 	ctx context.Context,
 	erc20ContractAddress ethcmn.Address,
 	callerAddress ethcmn.Address,
@@ -205,7 +205,7 @@ func (s *peggyContract) GetERC20Symbol(
 	return symbol, nil
 }
 
-func (s *peggyContract) GetERC20Decimals(
+func (s *gravityContract) GetERC20Decimals(
 	ctx context.Context,
 	tokenAddr ethcmn.Address,
 	callerAddr ethcmn.Address,

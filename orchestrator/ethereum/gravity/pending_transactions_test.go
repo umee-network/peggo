@@ -64,20 +64,20 @@ func TestIsPendingTxInput(t *testing.T) {
 
 	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
 
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
-	peggyContract.IsPendingTxInput([]byte{}, time.Second)
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	gravityContract.IsPendingTxInput([]byte{}, time.Second)
 
 	// Add a TX
-	peggyContract.GetPendingTxInputList().AddPendingTxInput(&RPCTransaction{
+	gravityContract.GetPendingTxInputList().AddPendingTxInput(&RPCTransaction{
 		Input: hexutil.MustDecode("0xa5352f5b00000000"),
 	})
 
 	// Check if the tx is pending (with a generous 1m timeout)
-	assert.True(t, peggyContract.IsPendingTxInput(hexutil.MustDecode("0xa5352f5b00000000"), time.Minute))
+	assert.True(t, gravityContract.IsPendingTxInput(hexutil.MustDecode("0xa5352f5b00000000"), time.Minute))
 	time.Sleep(time.Millisecond * 1)
 
 	// Now let's check back again with only a 1µs timeout after having waited 1ms. Should be marked as timed out
-	assert.False(t, peggyContract.IsPendingTxInput(hexutil.MustDecode("0xa5352f5b00000000"), time.Microsecond))
+	assert.False(t, gravityContract.IsPendingTxInput(hexutil.MustDecode("0xa5352f5b00000000"), time.Microsecond))
 
 }
 
@@ -96,9 +96,9 @@ func TestIsPendingTxInput(t *testing.T) {
 // 		nil,
 // 		mockEvmProvider,
 // 	)
-// 	peggyContract, _ := NewPeggyContract(logger, ethCommitter, ethcmn.Address{})
+// 	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{})
 
-// 	err := peggyContract.SubscribeToPendingTxs(context.Background(), "invalidURL")
+// 	err := gravityContract.SubscribeToPendingTxs(context.Background(), "invalidURL")
 
 // 	assert.NotNil(t, err)
 

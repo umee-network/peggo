@@ -11,8 +11,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/cmd/peggo/client"
+	peggy "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/keystore"
-	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
@@ -23,7 +23,7 @@ type PeggyBroadcastClient interface {
 	SendValsetConfirm(
 		ctx context.Context,
 		ethFrom ethcmn.Address,
-		peggyID string,
+		gravityID string,
 		valset types.Valset,
 	) error
 
@@ -32,7 +32,7 @@ type PeggyBroadcastClient interface {
 	SendBatchConfirm(
 		ctx context.Context,
 		ethFrom ethcmn.Address,
-		peggyID string,
+		gravityID string,
 		batch types.OutgoingTxBatch,
 	) error
 
@@ -54,7 +54,7 @@ type PeggyBroadcastClient interface {
 }
 
 type (
-	peggyBroadcastClient struct {
+	gravityBroadcastClient struct {
 		logger            zerolog.Logger
 		daemonQueryClient types.QueryClient
 		broadcastClient   client.CosmosClient
@@ -80,7 +80,7 @@ func NewPeggyBroadcastClient(
 	ethSignerFn keystore.SignerFn,
 	ethPersonalSignFn keystore.PersonalSignFn,
 ) PeggyBroadcastClient {
-	return &peggyBroadcastClient{
+	return &gravityBroadcastClient{
 		logger:            logger.With().Str("module", "peggy_broadcast_client").Logger(),
 		daemonQueryClient: queryClient,
 		broadcastClient:   broadcastClient,
@@ -89,18 +89,18 @@ func NewPeggyBroadcastClient(
 	}
 }
 
-func (s *peggyBroadcastClient) AccFromAddress() sdk.AccAddress {
+func (s *gravityBroadcastClient) AccFromAddress() sdk.AccAddress {
 	return s.broadcastClient.FromAddress()
 }
 
-func (s *peggyBroadcastClient) SendValsetConfirm(
+func (s *gravityBroadcastClient) SendValsetConfirm(
 	ctx context.Context,
 	ethFrom ethcmn.Address,
-	peggyID string,
+	gravityID string,
 	valset types.Valset,
 ) error {
 
-	confirmHash := peggy.EncodeValsetConfirm(peggyID, valset)
+	confirmHash := peggy.EncodeValsetConfirm(gravityID, valset)
 	signature, err := s.ethPersonalSignFn(ethFrom, confirmHash.Bytes())
 	if err != nil {
 		err = errors.New("failed to sign validator address")
@@ -136,14 +136,14 @@ func (s *peggyBroadcastClient) SendValsetConfirm(
 	return nil
 }
 
-func (s *peggyBroadcastClient) SendBatchConfirm(
+func (s *gravityBroadcastClient) SendBatchConfirm(
 	ctx context.Context,
 	ethFrom ethcmn.Address,
-	peggyID string,
+	gravityID string,
 	batch types.OutgoingTxBatch,
 ) error {
 
-	confirmHash := peggy.EncodeTxBatchConfirm(peggyID, batch)
+	confirmHash := peggy.EncodeTxBatchConfirm(gravityID, batch)
 	signature, err := s.ethPersonalSignFn(ethFrom, confirmHash)
 	if err != nil {
 		err = errors.New("failed to sign validator address")
@@ -173,7 +173,7 @@ func (s *peggyBroadcastClient) SendBatchConfirm(
 	return nil
 }
 
-func (s *peggyBroadcastClient) SendEthereumClaims(
+func (s *gravityBroadcastClient) SendEthereumClaims(
 	ctx context.Context,
 	lastClaimEvent uint64,
 	deposits []*wrappers.GravitySendToCosmosEvent,
@@ -225,7 +225,7 @@ func (s *peggyBroadcastClient) SendEthereumClaims(
 	return s.broadcastEthereumEvents(allevents)
 }
 
-func (s *peggyBroadcastClient) SendRequestBatch(
+func (s *gravityBroadcastClient) SendRequestBatch(
 	ctx context.Context,
 	denom string,
 ) error {
@@ -251,7 +251,7 @@ func (s *peggyBroadcastClient) SendRequestBatch(
 	return nil
 }
 
-func (s *peggyBroadcastClient) broadcastEthereumEvents(events []sortableEvent) error {
+func (s *gravityBroadcastClient) broadcastEthereumEvents(events []sortableEvent) error {
 	msgs := []sdk.Msg{}
 
 	// Use SliceStable so we always get the same order

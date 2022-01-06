@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	peggytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -40,10 +40,10 @@ func getBridgeCommand() *cobra.Command {
 
 	cmd.PersistentFlags().AddFlagSet(cosmosFlagSet())
 	cmd.PersistentFlags().AddFlagSet(bridgeFlagSet())
+	cmd.PersistentFlags().AddFlagSet(bridgeAddrFlagSet())
 
 	cmd.AddCommand(
-		deployPeggyCmd(),
-		// initPeggyCmd(),
+		deployGravityCmd(),
 		deployERC20Cmd(),
 		deployERC20RawCmd(),
 		sendToCosmosCmd(),
@@ -53,10 +53,10 @@ func getBridgeCommand() *cobra.Command {
 }
 
 // TODO: Support --admin capabilities.
-func deployPeggyCmd() *cobra.Command {
+func deployGravityCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "deploy-peggy",
-		Short: "Deploy the Peggy (Gravity Bridge) smart contract on Ethereum",
+		Use:   "deploy-gravity",
+		Short: "Deploy the Gravity Bridge smart contract on Ethereum",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			konfig, err := parseServerConfig(cmd)
 			if err != nil {
@@ -123,8 +123,8 @@ func deployPeggyCmd() *cobra.Command {
 				return err
 			}
 
-			peggyQueryClient := peggytypes.NewQueryClient(gRPCConn)
-			currValset, err := peggyQueryClient.CurrentValset(cmd.Context(), &peggytypes.QueryCurrentValsetRequest{})
+			gravityQueryClient := gravitytypes.NewQueryClient(gRPCConn)
+			currValset, err := gravityQueryClient.CurrentValset(cmd.Context(), &gravitytypes.QueryCurrentValsetRequest{})
 			if err != nil {
 				return err
 			}
@@ -158,13 +158,13 @@ func deployPeggyCmd() *cobra.Command {
 			// var gravityID [32]byte
 			// copy(gravityID[:], []byte(gravityParams.GravityId))
 
-			peggyIDBytes := []uint8(gravityParams.GravityId)
-			var peggyIDBytes32 [32]uint8
-			copy(peggyIDBytes32[:], peggyIDBytes)
+			gravityIDBytes := []uint8(gravityParams.GravityId)
+			var gravityIDBytes32 [32]uint8
+			copy(gravityIDBytes32[:], gravityIDBytes)
 
 			// TODO: FIX DEPLOYMENT OF GRAVITY CONTRACT
 
-			address, tx, _, err := wrappers.DeployGravity(auth, ethRPC, peggyIDBytes32, validators, powers)
+			address, tx, _, err := wrappers.DeployGravity(auth, ethRPC, gravityIDBytes32, validators, powers)
 			if err != nil {
 				return fmt.Errorf("failed deploy Peggy (Gravity Bridge) contract: %w", err)
 			}
@@ -183,116 +183,6 @@ Transaction: %s
 
 	return cmd
 }
-
-// func initPeggyCmd() *cobra.Command {
-// 	cmd := &cobra.Command{
-// 		Use:   "init-peggy",
-// 		Short: "Initialize the Peggy (Gravity Bridge) smart contract on Ethereum",
-// 		Long: `Initialize the Peggy (Gravity Bridge) smart contract on Ethereum using
-// the current validator set and their respective powers.
-
-// Note, each validator must have their Ethereum delegate keys registered on chain
-// prior to initializing.`,
-// 		RunE: func(cmd *cobra.Command, args []string) error {
-// 			konfig, err := parseServerConfig(cmd)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			cosmosChainID := konfig.String(flagCosmosChainID)
-// 			clientCtx, err := client.NewClientContext(cosmosChainID, "", nil)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			tmRPCEndpoint := konfig.String(flagTendermintRPC)
-// 			cosmosGRPC := konfig.String(flagCosmosGRPC)
-
-// 			tmRPC, err := rpchttp.New(tmRPCEndpoint, "/websocket")
-// 			if err != nil {
-// 				return fmt.Errorf("failed to create Tendermint RPC client: %w", err)
-// 			}
-
-// 			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s\n", tmRPCEndpoint)
-// 			clientCtx = clientCtx.WithClient(tmRPC).WithNodeURI(tmRPCEndpoint)
-
-// 			logger, err := getLogger(cmd)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			daemonClient, err := client.NewCosmosClient(clientCtx, logger, cosmosGRPC)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			// TODO: Clean this up to be more ergonomic and clean. We can probably
-// 			// encapsulate all of this into a single utility function that gracefully
-// 			// checks for the gRPC status/health.
-// 			//
-// 			// Ref: https://github.com/umee-network/peggo/issues/2
-// 			fmt.Fprintln(os.Stderr, "Waiting for cosmos gRPC service...")
-// 			time.Sleep(time.Second)
-
-// 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-// 			defer cancel()
-
-// 			gRPCConn := daemonClient.QueryClient()
-// 			waitForService(ctx, gRPCConn)
-
-// 			peggyParams, err := getPeggyParams(gRPCConn)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			ethRPCEndpoint := konfig.String(flagEthRPC)
-// 			ethRPC, err := ethclient.Dial(ethRPCEndpoint)
-// 			if err != nil {
-// 				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
-// 			}
-
-// 			peggyContract, err := getPeggyContract(ethRPC, peggyParams.BridgeEthereumAddress)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			auth, err := buildTransactOpts(konfig, ethRPC)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			tx, err := peggyContract.Initialize(auth, gravityID, powerThreshold, validators, powers)
-// 			if err != nil {
-// 				return fmt.Errorf("failed to initialize Peggy (Gravity Bridge): %w", err)
-// 			}
-
-// 			_, _ = fmt.Fprintf(os.Stderr, `Peggy (Gravity Bridge) contract successfully initialized!
-// 			Gravity Address: %s
-// 			PeggyID: %s
-// 			Init Params:
-// 			  Peggy ID: 0x%X
-// 			  Power Threshold: %d
-// 			  Validator Set Size: %d
-// 			  Validator Total Power: %d
-// 			Transaction: %s
-// 			`,
-// 				peggyParams.BridgeEthereumAddress,
-// 				peggyParams.GravityId,
-// 				gravityID,
-// 				powerThresholdInt,
-// 				len(validators),
-// 				totalPower,
-// 				tx.Hash().Hex(),
-// 			)
-
-// 			return nil
-// 		},
-// 	}
-
-// 	cmd.Flags().Uint64(flagPowerThreshold, 2834678415, "The validator power threshold to initialize Peggy with")
-
-// 	return cmd
-// }
 
 func deployERC20Cmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -358,14 +248,9 @@ func deployERC20Cmd() *cobra.Command {
 			gRPCConn := daemonClient.QueryClient()
 			waitForService(ctx, gRPCConn)
 
-			// peggyParams, err := getGravityParams(gRPCConn)
-			// if err != nil {
-			// 	return err
-			// }
+			bridgeAddress := konfig.String(flagContractAddress)
 
-			// TODO: use flag for BridgeEthereumAddress
-
-			peggyContract, err := getPeggyContract(ethRPC, "0x7DB17393c65bB58381F114A6965b3cB25F993def")
+			gravityContract, err := getGravityContract(ethRPC, bridgeAddress)
 			if err != nil {
 				return err
 			}
@@ -404,7 +289,7 @@ func deployERC20Cmd() *cobra.Command {
 				}
 			}
 
-			tx, err := peggyContract.DeployERC20(auth, baseDenom, resp.Metadata.Name, resp.Metadata.Symbol, decimals)
+			tx, err := gravityContract.DeployERC20(auth, baseDenom, resp.Metadata.Name, resp.Metadata.Symbol, decimals)
 			if err != nil {
 				return fmt.Errorf("failed deploy Cosmos native ERC20 token: %w", err)
 			}
@@ -456,9 +341,9 @@ network starting.`,
 				return err
 			}
 
-			peggyAddr := args[0]
+			gravityAddr := args[0]
 
-			peggyContract, err := getPeggyContract(ethRPC, peggyAddr)
+			gravityContract, err := getGravityContract(ethRPC, gravityAddr)
 			if err != nil {
 				return err
 			}
@@ -471,7 +356,7 @@ network starting.`,
 				return fmt.Errorf("invalid denom decimals: %w", err)
 			}
 
-			tx, err := peggyContract.DeployERC20(auth, denomBase, denomName, denomSymbol, uint8(denomDecimals))
+			tx, err := gravityContract.DeployERC20(auth, denomBase, denomName, denomSymbol, uint8(denomDecimals))
 			if err != nil {
 				return fmt.Errorf("failed deploy Cosmos native ERC20 token: %w", err)
 			}
@@ -555,9 +440,9 @@ func sendToCosmosCmd() *cobra.Command {
 			waitForService(ctx, gRPCConn)
 
 			// TODO: BridgeEthereumAddress
-			peggyAddr := konfig.String(flagContractAddress)
+			gravityAddr := konfig.String(flagContractAddress)
 
-			peggyContract, err := getPeggyContract(ethRPC, peggyAddr)
+			gravityContract, err := getGravityContract(ethRPC, gravityAddr)
 			if err != nil {
 				return err
 			}
@@ -566,7 +451,7 @@ func sendToCosmosCmd() *cobra.Command {
 			tokenAddr := ethcmn.HexToAddress(tokenAddrStr)
 
 			if konfig.Bool(flagAutoApprove) {
-				if err := approveERC20(konfig, ethRPC, tokenAddrStr, peggyAddr); err != nil {
+				if err := approveERC20(konfig, ethRPC, tokenAddrStr, gravityAddr); err != nil {
 					return err
 				}
 			}
@@ -586,7 +471,7 @@ func sendToCosmosCmd() *cobra.Command {
 				return fmt.Errorf("invalid token amount: %s", args[2])
 			}
 
-			tx, err := peggyContract.SendToCosmos(auth, tokenAddr, recipientAddr.String(), amount)
+			tx, err := gravityContract.SendToCosmos(auth, tokenAddr, recipientAddr.String(), amount)
 			if err != nil {
 				return fmt.Errorf("failed to send tokens to Cosmos: %w", err)
 			}
@@ -681,22 +566,22 @@ func buildTransactOpts(konfig *koanf.Koanf, ethClient *ethclient.Client) (*bind.
 	return auth, nil
 }
 
-func getGravityParams(gRPCConn *grpc.ClientConn) (*peggytypes.Params, error) {
-	peggyQueryClient := peggytypes.NewQueryClient(gRPCConn)
+func getGravityParams(gRPCConn *grpc.ClientConn) (*gravitytypes.Params, error) {
+	gravityQueryClient := gravitytypes.NewQueryClient(gRPCConn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	peggyParamsResp, err := peggyQueryClient.Params(ctx, &peggytypes.QueryParamsRequest{})
-	if err != nil || peggyParamsResp == nil {
+	gravityParamsResp, err := gravityQueryClient.Params(ctx, &gravitytypes.QueryParamsRequest{})
+	if err != nil || gravityParamsResp == nil {
 		return nil, fmt.Errorf("failed to query for Peggy params: %w", err)
 	}
 
-	return &peggyParamsResp.Params, nil
+	return &gravityParamsResp.Params, nil
 }
 
-func getPeggyContract(ethRPC *ethclient.Client, peggyAddr string) (*wrappers.Gravity, error) {
-	contract, err := wrappers.NewGravity(ethcmn.HexToAddress(peggyAddr), ethRPC)
+func getGravityContract(ethRPC *ethclient.Client, gravityAddr string) (*wrappers.Gravity, error) {
+	contract, err := wrappers.NewGravity(ethcmn.HexToAddress(gravityAddr), ethRPC)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Peggy contract instance: %w", err)
 	}
@@ -704,7 +589,7 @@ func getPeggyContract(ethRPC *ethclient.Client, peggyAddr string) (*wrappers.Gra
 	return contract, nil
 }
 
-func approveERC20(konfig *koanf.Koanf, ethRPC *ethclient.Client, erc20AddrStr, peggyAddrStr string) error {
+func approveERC20(konfig *koanf.Koanf, ethRPC *ethclient.Client, erc20AddrStr, gravityAddrStr string) error {
 	contract, err := wrappers.NewERC20(ethcmn.HexToAddress(erc20AddrStr), ethRPC)
 	if err != nil {
 		return fmt.Errorf("failed to create ERC20 contract instance: %w", err)
@@ -715,12 +600,12 @@ func approveERC20(konfig *koanf.Koanf, ethRPC *ethclient.Client, erc20AddrStr, p
 		return err
 	}
 
-	peggyAddr := ethcmn.HexToAddress(peggyAddrStr)
+	gravityAddr := ethcmn.HexToAddress(gravityAddrStr)
 
 	// Check if the allowance remaining is greater than half of a Uint256 - it's
 	// as good a test as any. If so, we skip approving Peggy as the spender and
 	// assume it's already approved.
-	allowance, err := contract.Allowance(nil, auth.From, peggyAddr)
+	allowance, err := contract.Allowance(nil, auth.From, gravityAddr)
 	if err != nil {
 		return fmt.Errorf("failed to get ERC20 allowance: %w", err)
 	}
@@ -730,7 +615,7 @@ func approveERC20(konfig *koanf.Koanf, ethRPC *ethclient.Client, erc20AddrStr, p
 		return nil
 	}
 
-	tx, err := contract.Approve(auth, peggyAddr, maxUint256)
+	tx, err := contract.Approve(auth, gravityAddr, maxUint256)
 	if err != nil {
 		return fmt.Errorf("failed to approve ERC20 contract: %w", err)
 	}

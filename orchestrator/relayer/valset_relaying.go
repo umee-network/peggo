@@ -60,7 +60,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset types.Val
 	}
 
 	if latestCosmosConfirmed.Nonce > currentValset.Nonce {
-		latestEthereumValsetNonce, err := s.peggyContract.GetValsetNonce(ctx, s.peggyContract.FromAddress())
+		latestEthereumValsetNonce, err := s.gravityContract.GetValsetNonce(ctx, s.gravityContract.FromAddress())
 		if err != nil {
 			err = errors.Wrap(err, "failed to get latest Valset nonce")
 			return err
@@ -73,7 +73,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset types.Val
 				Uint64("latest_ethereum_valset_nonce", latestEthereumValsetNonce.Uint64()).
 				Msg("detected latest cosmos valset nonce, but latest valset on Ethereum is different. Sending update to Ethereum")
 
-			txData, err := s.peggyContract.EncodeValsetUpdate(
+			txData, err := s.gravityContract.EncodeValsetUpdate(
 				ctx,
 				currentValset,
 				*latestCosmosConfirmed,
@@ -83,7 +83,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset types.Val
 				return err
 			}
 
-			estimatedGasCost, gasPrice, err := s.peggyContract.EstimateGas(ctx, s.peggyContract.Address(), txData)
+			estimatedGasCost, gasPrice, err := s.gravityContract.EstimateGas(ctx, s.gravityContract.Address(), txData)
 			if err != nil {
 				s.logger.Err(err).Msg("failed to estimate gas cost")
 				return err
@@ -95,14 +95,14 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset types.Val
 
 			// Checking in pending txs (mempool) if tx with same input is already submitted.
 			// We have to check this at the very last moment because any other relayer could have submitted.
-			if s.peggyContract.IsPendingTxInput(txData, s.pendingTxWait) {
+			if s.gravityContract.IsPendingTxInput(txData, s.pendingTxWait) {
 				s.logger.Error().
 					Msg("Transaction with same valset input data is already present in mempool")
 				return nil
 			}
 
 			// Send Valset Update to Ethereum
-			txHash, err := s.peggyContract.SendTx(ctx, s.peggyContract.Address(), txData, estimatedGasCost, gasPrice)
+			txHash, err := s.gravityContract.SendTx(ctx, s.gravityContract.Address(), txData, estimatedGasCost, gasPrice)
 			if err != nil {
 				s.logger.Err(err).
 					Str("tx_hash", txHash.Hex()).

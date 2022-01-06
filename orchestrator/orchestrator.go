@@ -5,12 +5,12 @@ import (
 	"sync"
 	"time"
 
-	peggytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog"
 	sidechain "github.com/umee-network/peggo/orchestrator/cosmos"
+	peggy "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/keystore"
-	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	"github.com/umee-network/peggo/orchestrator/relayer"
 )
@@ -27,9 +27,9 @@ type PeggyOrchestrator interface {
 
 type peggyOrchestrator struct {
 	logger                     zerolog.Logger
-	cosmosQueryClient          peggytypes.QueryClient
-	peggyBroadcastClient       sidechain.PeggyBroadcastClient
-	peggyContract              peggy.Contract
+	cosmosQueryClient          gravitytypes.QueryClient
+	gravityBroadcastClient     sidechain.PeggyBroadcastClient
+	gravityContract            peggy.Contract
 	ethProvider                provider.EVMProvider
 	ethFrom                    ethcmn.Address
 	ethSignerFn                keystore.SignerFn
@@ -47,9 +47,9 @@ type peggyOrchestrator struct {
 
 func NewPeggyOrchestrator(
 	logger zerolog.Logger,
-	cosmosQueryClient peggytypes.QueryClient,
-	peggyBroadcastClient sidechain.PeggyBroadcastClient,
-	peggyContract peggy.Contract,
+	cosmosQueryClient gravitytypes.QueryClient,
+	gravityBroadcastClient sidechain.PeggyBroadcastClient,
+	gravityContract peggy.Contract,
 	ethFrom ethcmn.Address,
 	ethSignerFn keystore.SignerFn,
 	ethPersonalSignFn keystore.PersonalSignFn,
@@ -64,9 +64,9 @@ func NewPeggyOrchestrator(
 	orch := &peggyOrchestrator{
 		logger:                     logger.With().Str("module", "orchestrator").Logger(),
 		cosmosQueryClient:          cosmosQueryClient,
-		peggyBroadcastClient:       peggyBroadcastClient,
-		peggyContract:              peggyContract,
-		ethProvider:                peggyContract.Provider(),
+		gravityBroadcastClient:     gravityBroadcastClient,
+		gravityContract:            gravityContract,
+		ethProvider:                gravityContract.Provider(),
 		ethFrom:                    ethFrom,
 		ethSignerFn:                ethSignerFn,
 		ethPersonalSignFn:          ethPersonalSignFn,

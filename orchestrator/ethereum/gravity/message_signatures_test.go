@@ -10,7 +10,7 @@ import (
 )
 
 func TestEncodeValsetConfirm(t *testing.T) {
-	peggyID := ethcmn.HexToHash("0x756d65652d706567677969640000000000000000000000000000000000000000")
+	gravityID := ethcmn.HexToHash("0x756d65652d706567677969640000000000000000000000000000000000000000")
 
 	valset := &types.Valset{
 		Nonce: 5,
@@ -23,14 +23,14 @@ func TestEncodeValsetConfirm(t *testing.T) {
 		RewardToken:  "",
 	}
 
-	result := EncodeValsetConfirm(peggyID, valset)
+	result := EncodeValsetConfirm(gravityID, valset)
 
 	// Check the result with a previously calculated one.
 	assert.Equal(t, "0x530516ded1a45852c4000d36e5da715a934b8f272ed09e70b049c78474f8343b", result.Hex())
 }
 
 func TestEncodeTxBatchConfirm(t *testing.T) {
-	peggyID := ethcmn.HexToHash("0x756d65652d706567677969640000000000000000000000000000000000000000")
+	gravityID := ethcmn.HexToHash("0x756d65652d706567677969640000000000000000000000000000000000000000")
 
 	txBatch := types.OutgoingTxBatch{
 		Transactions: []types.OutgoingTransferTx{
@@ -48,7 +48,7 @@ func TestEncodeTxBatchConfirm(t *testing.T) {
 		},
 	}
 
-	result := EncodeTxBatchConfirm(peggyID, txBatch)
+	result := EncodeTxBatchConfirm(gravityID, txBatch)
 
 	// Check the result with a previously calculated one.
 	assert.Equal(t, "0x2c8418bc8093a21b04e82d0527b039084bca48cbbb6d413011a98181f7af5081", result.Hex())

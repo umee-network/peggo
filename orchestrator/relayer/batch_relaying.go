@@ -62,7 +62,7 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 
 		// This checks that the signatures for the batch are actually possible to submit to the chain.
 		// We only need to know if the signatures are good, we won't use the other returned value.
-		_, err = s.peggyContract.EncodeTransactionBatch(ctx, currentValset, batch, batchConfirms.Confirms)
+		_, err = s.gravityContract.EncodeTransactionBatch(ctx, currentValset, batch, batchConfirms.Confirms)
 
 		if err != nil {
 			// this batch is not ready to be relayed
@@ -123,10 +123,10 @@ func (s *peggyRelayer) RelayBatches(
 		// iterating from oldest to newest, so submitting a batch earlier in the loop won't
 		// ever invalidate submitting a batch later in the loop. Another relayer could always
 		// do that though.
-		latestEthereumBatch, err := s.peggyContract.GetTxBatchNonce(
+		latestEthereumBatch, err := s.gravityContract.GetTxBatchNonce(
 			ctx,
 			tokenContract,
-			s.peggyContract.FromAddress(),
+			s.gravityContract.FromAddress(),
 		)
 		if err != nil {
 			s.logger.Err(err).Msg("failed to get latest Ethereum batch")
@@ -150,12 +150,12 @@ func (s *peggyRelayer) RelayBatches(
 				continue
 			}
 
-			txData, err := s.peggyContract.EncodeTransactionBatch(ctx, currentValset, batch.Batch, batch.Signatures)
+			txData, err := s.gravityContract.EncodeTransactionBatch(ctx, currentValset, batch.Batch, batch.Signatures)
 			if err != nil {
 				return err
 			}
 
-			estimatedGasCost, gasPrice, err := s.peggyContract.EstimateGas(ctx, s.peggyContract.Address(), txData)
+			estimatedGasCost, gasPrice, err := s.gravityContract.EstimateGas(ctx, s.gravityContract.Address(), txData)
 			if err != nil {
 				s.logger.Err(err).Msg("failed to estimate gas cost")
 				return err
@@ -168,7 +168,7 @@ func (s *peggyRelayer) RelayBatches(
 
 			// Checking in pending txs(mempool) if tx with same input is already submitted
 			// We have to check this at the last moment because any other relayer could have submitted.
-			if s.peggyContract.IsPendingTxInput(txData, s.pendingTxWait) {
+			if s.gravityContract.IsPendingTxInput(txData, s.pendingTxWait) {
 				s.logger.Debug().
 					Msg("Transaction with same batch input data is already present in mempool")
 				continue
@@ -179,7 +179,7 @@ func (s *peggyRelayer) RelayBatches(
 				Uint64("latest_ethereum_batch", latestEthereumBatch.Uint64()).
 				Msg("we have detected a newer profitable batch; sending an update")
 
-			txHash, err := s.peggyContract.SendTx(ctx, s.peggyContract.Address(), txData, estimatedGasCost, gasPrice)
+			txHash, err := s.gravityContract.SendTx(ctx, s.gravityContract.Address(), txData, estimatedGasCost, gasPrice)
 			if err != nil {
 				s.logger.Err(err).Str("tx_hash", txHash.Hex()).Msg("failed to sign and submit (Peggy submitBatch) to EVM")
 				return err
@@ -223,10 +223,10 @@ func (s *peggyRelayer) IsBatchProfitable(
 	gasCostInUSDDec := decimal.NewFromBigInt(totalETHcost, -18).Mul(usdEthPriceDec)
 
 	// Then we get the fees of the batch in USD
-	decimals, err := s.peggyContract.GetERC20Decimals(
+	decimals, err := s.gravityContract.GetERC20Decimals(
 		ctx,
 		ethcmn.HexToAddress(batch.TokenContract),
-		s.peggyContract.FromAddress(),
+		s.gravityContract.FromAddress(),
 	)
 	if err != nil {
 		s.logger.Err(err).Str("token_contract", batch.TokenContract).Msg("failed to get token decimals")

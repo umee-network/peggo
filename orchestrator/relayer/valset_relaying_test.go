@@ -57,7 +57,7 @@ func TestRelayValsets(t *testing.T) {
 			},
 		}, nil)
 
-		peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
+		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
 
 		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
@@ -66,23 +66,23 @@ func TestRelayValsets(t *testing.T) {
 		mockPeggyContract.EXPECT().
 			EncodeValsetUpdate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return([]byte{1, 2, 3}, nil)
-		mockPeggyContract.EXPECT().Address().Return(peggyAddress).AnyTimes()
+		mockPeggyContract.EXPECT().Address().Return(gravityAddress).AnyTimes()
 		mockPeggyContract.EXPECT().
-			EstimateGas(gomock.Any(), peggyAddress, []byte{1, 2, 3}).
+			EstimateGas(gomock.Any(), gravityAddress, []byte{1, 2, 3}).
 			Return(uint64(1000), big.NewInt(100), nil)
 
 		mockPeggyContract.EXPECT().IsPendingTxInput([]byte{1, 2, 3}, gomock.Any()).Return(false)
 
 		mockPeggyContract.EXPECT().SendTx(
 			gomock.Any(),
-			peggyAddress,
+			gravityAddress,
 			[]byte{1, 2, 3},
 			uint64(1000),
 			big.NewInt(100),
 		).Return(ethcmn.HexToHash("0x01010101"), nil)
 
 		relayer := peggyRelayer{
-			peggyContract:     mockPeggyContract,
+			gravityContract:   mockPeggyContract,
 			cosmosQueryClient: mockQClient,
 		}
 
@@ -102,7 +102,7 @@ func TestRelayValsets(t *testing.T) {
 		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
 
 		relayer := peggyRelayer{
-			peggyContract:     mockPeggyContract,
+			gravityContract:   mockPeggyContract,
 			cosmosQueryClient: mockQClient,
 		}
 
@@ -123,7 +123,7 @@ func TestRelayValsets(t *testing.T) {
 		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
 
 		relayer := peggyRelayer{
-			peggyContract:     mockPeggyContract,
+			gravityContract:   mockPeggyContract,
 			cosmosQueryClient: mockQClient,
 		}
 
@@ -176,7 +176,7 @@ func TestRelayValsets(t *testing.T) {
 		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
 
 		relayer := peggyRelayer{
-			peggyContract:     mockPeggyContract,
+			gravityContract:   mockPeggyContract,
 			cosmosQueryClient: mockQClient,
 		}
 
@@ -220,7 +220,7 @@ func TestRelayValsets(t *testing.T) {
 		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
 
 		relayer := peggyRelayer{
-			peggyContract:     mockPeggyContract,
+			gravityContract:   mockPeggyContract,
 			cosmosQueryClient: mockQClient,
 		}
 
@@ -270,7 +270,7 @@ func TestRelayValsets(t *testing.T) {
 			},
 		}, nil)
 
-		peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
+		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
 
 		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
@@ -279,23 +279,23 @@ func TestRelayValsets(t *testing.T) {
 		mockPeggyContract.EXPECT().
 			EncodeValsetUpdate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return([]byte{1, 2, 3}, nil)
-		mockPeggyContract.EXPECT().Address().Return(peggyAddress).AnyTimes()
+		mockPeggyContract.EXPECT().Address().Return(gravityAddress).AnyTimes()
 		mockPeggyContract.EXPECT().
-			EstimateGas(gomock.Any(), peggyAddress, []byte{1, 2, 3}).
+			EstimateGas(gomock.Any(), gravityAddress, []byte{1, 2, 3}).
 			Return(uint64(1000), big.NewInt(100), nil)
 
 		mockPeggyContract.EXPECT().IsPendingTxInput([]byte{1, 2, 3}, gomock.Any()).Return(false)
 
 		mockPeggyContract.EXPECT().SendTx(
 			gomock.Any(),
-			peggyAddress,
+			gravityAddress,
 			[]byte{1, 2, 3},
 			uint64(1000),
 			big.NewInt(100),
 		).Return(ethcmn.HexToHash("0x0"), errors.New("some error while sending tx"))
 
 		relayer := peggyRelayer{
-			peggyContract:     mockPeggyContract,
+			gravityContract:   mockPeggyContract,
 			cosmosQueryClient: mockQClient,
 		}
 

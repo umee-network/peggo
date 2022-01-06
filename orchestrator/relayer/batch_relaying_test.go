@@ -23,7 +23,7 @@ import (
 	peggyMocks "github.com/umee-network/peggo/mocks/peggy"
 	"github.com/umee-network/peggo/orchestrator/coingecko"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
-	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
+	peggy "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 )
 
 func TestIsBatchProfitable(t *testing.T) {
@@ -31,7 +31,7 @@ func TestIsBatchProfitable(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
-	peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
+	gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 	fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
 	erc20Address := ethcmn.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7")
 
@@ -61,7 +61,7 @@ func TestIsBatchProfitable(t *testing.T) {
 		ethProvider,
 	)
 
-	peggyContract, _ := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress, nil)
+	gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("contract_addresses") != "" {
@@ -73,7 +73,7 @@ func TestIsBatchProfitable(t *testing.T) {
 	coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, &coingecko.Config{BaseURL: svr.URL})
 
 	relayer := peggyRelayer{
-		peggyContract:    peggyContract,
+		gravityContract:  gravityContract,
 		priceFeeder:      coingeckoFeed,
 		profitMultiplier: 1.1,
 	}
@@ -207,7 +207,7 @@ func TestGetBatchesAndSignatures(t *testing.T) {
 		relayer := peggyRelayer{
 			logger:            logger,
 			cosmosQueryClient: mockQClient,
-			peggyContract:     mockPeggyContract,
+			gravityContract:   mockPeggyContract,
 		}
 
 		submittableBatches, err := relayer.getBatchesAndSignatures(context.Background(), &types.Valset{})
@@ -293,7 +293,7 @@ func TestGetBatchesAndSignatures(t *testing.T) {
 		relayer := peggyRelayer{
 			logger:            logger,
 			cosmosQueryClient: mockQClient,
-			peggyContract:     mockPeggyContract,
+			gravityContract:   mockPeggyContract,
 		}
 
 		submittableBatches, err := relayer.getBatchesAndSignatures(context.Background(), &types.Valset{})
@@ -383,7 +383,7 @@ func TestRelayBatches(t *testing.T) {
 		ethProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
 		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
 
-		peggyAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
+		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
 
 		ethProvider.EXPECT().HeaderByNumber(gomock.Any(), nil).Return(&ethtypes.Header{
@@ -394,13 +394,13 @@ func TestRelayBatches(t *testing.T) {
 		mockPeggyContract.EXPECT().FromAddress().Return(fromAddress).AnyTimes()
 		mockPeggyContract.EXPECT().GetTxBatchNonce(gomock.Any(), gomock.Any(), gomock.Any()).Return(big.NewInt(1), nil)
 		mockPeggyContract.EXPECT().EncodeTransactionBatch(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return([]byte{}, nil)
-		mockPeggyContract.EXPECT().Address().Return(peggyAddress).AnyTimes()
+		mockPeggyContract.EXPECT().Address().Return(gravityAddress).AnyTimes()
 		mockPeggyContract.EXPECT().EstimateGas(gomock.Any(), gomock.Any(), gomock.Any()).Return(uint64(99999), big.NewInt(1), nil)
 		mockPeggyContract.EXPECT().IsPendingTxInput(gomock.Any(), gomock.Any()).Return(false)
 
 		mockPeggyContract.EXPECT().SendTx(
 			gomock.Any(),
-			peggyAddress,
+			gravityAddress,
 			[]byte{},
 			uint64(99999),
 			big.NewInt(1),
@@ -409,7 +409,7 @@ func TestRelayBatches(t *testing.T) {
 		relayer := peggyRelayer{
 			logger:            logger,
 			cosmosQueryClient: mockQClient,
-			peggyContract:     mockPeggyContract,
+			gravityContract:   mockPeggyContract,
 			ethProvider:       ethProvider,
 		}
 
@@ -450,7 +450,7 @@ func TestRelayBatches(t *testing.T) {
 		relayer := peggyRelayer{
 			logger:            logger,
 			cosmosQueryClient: mockQClient,
-			peggyContract:     mockPeggyContract,
+			gravityContract:   mockPeggyContract,
 			ethProvider:       ethProvider,
 		}
 

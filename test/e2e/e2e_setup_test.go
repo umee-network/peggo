@@ -28,7 +28,7 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
-	peggytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/umee-network/umee/app"
 )
 
@@ -50,15 +50,15 @@ var (
 type IntegrationTestSuite struct {
 	suite.Suite
 
-	tmpDirs           []string
-	chain             *chain
-	ethClient         *ethclient.Client
-	dkrPool           *dockertest.Pool
-	dkrNet            *dockertest.Network
-	ethResource       *dockertest.Resource
-	valResources      []*dockertest.Resource
-	orchResources     []*dockertest.Resource
-	peggyContractAddr string
+	tmpDirs             []string
+	chain               *chain
+	ethClient           *ethclient.Client
+	dkrPool             *dockertest.Pool
+	dkrNet              *dockertest.Network
+	ethResource         *dockertest.Resource
+	valResources        []*dockertest.Resource
+	orchResources       []*dockertest.Resource
+	gravityContractAddr string
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -198,16 +198,16 @@ func (s *IntegrationTestSuite) initGenesis() {
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
 
-	var peggyGenState peggytypes.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[peggytypes.ModuleName], &peggyGenState))
+	var peggyGenState gravitytypes.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &peggyGenState))
 
-	peggyGenState.Params.BridgeEthereumAddress = s.peggyContractAddr
+	peggyGenState.Params.BridgeEthereumAddress = s.gravityContractAddr
 	peggyGenState.Params.BridgeContractStartHeight = 0
 	peggyGenState.Params.BridgeChainId = uint64(ethChainID)
 
 	bz, err := cdc.MarshalJSON(&peggyGenState)
 	s.Require().NoError(err)
-	appGenState[peggytypes.ModuleName] = bz
+	appGenState[gravitytypes.ModuleName] = bz
 
 	var bankGenState banktypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
@@ -453,7 +453,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 			Entrypoint: []string{
 				"peggo",
 				"bridge",
-				"deploy-peggy",
+				"deploy-gravity",
 				"--eth-pk",
 				ethMinerPK[2:], // remove 0x prefix
 				"--eth-rpc",
@@ -497,8 +497,8 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 	tokens := re.FindStringSubmatch(errBuf.String())
 	s.Require().Len(tokens, 2)
 
-	peggyContractAddr := tokens[1]
-	s.Require().NotEmpty(peggyContractAddr)
+	gravityContractAddr := tokens[1]
+	s.Require().NotEmpty(gravityContractAddr)
 
 	re = regexp.MustCompile(`Transaction: (0x.+)`)
 	tokens = re.FindStringSubmatch(errBuf.String())
@@ -525,8 +525,8 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 
 	s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
 
-	s.T().Logf("deployed Peggy (Gravity Bridge) contract: %s", peggyContractAddr)
-	s.peggyContractAddr = peggyContractAddr
+	s.T().Logf("deployed Peggy (Gravity Bridge) contract: %s", gravityContractAddr)
+	s.gravityContractAddr = gravityContractAddr
 }
 
 func (s *IntegrationTestSuite) registerValidatorOrchAddresses() {

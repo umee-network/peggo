@@ -25,7 +25,7 @@ type genericConfirm struct {
 	Signature string
 }
 
-func (s *peggyContract) EncodeTransactionBatch(
+func (s *gravityContract) EncodeTransactionBatch(
 	ctx context.Context,
 	currentValset types.Valset,
 	batch types.OutgoingTxBatch,

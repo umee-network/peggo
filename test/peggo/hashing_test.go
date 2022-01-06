@@ -14,7 +14,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
+	peggy "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 )
 
 var _ = Describe("Contract Tests", func() {
@@ -51,7 +51,7 @@ var _ = Describe("Contract Tests", func() {
 
 		_ = Context("HashingTest contract deployment done", func() {
 			var (
-				peggyID     ethcmn.Hash
+				gravityID   ethcmn.Hash
 				validators  []ethcmn.Address
 				powers      []*big.Int
 				valsetNonce *big.Int
@@ -83,7 +83,7 @@ var _ = Describe("Contract Tests", func() {
 			})
 
 			BeforeEach(func() {
-				peggyID = formatBytes32String("foo")
+				gravityID = formatBytes32String("foo")
 				validators = getEthAddresses(CosmosAccounts[:3]...)
 				powers = make([]*big.Int, len(validators))
 				for i := range powers {
@@ -100,7 +100,7 @@ var _ = Describe("Contract Tests", func() {
 
 			It("Update checkpoint using CheckpointHash", func() {
 				_, _, err := ContractDeployer.Tx(context.Background(), hashingTestTxOpts,
-					"CheckpointHash", withArgsFn(validators, powers, valsetNonce, big.NewInt(0), zeroAddress, peggyID),
+					"CheckpointHash", withArgsFn(validators, powers, valsetNonce, big.NewInt(0), zeroAddress, gravityID),
 				)
 				Ω(err).Should(BeNil())
 			})
@@ -118,7 +118,7 @@ var _ = Describe("Contract Tests", func() {
 
 				Ω(lastCheckpoint).ShouldNot(Equal(zeroHash))
 				Ω(lastCheckpoint).Should(Equal(
-					makeValsetCheckpoint(peggyID, validators, powers, valsetNonce, big.NewInt(0), zeroAddress),
+					makeValsetCheckpoint(gravityID, validators, powers, valsetNonce, big.NewInt(0), zeroAddress),
 				))
 			})
 
@@ -142,7 +142,7 @@ var _ = Describe("Contract Tests", func() {
 var valsetConfirmABI, _ = abi.JSON(strings.NewReader(peggy.ValsetCheckpointABIJSON))
 
 func makeValsetCheckpoint(
-	peggyID ethcmn.Hash,
+	gravityID ethcmn.Hash,
 	validators []ethcmn.Address,
 	powers []*big.Int,
 	valsetNonce *big.Int,
@@ -154,7 +154,7 @@ func makeValsetCheckpoint(
 	//TODO: check if we want to add a reward amount and a reward token here
 
 	buf, err := valsetConfirmABI.Pack("checkpoint",
-		peggyID,
+		gravityID,
 		methodName,
 		valsetNonce,
 		validators,

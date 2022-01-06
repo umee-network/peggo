@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	peggytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
@@ -21,7 +21,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/coingecko"
 	"github.com/umee-network/peggo/orchestrator/cosmos"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
-	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
+	peggy "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	"github.com/umee-network/peggo/orchestrator/relayer"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
@@ -101,14 +101,14 @@ func getOrchestratorCmd() *cobra.Command {
 			gRPCConn := daemonClient.QueryClient()
 			waitForService(ctx, gRPCConn)
 
-			peggyQuerier := peggytypes.NewQueryClient(gRPCConn)
+			peggyQuerier := gravitytypes.NewQueryClient(gRPCConn)
 
-			peggyParams, err := getGravityParams(gRPCConn)
+			gravityParams, err := getGravityParams(gRPCConn)
 			if err != nil {
 				return fmt.Errorf("failed to query for Peggy params: %w", err)
 			}
 
-			ethChainID := peggyParams.BridgeChainId
+			ethChainID := gravityParams.BridgeChainId
 			ethKeyFromAddress, signerFn, personalSignFn, err := initEthereumAccountsManager(logger, ethChainID, konfig)
 			if err != nil {
 				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
@@ -137,7 +137,7 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
 
-			peggyBroadcaster := cosmos.NewPeggyBroadcastClient(
+			gravityBroadcaster := cosmos.NewPeggyBroadcastClient(
 				logger,
 				peggyQuerier,
 				daemonClient,
@@ -145,14 +145,14 @@ func getOrchestratorCmd() *cobra.Command {
 				personalSignFn,
 			)
 
-			peggyAddress := ethcmn.HexToAddress(konfig.String(flagContractAddress))
+			gravityAddress := ethcmn.HexToAddress(konfig.String(flagContractAddress))
 
-			ethPeggy, err := wrappers.NewGravity(peggyAddress, ethCommitter.Provider())
+			ethPeggy, err := wrappers.NewGravity(gravityAddress, ethCommitter.Provider())
 			if err != nil {
 				return fmt.Errorf("failed to create a new instance of Peggy: %w", err)
 			}
 
-			peggyContract, err := peggy.NewPeggyContract(logger, ethCommitter, peggyAddress, ethPeggy)
+			gravityContract, err := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, ethPeggy)
 			if err != nil {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
@@ -162,12 +162,12 @@ func getOrchestratorCmd() *cobra.Command {
 				BaseURL: coingeckoAPI,
 			})
 
-			// peggyParams.AverageBlockTime and peggyParams.AverageEthereumBlockTime are in milliseconds.
-			averageCosmosBlockTime := time.Duration(peggyParams.AverageBlockTime) * time.Millisecond
-			averageEthBlockTime := time.Duration(peggyParams.AverageEthereumBlockTime) * time.Millisecond
+			// gravityParams.AverageBlockTime and gravityParams.AverageEthereumBlockTime are in milliseconds.
+			averageCosmosBlockTime := time.Duration(gravityParams.AverageBlockTime) * time.Millisecond
+			averageEthBlockTime := time.Duration(gravityParams.AverageEthereumBlockTime) * time.Millisecond
 
 			// We multiply the relayer loop multiplier by the ETH block time.
-			// peggyParams.AverageEthereumBlockTime is in milliseconds.
+			// gravityParams.AverageEthereumBlockTime is in milliseconds.
 			ethBlockTimeF64 := float64(averageEthBlockTime.Milliseconds())
 			relayerLoopMultiplier := konfig.Float64(flagRelayerLoopMultiplier)
 
@@ -177,7 +177,7 @@ func getOrchestratorCmd() *cobra.Command {
 			relayer := relayer.NewPeggyRelayer(
 				logger,
 				peggyQuerier,
-				peggyContract,
+				gravityContract,
 				konfig.Bool(flagRelayValsets),
 				konfig.Bool(flagRelayBatches),
 				relayerLoopDuration,
@@ -205,8 +205,8 @@ func getOrchestratorCmd() *cobra.Command {
 			orch := orchestrator.NewPeggyOrchestrator(
 				logger,
 				peggyQuerier,
-				peggyBroadcaster,
-				peggyContract,
+				gravityBroadcaster,
+				gravityContract,
 				ethKeyFromAddress,
 				signerFn,
 				personalSignFn,
@@ -228,7 +228,7 @@ func getOrchestratorCmd() *cobra.Command {
 			alchemyWS := konfig.String(flagEthAlchemyWS)
 			if alchemyWS != "" {
 				g.Go(func() error {
-					return peggyContract.SubscribeToPendingTxs(errCtx, alchemyWS)
+					return gravityContract.SubscribeToPendingTxs(errCtx, alchemyWS)
 				})
 			}
 
@@ -253,6 +253,7 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().AddFlagSet(cosmosKeyringFlagSet())
 	cmd.Flags().AddFlagSet(ethereumKeyOptsFlagSet())
 	cmd.Flags().AddFlagSet(ethereumOptsFlagSet())
+	cmd.Flags().AddFlagSet(bridgeAddrFlagSet())
 
 	return cmd
 }

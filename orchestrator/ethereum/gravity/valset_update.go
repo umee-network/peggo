@@ -20,7 +20,7 @@ import (
 // 	RewardToken ethcmn.Address `protobuf:"bytes,5,opt,name=rewardToken,json=rewardToken,proto3" json:"rewardToken,omitempty"`
 // }
 
-func (s *peggyContract) EncodeValsetUpdate(
+func (s *gravityContract) EncodeValsetUpdate(
 	ctx context.Context,
 	oldValset types.Valset,
 	newValset types.Valset,

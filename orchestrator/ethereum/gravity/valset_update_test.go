@@ -85,8 +85,8 @@ func TestEncodeValsetUpdate(t *testing.T) {
 
 	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
 
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
-	txData, err := peggyContract.EncodeValsetUpdate(
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	txData, err := gravityContract.EncodeValsetUpdate(
 		context.Background(),
 		valset,
 		newValset,

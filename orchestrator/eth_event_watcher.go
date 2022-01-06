@@ -36,7 +36,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 		currentBlock = startingBlock + p.ethBlocksPerLoop
 	}
 
-	peggyFilterer, err := wrappers.NewGravityFilterer(p.peggyContract.Address(), p.ethProvider)
+	peggyFilterer, err := wrappers.NewGravityFilterer(p.gravityContract.Address(), p.ethProvider)
 	if err != nil {
 		err = errors.Wrap(err, "failed to init Peggy events filterer")
 		return 0, err
@@ -181,7 +181,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 	// multi event block again. In theory we only send all events for every block and that will pass of fail
 	// atomically but lets not take that risk.
 	lastEventResp, err := p.cosmosQueryClient.LastEventNonceByAddr(ctx, &types.QueryLastEventNonceByAddrRequest{
-		Address: p.peggyBroadcastClient.AccFromAddress().String(),
+		Address: p.gravityBroadcastClient.AccFromAddress().String(),
 	})
 
 	if err != nil {
@@ -203,7 +203,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 
 	if len(deposits) > 0 || len(withdraws) > 0 || len(valsetUpdates) > 0 || len(deployedERC20Updates) > 0 {
 
-		if err := p.peggyBroadcastClient.SendEthereumClaims(
+		if err := p.gravityBroadcastClient.SendEthereumClaims(
 			ctx,
 			lastEventResp.EventNonce,
 			deposits,

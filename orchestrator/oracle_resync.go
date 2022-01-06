@@ -16,7 +16,7 @@ func (p *peggyOrchestrator) GetLastCheckedBlock(
 ) (uint64, error) {
 
 	lastEventResp, err := p.cosmosQueryClient.LastEventNonceByAddr(ctx, &types.QueryLastEventNonceByAddrRequest{
-		Address: p.peggyBroadcastClient.AccFromAddress().String(),
+		Address: p.gravityBroadcastClient.AccFromAddress().String(),
 	})
 
 	if err != nil {
@@ -49,7 +49,7 @@ func (p *peggyOrchestrator) GetLastCheckedBlock(
 			endSearch = currentBlock - p.ethBlocksPerLoop
 		}
 
-		peggyFilterer, err := wrappers.NewGravityFilterer(p.peggyContract.Address(), p.ethProvider)
+		peggyFilterer, err := wrappers.NewGravityFilterer(p.gravityContract.Address(), p.ethProvider)
 		if err != nil {
 			err = errors.Wrap(err, "failed to init Peggy events filterer")
 			return 0, err

@@ -88,9 +88,9 @@ func TestEncodeTransactionBatch(t *testing.T) {
 	}
 
 	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	peggyContract, _ := NewPeggyContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
 
-	txData, err := peggyContract.EncodeTransactionBatch(
+	txData, err := gravityContract.EncodeTransactionBatch(
 		context.Background(),
 		valset,
 		batch,

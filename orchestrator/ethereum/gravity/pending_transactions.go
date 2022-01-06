@@ -51,7 +51,7 @@ func (p *PendingTxInputList) AddPendingTxInput(pendingTx *RPCTransaction) {
 	}
 }
 
-func (s *peggyContract) IsPendingTxInput(txData []byte, pendingTxWaitDuration time.Duration) bool {
+func (s *gravityContract) IsPendingTxInput(txData []byte, pendingTxWaitDuration time.Duration) bool {
 	t := time.Now()
 
 	for _, pendingTxInput := range s.pendingTxInputList {
@@ -63,9 +63,9 @@ func (s *peggyContract) IsPendingTxInput(txData []byte, pendingTxWaitDuration ti
 	return false
 }
 
-func (s *peggyContract) SubscribeToPendingTxs(ctx context.Context, alchemyWebsocketURL string) error {
+func (s *gravityContract) SubscribeToPendingTxs(ctx context.Context, alchemyWebsocketURL string) error {
 	args := map[string]interface{}{
-		"address": s.peggyAddress.Hex(),
+		"address": s.gravityAddress.Hex(),
 	}
 
 	wsClient, err := rpc.Dial(alchemyWebsocketURL)
@@ -98,6 +98,6 @@ func (s *peggyContract) SubscribeToPendingTxs(ctx context.Context, alchemyWebsoc
 	}
 }
 
-func (s *peggyContract) GetPendingTxInputList() *PendingTxInputList {
+func (s *gravityContract) GetPendingTxInputList() *PendingTxInputList {
 	return &s.pendingTxInputList
 }
