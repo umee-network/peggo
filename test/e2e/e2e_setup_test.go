@@ -204,7 +204,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 
 	for i := range s.chain.validators {
 		peggyGenState.DelegateKeys = append(peggyGenState.DelegateKeys, gravitytypes.MsgSetOrchestratorAddress{
-			Validator:    s.chain.validators[i].keyInfo.GetAddress().String(), // TODO: Bez, this needs to be a valoper address
+			Validator:    sdk.ValAddress(s.chain.validators[i].keyInfo.GetAddress()).String(),
 			Orchestrator: s.chain.orchestrators[i].keyInfo.GetAddress().String(),
 			EthAddress:   s.chain.validators[i].ethereumKey.address,
 		})
