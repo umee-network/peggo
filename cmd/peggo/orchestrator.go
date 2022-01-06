@@ -31,7 +31,8 @@ import (
 
 func getOrchestratorCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "orchestrator",
+		Use:   "orchestrator [gravity-addr]",
+		Args:  cobra.ExactArgs(1),
 		Short: "Starts the orchestrator",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			konfig, err := parseServerConfig(cmd)
@@ -145,14 +146,14 @@ func getOrchestratorCmd() *cobra.Command {
 				personalSignFn,
 			)
 
-			gravityAddress := ethcmn.HexToAddress(konfig.String(flagContractAddress))
+			gravityAddr := ethcmn.HexToAddress(args[0])
 
-			ethPeggy, err := wrappers.NewGravity(gravityAddress, ethCommitter.Provider())
+			ethPeggy, err := wrappers.NewGravity(gravityAddr, ethCommitter.Provider())
 			if err != nil {
 				return fmt.Errorf("failed to create a new instance of Peggy: %w", err)
 			}
 
-			gravityContract, err := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, ethPeggy)
+			gravityContract, err := peggy.NewGravityContract(logger, ethCommitter, gravityAddr, ethPeggy)
 			if err != nil {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
@@ -253,7 +254,6 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().AddFlagSet(cosmosKeyringFlagSet())
 	cmd.Flags().AddFlagSet(ethereumKeyOptsFlagSet())
 	cmd.Flags().AddFlagSet(ethereumOptsFlagSet())
-	cmd.Flags().AddFlagSet(bridgeAddrFlagSet())
 
 	return cmd
 }

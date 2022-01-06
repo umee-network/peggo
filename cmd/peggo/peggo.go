@@ -29,8 +29,6 @@ flag (e.g. PEGGO_COSMOS_PK).`,
 	cmd.PersistentFlags().String(flagLogFormat, logLevelText, "logging format (text|json)")
 	cmd.PersistentFlags().String(flagSvcWaitTimeout, "1m", "Standard wait timeout for external services (e.g. Cosmos daemon gRPC connection)")
 
-	cmd.MarkFlagRequired(flagContractAddress)
-
 	cmd.AddCommand(
 		getOrchestratorCmd(),
 		getBridgeCommand(),

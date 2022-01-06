@@ -45,7 +45,6 @@ const (
 	flagProfitMultiplier        = "profit-multiplier"
 	flagRelayerLoopMultiplier   = "relayer-loop-multiplier"
 	flagRequesterLoopMultiplier = "requester-loop-multiplier"
-	flagContractAddress         = "contract-address"
 )
 
 func cosmosFlagSet() *pflag.FlagSet {
@@ -101,14 +100,6 @@ func bridgeFlagSet() *pflag.FlagSet {
 	fs.String(flagEthPK, "", "Provide the Ethereum private key of the validator in hex")
 	fs.Int64(flagEthGasPrice, 0, "The Ethereum gas price to include in the transaction; If zero, gas price will be estimated")
 	fs.Int64(flagEthGasLimit, 6000000, "The Ethereum gas limit to include in the transaction")
-
-	return fs
-}
-
-func bridgeAddrFlagSet() *pflag.FlagSet {
-	fs := pflag.NewFlagSet("", pflag.PanicOnError)
-	// TODO: make this flag required
-	fs.String(flagContractAddress, "", "Specify the Gravity Ethereum contract address (required)")
 
 	return fs
 }

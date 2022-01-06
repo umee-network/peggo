@@ -153,7 +153,7 @@ func (p *peggyOrchestrator) GetLastCheckedBlock(
 			if commonCase || bootstrapping {
 				return valset.Raw.BlockNumber, nil
 			} else if valset.NewValsetNonce.Uint64() == 0 && lastEventNonce > 1 {
-				// p.logger.Panic().Msg("could not find the last event relayed")
+				p.logger.Panic().Msg("could not find the last event relayed")
 			}
 		}
 

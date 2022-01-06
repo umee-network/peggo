@@ -35,12 +35,11 @@ var (
 func getBridgeCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bridge",
-		Short: "Commands to interface with Peggy (Gravity Bridge) Ethereum contract",
+		Short: "Commands to interface with Gravity Bridge Ethereum contract",
 	}
 
 	cmd.PersistentFlags().AddFlagSet(cosmosFlagSet())
 	cmd.PersistentFlags().AddFlagSet(bridgeFlagSet())
-	cmd.PersistentFlags().AddFlagSet(bridgeAddrFlagSet())
 
 	cmd.AddCommand(
 		deployGravityCmd(),
@@ -155,14 +154,9 @@ func deployGravityCmd() *cobra.Command {
 				)
 			}
 
-			// var gravityID [32]byte
-			// copy(gravityID[:], []byte(gravityParams.GravityId))
-
 			gravityIDBytes := []uint8(gravityParams.GravityId)
 			var gravityIDBytes32 [32]uint8
 			copy(gravityIDBytes32[:], gravityIDBytes)
-
-			// TODO: FIX DEPLOYMENT OF GRAVITY CONTRACT
 
 			address, tx, _, err := wrappers.DeployGravity(auth, ethRPC, gravityIDBytes32, validators, powers)
 			if err != nil {
@@ -186,8 +180,8 @@ Transaction: %s
 
 func deployERC20Cmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "deploy-erc20 [denom-base]",
-		Args:  cobra.ExactArgs(1),
+		Use:   "deploy-erc20 [gravity-addr] [denom-base]",
+		Args:  cobra.ExactArgs(2),
 		Short: "Deploy a Cosmos native asset on Ethereum as an ERC20 token",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			konfig, err := parseServerConfig(cmd)
@@ -248,14 +242,14 @@ func deployERC20Cmd() *cobra.Command {
 			gRPCConn := daemonClient.QueryClient()
 			waitForService(ctx, gRPCConn)
 
-			bridgeAddress := konfig.String(flagContractAddress)
+			gravityAddr := args[0]
 
-			gravityContract, err := getGravityContract(ethRPC, bridgeAddress)
+			gravityContract, err := getGravityContract(ethRPC, gravityAddr)
 			if err != nil {
 				return err
 			}
 
-			baseDenom := args[0]
+			baseDenom := args[1]
 			bankQuerier := banktypes.NewQueryClient(gRPCConn)
 
 			ctx, cancel = context.WithTimeout(context.Background(), time.Minute)
@@ -317,7 +311,7 @@ Transaction: %s
 
 func deployERC20RawCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "deploy-erc20-raw [peggy-addr] [denom-base] [denom-name] [denom-symbol] [denom-decimals]",
+		Use:   "deploy-erc20-raw [gravity-addr] [denom-base] [denom-name] [denom-symbol] [denom-decimals]",
 		Short: "Deploy a Cosmos native asset on Ethereum as an ERC20 token using raw input",
 		Long: `Deploy a Cosmos native asset on Ethereum as an ERC20 token using raw input.
 The Peggy contract address along with all Cosmos native token denomination data
@@ -382,9 +376,9 @@ Transaction: %s
 
 func sendToCosmosCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "send-to-cosmos [token-address] [recipient] [amount]",
-		Args:  cobra.ExactArgs(3),
-		Short: "Send tokens from an Ethereum account to a recipient on Cosmos via Peggy (Gravity Bridge)",
+		Use:   "send-to-cosmos [gravity-addr] [token-address] [recipient] [amount]",
+		Args:  cobra.ExactArgs(4),
+		Short: "Send tokens from an Ethereum account to a recipient on Cosmos via Gravity Bridge",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			konfig, err := parseServerConfig(cmd)
 			if err != nil {
@@ -439,15 +433,14 @@ func sendToCosmosCmd() *cobra.Command {
 			gRPCConn := daemonClient.QueryClient()
 			waitForService(ctx, gRPCConn)
 
-			// TODO: BridgeEthereumAddress
-			gravityAddr := konfig.String(flagContractAddress)
+			gravityAddr := args[0]
 
 			gravityContract, err := getGravityContract(ethRPC, gravityAddr)
 			if err != nil {
 				return err
 			}
 
-			tokenAddrStr := args[0]
+			tokenAddrStr := args[1]
 			tokenAddr := ethcmn.HexToAddress(tokenAddrStr)
 
 			if konfig.Bool(flagAutoApprove) {
@@ -461,14 +454,14 @@ func sendToCosmosCmd() *cobra.Command {
 				return err
 			}
 
-			recipientAddr, err := sdk.AccAddressFromBech32(args[1])
+			recipientAddr, err := sdk.AccAddressFromBech32(args[2])
 			if err != nil {
 				return fmt.Errorf("failed to Bech32 decode recipient address: %w", err)
 			}
 
-			amount, ok := new(big.Int).SetString(args[2], 10)
+			amount, ok := new(big.Int).SetString(args[3], 10)
 			if !ok || amount == nil {
-				return fmt.Errorf("invalid token amount: %s", args[2])
+				return fmt.Errorf("invalid token amount: %s", args[3])
 			}
 
 			tx, err := gravityContract.SendToCosmos(auth, tokenAddr, recipientAddr.String(), amount)

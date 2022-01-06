@@ -563,6 +563,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 				Entrypoint: []string{
 					"peggo",
 					"orchestrator",
+					s.gravityContractAddr,
 					"--eth-pk",
 					val.ethereumKey.privateKey[2:], // remove 0x prefix
 					"--eth-rpc",
@@ -584,8 +585,6 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--profit-multiplier=0.0",
 					"--relayer-loop-multiplier=1.0",
 					"--requester-loop-multiplier=1.0",
-					"--contract-address",
-					s.gravityContractAddr,
 				},
 			},
 			noRestart,
