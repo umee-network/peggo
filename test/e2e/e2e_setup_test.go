@@ -205,7 +205,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 	for i := range s.chain.validators {
 		peggyGenState.DelegateKeys = append(peggyGenState.DelegateKeys, gravitytypes.MsgSetOrchestratorAddress{
 			Validator:    sdk.ValAddress(s.chain.validators[i].keyInfo.GetAddress()).String(),
-			Orchestrator: s.chain.orchestrators[i].keyInfo.GetAddress().String(),
+			Orchestrator: s.chain.validators[i].keyInfo.GetAddress().String(),
 			EthAddress:   s.chain.validators[i].ethereumKey.address,
 		})
 	}
@@ -576,7 +576,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--cosmos-gas-prices",
 					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
 					"--cosmos-from",
-					s.chain.orchestrators[i].keyInfo.GetName(),
+					val.keyInfo.GetName(),
 					"--cosmos-keyring-dir=/root/.umee",
 					"--cosmos-keyring=test",
 					"--relay-batches=true",

@@ -72,6 +72,8 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 		"failed to get ERC20 deployment logs; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
 	)
 
+	panic(errBuf.String() + "  ----  " + outBuf.String())
+
 	re := regexp.MustCompile(`Transaction: (0x.+)`)
 	tokens := re.FindStringSubmatch(errBuf.String())
 	s.Require().Lenf(tokens, 2, "stderr: %s", errBuf.String())
