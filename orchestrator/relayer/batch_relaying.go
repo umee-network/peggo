@@ -5,14 +5,14 @@ import (
 	"math/big"
 	"sort"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/shopspring/decimal"
-	"github.com/umee-network/umee/x/peggy/types"
 )
 
 type SubmittableBatch struct {
-	Batch      *types.OutgoingTxBatch
-	Signatures []*types.MsgConfirmBatch
+	Batch      types.OutgoingTxBatch
+	Signatures []types.MsgConfirmBatch
 }
 
 // getBatchesAndSignatures retrieves the latest batches from the Cosmos module and then iterates through the signatures
@@ -23,7 +23,7 @@ type SubmittableBatch struct {
 // batches will always be resolved.
 func (s *peggyRelayer) getBatchesAndSignatures(
 	ctx context.Context,
-	currentValset *types.Valset,
+	currentValset types.Valset,
 ) (map[ethcmn.Address][]SubmittableBatch, error) {
 	possibleBatches := map[ethcmn.Address][]SubmittableBatch{}
 
@@ -105,7 +105,7 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 // different orders.
 func (s *peggyRelayer) RelayBatches(
 	ctx context.Context,
-	currentValset *types.Valset,
+	currentValset types.Valset,
 	possibleBatches map[ethcmn.Address][]SubmittableBatch,
 ) error {
 	// first get current block height to check for any timeouts
@@ -201,7 +201,7 @@ func (s *peggyRelayer) RelayBatches(
 // fees, the batch is not profitable and should not be submitted.
 func (s *peggyRelayer) IsBatchProfitable(
 	ctx context.Context,
-	batch *types.OutgoingTxBatch,
+	batch types.OutgoingTxBatch,
 	ethGasCost uint64,
 	gasPrice *big.Int,
 	profitMultiplier float64,

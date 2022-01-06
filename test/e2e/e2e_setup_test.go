@@ -28,8 +28,8 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
+	peggytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/umee-network/umee/app"
-	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 const (

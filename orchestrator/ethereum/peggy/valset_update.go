@@ -4,26 +4,27 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"github.com/umee-network/umee/x/peggy/types"
+	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
-type ValsetArgs struct {
-	Validators   []ethcmn.Address `protobuf:"bytes,2,rep,name=validators,proto3" json:"validators,omitempty"`
-	Powers       []*big.Int       `protobuf:"varint,1,opt,name=powers,proto3" json:"powers,omitempty"`
-	ValsetNonce  *big.Int         `protobuf:"varint,3,opt,name=valsetNonce,proto3" json:"valsetNonce,omitempty"`
-	RewardAmount *big.Int         `protobuf:"bytes,4,opt,name=rewardAmount,json=rewardAmount,proto3" json:"rewardAmount"`
-	// the reward token in it's Ethereum hex address representation
-	// nolint: lll
-	RewardToken ethcmn.Address `protobuf:"bytes,5,opt,name=rewardToken,json=rewardToken,proto3" json:"rewardToken,omitempty"`
-}
+// type ValsetArgs struct {
+// 	Validators   []ethcmn.Address `protobuf:"bytes,2,rep,name=validators,proto3" json:"validators,omitempty"`
+// 	Powers       []*big.Int       `protobuf:"varint,1,opt,name=powers,proto3" json:"powers,omitempty"`
+// 	ValsetNonce  *big.Int         `protobuf:"varint,3,opt,name=valsetNonce,proto3" json:"valsetNonce,omitempty"`
+// 	RewardAmount *big.Int         `protobuf:"bytes,4,opt,name=rewardAmount,json=rewardAmount,proto3" json:"rewardAmount"`
+// 	// the reward token in it's Ethereum hex address representation
+// 	// nolint: lll
+// 	RewardToken ethcmn.Address `protobuf:"bytes,5,opt,name=rewardToken,json=rewardToken,proto3" json:"rewardToken,omitempty"`
+// }
 
 func (s *peggyContract) EncodeValsetUpdate(
 	ctx context.Context,
-	oldValset *types.Valset,
-	newValset *types.Valset,
-	confirms []*types.MsgValsetConfirm,
+	oldValset types.Valset,
+	newValset types.Valset,
+	confirms []types.MsgValsetConfirm,
 ) ([]byte, error) {
 	if newValset.Nonce <= oldValset.Nonce {
 		err := errors.New("new valset nonce should be greater than old valset nonce")
@@ -38,7 +39,7 @@ func (s *peggyContract) EncodeValsetUpdate(
 	newValidators, newPowers := validatorsAndPowers(newValset)
 	newValsetNonce := new(big.Int).SetUint64(newValset.Nonce)
 
-	newValsetArgs := ValsetArgs{
+	newValsetArgs := wrappers.ValsetArgs{
 		Validators:   newValidators,
 		Powers:       newPowers,
 		ValsetNonce:  newValsetNonce,
@@ -54,7 +55,7 @@ func (s *peggyContract) EncodeValsetUpdate(
 		return nil, err
 	}
 	currentValsetNonce := new(big.Int).SetUint64(oldValset.Nonce)
-	currentValsetArgs := ValsetArgs{
+	currentValsetArgs := wrappers.ValsetArgs{
 		Validators:   sigs.validators,
 		Powers:       sigs.powers,
 		ValsetNonce:  currentValsetNonce,
@@ -68,13 +69,21 @@ func (s *peggyContract) EncodeValsetUpdate(
 		Interface("current_valset_nonce", currentValsetNonce).
 		Msg("sending updateValset Ethereum TX")
 
+	sigArray := []wrappers.Signature{}
+	for i := range sigs.v {
+		sigArray = append(sigArray, wrappers.Signature{
+			V: sigs.v[i],
+			R: sigs.r[i],
+			S: sigs.s[i],
+		})
+	}
+
 	txData, err := peggyABI.Pack("updateValset",
 		newValsetArgs,
 		currentValsetArgs,
-		sigs.v,
-		sigs.r,
-		sigs.s,
+		sigArray,
 	)
+
 	if err != nil {
 		s.logger.Err(err).Msg("ABI Pack (Peggy updateValset) method")
 		return nil, err
@@ -83,7 +92,7 @@ func (s *peggyContract) EncodeValsetUpdate(
 	return txData, nil
 }
 
-func validatorsAndPowers(valset *types.Valset) (
+func validatorsAndPowers(valset types.Valset) (
 	validators []ethcmn.Address,
 	powers []*big.Int,
 ) {
@@ -96,7 +105,7 @@ func validatorsAndPowers(valset *types.Valset) (
 	return
 }
 
-func checkValsetSigsAndRepack(valset *types.Valset, confirms []*types.MsgValsetConfirm) (*RepackedSigs, error) {
+func checkValsetSigsAndRepack(valset types.Valset, confirms []types.MsgValsetConfirm) (*RepackedSigs, error) {
 	if len(confirms) == 0 {
 		return nil, errors.New("no signatures in valset confirmation")
 	}

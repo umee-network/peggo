@@ -10,13 +10,13 @@ import (
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/golang/mock/gomock"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
-	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
-	"github.com/umee-network/umee/x/peggy/types"
+	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
 func TestSendValsetConfirm(t *testing.T) {
@@ -185,7 +185,7 @@ type hasBiggerNonce struct {
 }
 
 func (m *hasBiggerNonce) Matches(input interface{}) bool {
-	deposit, ok := input.(*types.MsgDepositClaim)
+	deposit, ok := input.(*types.MsgSendToCosmosClaim)
 	if ok {
 		if deposit.EventNonce > m.currentNonce {
 			m.currentNonce = deposit.EventNonce
@@ -270,7 +270,7 @@ func TestSendEthereumClaims(t *testing.T) {
 		},
 	}
 
-	valsetUpdates := []*wrappers.PeggyValsetUpdatedEvent{
+	valsetUpdates := []*wrappers.GravityValsetUpdatedEvent{
 		{
 			EventNonce:     big.NewInt(4),
 			NewValsetNonce: big.NewInt(0),
@@ -342,7 +342,7 @@ func TestSendEthereumClaimsIgnoreNonSequentialNonces(t *testing.T) {
 		},
 	}
 
-	valsetUpdates := []*wrappers.PeggyValsetUpdatedEvent{
+	valsetUpdates := []*wrappers.GravityValsetUpdatedEvent{
 		{
 			EventNonce:     big.NewInt(4),
 			NewValsetNonce: big.NewInt(0),

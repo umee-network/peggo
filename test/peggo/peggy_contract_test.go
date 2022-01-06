@@ -14,7 +14,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
-	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
+	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
 var _ = Describe("Contract Tests", func() {
@@ -220,7 +220,7 @@ var _ = Describe("Contract Tests", func() {
 
 				_ = Describe("ValsetUpdatedEvent", func() {
 					var (
-						valsetUpdatedEvent = wrappers.PeggyValsetUpdatedEvent{}
+						valsetUpdatedEvent = wrappers.GravityValsetUpdatedEvent{}
 					)
 
 					BeforeEach(func() {
@@ -378,7 +378,7 @@ var _ = Describe("Contract Tests", func() {
 
 						_ = Describe("ValsetUpdatedEvent", func() {
 							var (
-								valsetUpdatedEvent = wrappers.PeggyValsetUpdatedEvent{}
+								valsetUpdatedEvent = wrappers.GravityValsetUpdatedEvent{}
 							)
 
 							BeforeEach(func() {
@@ -490,7 +490,7 @@ var _ = Describe("Contract Tests", func() {
 
 					_ = Describe("ValsetUpdatedEvent", func() {
 						var (
-							valsetUpdatedEvent = wrappers.PeggyValsetUpdatedEvent{}
+							valsetUpdatedEvent = wrappers.GravityValsetUpdatedEvent{}
 						)
 
 						BeforeEach(func() {
@@ -865,7 +865,7 @@ func unpackERC20DeployedEventTo(result *wrappers.PeggyERC20DeployedEvent) deploy
 	}
 }
 
-func unpackValsetUpdatedEventTo(result *wrappers.PeggyValsetUpdatedEvent) deployer.ContractLogUnpackFunc {
+func unpackValsetUpdatedEventTo(result *wrappers.GravityValsetUpdatedEvent) deployer.ContractLogUnpackFunc {
 	return func(unpacker deployer.LogUnpacker, event abi.Event, log ctypes.Log) (interface{}, error) {
 		err := unpacker.UnpackLog(result, event.Name, log)
 		return &result, err

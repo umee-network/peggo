@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
@@ -16,7 +17,6 @@ import (
 	"github.com/umee-network/peggo/orchestrator/cosmos"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
-	"github.com/umee-network/umee/x/peggy/types"
 )
 
 func TestGetLastCheckedBlock(t *testing.T) {

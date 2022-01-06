@@ -10,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum"
 	ethcmn "github.com/ethereum/go-ethereum/common"
@@ -23,7 +24,6 @@ import (
 	"github.com/umee-network/peggo/orchestrator/coingecko"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
-	"github.com/umee-network/umee/x/peggy/types"
 )
 
 func TestIsBatchProfitable(t *testing.T) {

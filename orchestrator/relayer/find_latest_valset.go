@@ -4,11 +4,11 @@ import (
 	"context"
 	"sort"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/pkg/errors"
-	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
-	"github.com/umee-network/umee/x/peggy/types"
+	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
 const defaultBlocksToSearch = 2000
@@ -26,7 +26,7 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 	}
 	currentBlock := latestHeader.Number.Uint64()
 
-	peggyFilterer, err := wrappers.NewPeggyFilterer(s.peggyContract.Address(), s.ethProvider)
+	peggyFilterer, err := wrappers.NewGravityFilterer(s.peggyContract.Address(), s.ethProvider)
 	if err != nil {
 		err = errors.Wrap(err, "failed to init Peggy events filterer")
 		return nil, err
@@ -57,7 +57,7 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 			endSearchBlock = currentBlock - defaultBlocksToSearch
 		}
 
-		var valsetUpdatedEvents []*wrappers.PeggyValsetUpdatedEvent
+		var valsetUpdatedEvents []*wrappers.GravityValsetUpdatedEvent
 		iter, err := peggyFilterer.FilterValsetUpdatedEvent(&bind.FilterOpts{
 			Start: endSearchBlock,
 			End:   &currentBlock,
@@ -78,7 +78,7 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 		//
 		// TODO(xlab): this follows the original impl, but sort might be skipped there:
 		// we could access just the latest element later.
-		sort.Sort(sort.Reverse(PeggyValsetUpdatedEvents(valsetUpdatedEvents)))
+		sort.Sort(sort.Reverse(GravityValsetUpdatedEvents(valsetUpdatedEvents)))
 
 		s.logger.Debug().
 			Int("valset_updated_events_num", len(valsetUpdatedEvents)).
@@ -89,13 +89,13 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 			event := valsetUpdatedEvents[0]
 			valset := &types.Valset{
 				Nonce:        event.NewValsetNonce.Uint64(),
-				Members:      make([]*types.BridgeValidator, 0, len(event.Powers)),
+				Members:      make([]types.BridgeValidator, 0, len(event.Powers)),
 				RewardAmount: sdk.NewIntFromBigInt(event.RewardAmount),
 				RewardToken:  event.RewardToken.Hex(),
 			}
 
 			for idx, p := range event.Powers {
-				valset.Members = append(valset.Members, &types.BridgeValidator{
+				valset.Members = append(valset.Members, types.BridgeValidator{
 					Power:           p.Uint64(),
 					EthereumAddress: event.Validators[idx].Hex(),
 				})
@@ -113,13 +113,13 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 
 var ErrNotFound = errors.New("not found")
 
-type PeggyValsetUpdatedEvents []*wrappers.PeggyValsetUpdatedEvent
+type GravityValsetUpdatedEvents []*wrappers.GravityValsetUpdatedEvent
 
-func (a PeggyValsetUpdatedEvents) Len() int { return len(a) }
-func (a PeggyValsetUpdatedEvents) Less(i, j int) bool {
+func (a GravityValsetUpdatedEvents) Len() int { return len(a) }
+func (a GravityValsetUpdatedEvents) Less(i, j int) bool {
 	return a[i].NewValsetNonce.Cmp(a[j].NewValsetNonce) < 0
 }
-func (a PeggyValsetUpdatedEvents) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a GravityValsetUpdatedEvents) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 
 // This function exists to provide a warning if Cosmos and Ethereum have different validator sets
 // for a given nonce. In the mundane version of this warning the validator sets disagree on sorting order
@@ -171,14 +171,16 @@ func (s *peggyRelayer) checkIfValsetsDiffer(cosmosValset, ethereumValset *types.
 	}
 }
 
-type BridgeValidators []*types.BridgeValidator
+type BridgeValidators []types.BridgeValidator
 
 // Sort sorts the validators by power
 func (b BridgeValidators) Sort() {
 	sort.Slice(b, func(i, j int) bool {
 		if b[i].Power == b[j].Power {
 			// Secondary sort on eth address in case powers are equal
-			return types.EthAddrLessThan(b[i].EthereumAddress, b[j].EthereumAddress)
+			addrI, _ := types.NewEthAddress(b[i].EthereumAddress)
+			addrJ, _ := types.NewEthAddress(b[j].EthereumAddress)
+			return types.EthAddrLessThan(*addrI, *addrJ)
 		}
 		return b[i].Power > b[j].Power
 	})

@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
-	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
+	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
 func TestPeggyPowerToPercent(t *testing.T) {

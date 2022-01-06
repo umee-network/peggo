@@ -39,13 +39,13 @@ const (
 	flagCoinGeckoAPI            = "coingecko-api"
 	flagEthGasPrice             = "eth-gas-price"
 	flagEthGasLimit             = "eth-gas-limit"
-	flagPowerThreshold          = "power-threshold"
 	flagAutoApprove             = "auto-approve"
 	flagEthBlocksPerLoop        = "eth-blocks-per-loop"
 	flagEthPendingTXWait        = "eth-pending-tx-wait"
 	flagProfitMultiplier        = "profit-multiplier"
 	flagRelayerLoopMultiplier   = "relayer-loop-multiplier"
 	flagRequesterLoopMultiplier = "requester-loop-multiplier"
+	flagContractAddress         = "contract-address"
 )
 
 func cosmosFlagSet() *pflag.FlagSet {
@@ -81,7 +81,6 @@ func ethereumKeyOptsFlagSet() *pflag.FlagSet {
 	fs.String(flagEthPassphrase, "", "Specify the passphrase to unlock the private key from armor; If empty then STDIN is used")
 	fs.String(flagEthPK, "", "Provide the Ethereum private key of the validator in hex")
 	fs.Bool(flagEthUseLedger, false, "Use the Ethereum app on hardware ledger to sign transactions")
-
 	return fs
 }
 
@@ -91,6 +90,7 @@ func ethereumOptsFlagSet() *pflag.FlagSet {
 	fs.String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
 	fs.Float64(flagEthGasAdjustment, float64(1.3), "Specify a gas price adjustment for Ethereum transactions")
 	fs.Float64(flagEthGasLimitAdjustment, float64(1.2), "Specify a gas limit adjustment for Ethereum transactions")
+	fs.String(flagContractAddress, "0x4ecE7B277E26729F1934e4f080a502312d358F57", "Specify the Gravity Ethereum contract address")
 
 	return fs
 }

@@ -6,12 +6,12 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
 	peggyMocks "github.com/umee-network/peggo/mocks/peggy"
-	"github.com/umee-network/umee/x/peggy/types"
 )
 
 func TestRelayValsets(t *testing.T) {

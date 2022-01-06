@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	peggytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog"
 	sidechain "github.com/umee-network/peggo/orchestrator/cosmos"
@@ -12,13 +13,12 @@ import (
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	"github.com/umee-network/peggo/orchestrator/relayer"
-	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 type PeggyOrchestrator interface {
 	Start(ctx context.Context) error
 	CheckForEvents(ctx context.Context, startingBlock, ethBlockConfirmationDelay uint64) (currentBlock uint64, err error)
-	GetLastCheckedBlock(ctx context.Context) (uint64, error)
+	GetLastCheckedBlock(ctx context.Context, ethBlockConfirmationDelay uint64) (uint64, error)
 	EthOracleMainLoop(ctx context.Context) error
 	EthSignerMainLoop(ctx context.Context) error
 	BatchRequesterLoop(ctx context.Context) error
@@ -38,6 +38,7 @@ type peggyOrchestrator struct {
 	cosmosBlockTime            time.Duration
 	ethereumBlockTime          time.Duration
 	batchRequesterLoopDuration time.Duration
+	startingEthBlock           uint64
 	ethBlocksPerLoop           uint64
 
 	mtx             sync.Mutex
@@ -74,6 +75,7 @@ func NewPeggyOrchestrator(
 		ethereumBlockTime:          ethereumBlockTime,
 		batchRequesterLoopDuration: batchRequesterLoopDuration,
 		ethBlocksPerLoop:           uint64(ethBlocksPerLoop),
+		startingEthBlock:           uint64(6149808),
 	}
 
 	for _, option := range options {

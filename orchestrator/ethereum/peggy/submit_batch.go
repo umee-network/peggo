@@ -4,9 +4,10 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"github.com/umee-network/umee/x/peggy/types"
+	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
 type RepackedSigs struct {
@@ -26,9 +27,9 @@ type genericConfirm struct {
 
 func (s *peggyContract) EncodeTransactionBatch(
 	ctx context.Context,
-	currentValset *types.Valset,
-	batch *types.OutgoingTxBatch,
-	confirms []*types.MsgConfirmBatch,
+	currentValset types.Valset,
+	batch types.OutgoingTxBatch,
+	confirms []types.MsgConfirmBatch,
 ) ([]byte, error) {
 
 	sigs, err := checkBatchSigsAndRepack(currentValset, confirms)
@@ -42,7 +43,7 @@ func (s *peggyContract) EncodeTransactionBatch(
 	batchNonce := new(big.Int).SetUint64(batch.BatchNonce)
 	batchTimeout := new(big.Int).SetUint64(batch.BatchTimeout)
 
-	currentValsetArs := ValsetArgs{
+	currentValsetArs := wrappers.ValsetArgs{
 		Validators:   sigs.validators,
 		Powers:       sigs.powers,
 		ValsetNonce:  currentValsetNonce,
@@ -50,9 +51,18 @@ func (s *peggyContract) EncodeTransactionBatch(
 		RewardToken:  ethcmn.HexToAddress(currentValset.RewardToken),
 	}
 
+	sigArray := []wrappers.Signature{}
+	for i := range sigs.v {
+		sigArray = append(sigArray, wrappers.Signature{
+			V: sigs.v[i],
+			R: sigs.r[i],
+			S: sigs.s[i],
+		})
+	}
+
 	txData, err := peggyABI.Pack("submitBatch",
 		currentValsetArs,
-		sigs.v, sigs.r, sigs.s,
+		sigArray,
 		amounts,
 		destinations,
 		fees,
@@ -68,7 +78,7 @@ func (s *peggyContract) EncodeTransactionBatch(
 	return txData, nil
 }
 
-func getBatchCheckpointValues(batch *types.OutgoingTxBatch) (
+func getBatchCheckpointValues(batch types.OutgoingTxBatch) (
 	amounts []*big.Int,
 	destinations []ethcmn.Address,
 	fees []*big.Int,
@@ -88,7 +98,7 @@ func getBatchCheckpointValues(batch *types.OutgoingTxBatch) (
 
 // checkBatchSigsAndRepack checks all the signatures for a batch (confirmations), assembles them into the expected
 // format and checks if the power of the signatures would be enough to send this batch to Ethereum.
-func checkBatchSigsAndRepack(valset *types.Valset, confirms []*types.MsgConfirmBatch) (*RepackedSigs, error) {
+func checkBatchSigsAndRepack(valset types.Valset, confirms []types.MsgConfirmBatch) (*RepackedSigs, error) {
 	if len(confirms) == 0 {
 		return nil, errors.New("no signatures in batch confirmation")
 	}
@@ -104,7 +114,7 @@ func checkBatchSigsAndRepack(valset *types.Valset, confirms []*types.MsgConfirmB
 	return checkAndRepackSigs(valset, genericConfirms)
 }
 
-func checkAndRepackSigs(valset *types.Valset, confirms []genericConfirm) (*RepackedSigs, error) {
+func checkAndRepackSigs(valset types.Valset, confirms []genericConfirm) (*RepackedSigs, error) {
 	var err error
 
 	sigs := &RepackedSigs{}

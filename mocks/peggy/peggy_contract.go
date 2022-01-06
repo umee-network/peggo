@@ -10,11 +10,11 @@ import (
 	reflect "reflect"
 	time "time"
 
+	types "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	common "github.com/ethereum/go-ethereum/common"
 	gomock "github.com/golang/mock/gomock"
 	peggy "github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	provider "github.com/umee-network/peggo/orchestrator/ethereum/provider"
-	types "github.com/umee-network/umee/x/peggy/types"
 )
 
 // MockContract is a mock of Contract interface.

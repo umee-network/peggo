@@ -5,69 +5,19 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/umee-network/umee/x/peggy/types"
-)
-
-const (
-	// ValsetConfirmABIJSON = `[{
-	//     "name": "checkpoint",
-	//     "stateMutability": "pure",
-	//     "type": "function",
-	//     "inputs": [
-	//         { "internalType": "bytes32",   "name": "_peggyId",     "type": "bytes32" },
-	//         { "internalType": "bytes32",   "name": "_checkpoint",  "type": "bytes32" },
-	//         { "internalType": "uint256",   "name": "_valsetNonce", "type": "uint256" },
-	//         { "internalType": "address[]", "name": "_validators",  "type": "address[]" },
-	//         { "internalType": "uint256[]", "name": "_powers",      "type": "uint256[]" }
-	//     ]
-	// }]`
-
-	// ValsetCheckpointABIJSON checks the ETH ABI for compatibility of the Valset update message
-	ValsetCheckpointABIJSON = `[{
-		"name": "checkpoint",
-		"stateMutability": "pure",
-		"type": "function",
-		"inputs": [
-			{ "internalType": "bytes32",   "name": "_peggyId",   "type": "bytes32"   },
-			{ "internalType": "bytes32",   "name": "_checkpoint",  "type": "bytes32"   },
-			{ "internalType": "uint256",   "name": "_valsetNonce", "type": "uint256"   },
-			{ "internalType": "address[]", "name": "_validators",  "type": "address[]" },
-			{ "internalType": "uint256[]", "name": "_powers",      "type": "uint256[]" },
-			{ "internalType": "uint256",   "name": "_rewardAmount","type": "uint256"   },
-			{ "internalType": "address",   "name": "_rewardToken", "type": "address"   }
-		],
-		"outputs": [
-			{ "internalType": "bytes32", "name": "", "type": "bytes32" }
-		]
-	}]`
-
-	OutgoingBatchTxConfirmABIJSON = `[{
-        "name": "transactionBatch",
-        "stateMutability": "pure",
-        "type": "function",
-        "inputs": [
-            { "internalType": "bytes32",   "name": "_peggyId",       "type": "bytes32" },
-            { "internalType": "bytes32",   "name": "_methodName",    "type": "bytes32" },
-            { "internalType": "uint256[]", "name": "_amounts",       "type": "uint256[]" },
-            { "internalType": "address[]", "name": "_destinations",  "type": "address[]" },
-            { "internalType": "uint256[]", "name": "_fees",          "type": "uint256[]" },
-            { "internalType": "uint256",   "name": "_batchNonce",    "type": "uint256" },
-            { "internalType": "address",   "name": "_tokenContract", "type": "address" },
-            { "internalType": "uint256",   "name": "_batchTimeout",  "type": "uint256" }
-        ]
-    }]`
 )
 
 // EncodeValsetConfirm takes the required input data and produces the required
 // signature to confirm a validator set update on the Peggy Ethereum contract.
 // This value will then be signed before being submitted to Cosmos, verified,
 // and then relayed to Ethereum.
-func EncodeValsetConfirm(peggyID ethcmn.Hash, valset *types.Valset) ethcmn.Hash {
+func EncodeValsetConfirm(peggyID string, valset types.Valset) ethcmn.Hash {
 	// error case here should not occur outside of testing since the above is a constant
-	contractAbi, err := abi.JSON(strings.NewReader(ValsetCheckpointABIJSON))
+	contractAbi, err := abi.JSON(strings.NewReader(types.ValsetCheckpointABIJSON))
 	if err != nil {
 		panic(fmt.Sprintf("failed to JSON parse ABI: %s", err))
 	}
@@ -75,6 +25,10 @@ func EncodeValsetConfirm(peggyID ethcmn.Hash, valset *types.Valset) ethcmn.Hash 
 	checkpointBytes := []uint8("checkpoint")
 	var checkpoint [32]uint8
 	copy(checkpoint[:], checkpointBytes)
+
+	peggyIDBytes := []uint8(peggyID)
+	var peggyIDBytes32 [32]uint8
+	copy(peggyIDBytes32[:], peggyIDBytes)
 
 	memberAddresses := make([]ethcmn.Address, len(valset.Members))
 	convertedPowers := make([]*big.Int, len(valset.Members))
@@ -98,7 +52,7 @@ func EncodeValsetConfirm(peggyID ethcmn.Hash, valset *types.Valset) ethcmn.Hash 
 	// then discard.
 	bytes, err := contractAbi.Pack(
 		"checkpoint",
-		peggyID,
+		peggyIDBytes32,
 		checkpoint,
 		big.NewInt(int64(valset.Nonce)),
 		memberAddresses,
@@ -124,8 +78,8 @@ func EncodeValsetConfirm(peggyID ethcmn.Hash, valset *types.Valset) ethcmn.Hash 
 // signature to confirm a transaction batch on the Peggy Ethereum contract. This
 // value will then be signed before being submitted to Cosmos, verified, and
 // then relayed to Ethereum.
-func EncodeTxBatchConfirm(peggyID ethcmn.Hash, batch *types.OutgoingTxBatch) ethcmn.Hash {
-	abi, err := abi.JSON(strings.NewReader(OutgoingBatchTxConfirmABIJSON))
+func EncodeTxBatchConfirm(peggyID string, batch types.OutgoingTxBatch) []byte {
+	abi, err := abi.JSON(strings.NewReader(types.OutgoingBatchTxCheckpointABIJSON))
 	if err != nil {
 		panic(fmt.Sprintf("failed to JSON parse ABI: %s", err))
 	}
@@ -134,6 +88,10 @@ func EncodeTxBatchConfirm(peggyID ethcmn.Hash, batch *types.OutgoingTxBatch) eth
 	methodNameBytes := []uint8("transactionBatch")
 	var batchMethodName [32]uint8
 	copy(batchMethodName[:], methodNameBytes)
+
+	peggyIDBytes := []uint8(peggyID)
+	var peggyIDBytes32 [32]uint8
+	copy(peggyIDBytes32[:], peggyIDBytes)
 
 	// Run through the elements of the batch and serialize them
 	txAmounts := make([]*big.Int, len(batch.Transactions))
@@ -149,8 +107,8 @@ func EncodeTxBatchConfirm(peggyID ethcmn.Hash, batch *types.OutgoingTxBatch) eth
 	// checkpointAbiJson but other than that it's a constant that has no impact on
 	// the output. This is because it gets encoded as a function name which we must
 	// then discard.
-	abiEncodedBatch, err := abi.Pack("transactionBatch",
-		peggyID,
+	abiEncodedBatch, err := abi.Pack("submitBatch",
+		peggyIDBytes32,
 		batchMethodName,
 		txAmounts,
 		txDestinations,
@@ -162,9 +120,8 @@ func EncodeTxBatchConfirm(peggyID ethcmn.Hash, batch *types.OutgoingTxBatch) eth
 	if err != nil {
 		// This should never happen outside of test since any case that could crash on
 		// encoding should be filtered above.
-		return ethcmn.Hash{}
+		return []byte{}
 	}
 
-	hash := crypto.Keccak256Hash(abiEncodedBatch[4:])
-	return ethcmn.BytesToHash(hash.Bytes())
+	return crypto.Keccak256Hash(abiEncodedBatch[4:]).Bytes()
 }

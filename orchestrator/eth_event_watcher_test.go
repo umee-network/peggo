@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum"
 	ethcmn "github.com/ethereum/go-ethereum/common"
@@ -21,8 +22,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/cosmos"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
-	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
-	"github.com/umee-network/umee/x/peggy/types"
+	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
 // TODO: This function will require quite some effort to get it tested.
@@ -638,7 +638,7 @@ func TestFilterTransactionBatchExecutedEventsByNonce(t *testing.T) {
 func TestFilterValsetUpdateEventsByNonce(t *testing.T) {
 	// In testEv we'll add 2 valid and 1 past event.
 	// This should result in only 2 events after the filter.
-	testEv := []*wrappers.PeggyValsetUpdatedEvent{
+	testEv := []*wrappers.GravityValsetUpdatedEvent{
 		{EventNonce: big.NewInt(3)},
 		{EventNonce: big.NewInt(4)},
 		{EventNonce: big.NewInt(5)},

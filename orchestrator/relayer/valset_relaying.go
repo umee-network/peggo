@@ -3,13 +3,13 @@ package relayer
 import (
 	"context"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/pkg/errors"
-	"github.com/umee-network/umee/x/peggy/types"
 )
 
 // RelayValsets checks the last validator set on Ethereum, if it's lower than our latest validator
 // set then we should package and submit the update as an Ethereum transaction
-func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset *types.Valset) error {
+func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset types.Valset) error {
 	// we should determine if we need to relay one
 	// to Ethereum for that we will find the latest confirmed valset and compare it to the ethereum chain
 	latestValsets, err := s.cosmosQueryClient.LastValsetRequests(ctx, &types.QueryLastValsetRequestsRequest{})
@@ -20,7 +20,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset *types.Va
 		return errors.New("no valsets found")
 	}
 
-	var latestCosmosSigs []*types.MsgValsetConfirm
+	var latestCosmosSigs []types.MsgValsetConfirm
 	var latestCosmosConfirmed *types.Valset
 	for _, set := range latestValsets.Valsets {
 		sigs, err := s.cosmosQueryClient.ValsetConfirmsByNonce(ctx, &types.QueryValsetConfirmsByNonceRequest{
@@ -40,7 +40,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset *types.Va
 		}
 
 		latestCosmosSigs = sigs.Confirms
-		latestCosmosConfirmed = set
+		latestCosmosConfirmed = &set
 		break
 	}
 
@@ -76,7 +76,7 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset *types.Va
 			txData, err := s.peggyContract.EncodeValsetUpdate(
 				ctx,
 				currentValset,
-				latestCosmosConfirmed,
+				*latestCosmosConfirmed,
 				latestCosmosSigs,
 			)
 			if err != nil {

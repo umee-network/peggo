@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
@@ -15,8 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
-	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
-	"github.com/umee-network/umee/x/peggy/types"
+	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
 func TestEncodeValsetUpdate(t *testing.T) {

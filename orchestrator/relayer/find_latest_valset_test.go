@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/ethereum/go-ethereum"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -16,7 +17,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
 	peggyMocks "github.com/umee-network/peggo/mocks/peggy"
-	"github.com/umee-network/umee/x/peggy/types"
 )
 
 func TestFindLatestValset(t *testing.T) {

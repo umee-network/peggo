@@ -19,8 +19,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3/docker"
 
+	peggytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	peggycli "github.com/umee-network/umee/x/peggy/client/cli"
-	peggytypes "github.com/umee-network/umee/x/peggy/types"
 )
 
 func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {

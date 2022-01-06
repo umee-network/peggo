@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	peggytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
@@ -23,8 +24,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	"github.com/umee-network/peggo/orchestrator/relayer"
-	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
-	peggytypes "github.com/umee-network/umee/x/peggy/types"
+	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 )
@@ -103,7 +103,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 			peggyQuerier := peggytypes.NewQueryClient(gRPCConn)
 
-			peggyParams, err := getPeggyParams(gRPCConn)
+			peggyParams, err := getGravityParams(gRPCConn)
 			if err != nil {
 				return fmt.Errorf("failed to query for Peggy params: %w", err)
 			}
@@ -145,9 +145,9 @@ func getOrchestratorCmd() *cobra.Command {
 				personalSignFn,
 			)
 
-			peggyAddress := ethcmn.HexToAddress(peggyParams.BridgeEthereumAddress)
+			peggyAddress := ethcmn.HexToAddress(konfig.String(flagContractAddress))
 
-			ethPeggy, err := wrappers.NewPeggy(peggyAddress, ethCommitter.Provider())
+			ethPeggy, err := wrappers.NewGravity(peggyAddress, ethCommitter.Provider())
 			if err != nil {
 				return fmt.Errorf("failed to create a new instance of Peggy: %w", err)
 			}

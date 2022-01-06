@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethcmn "github.com/ethereum/go-ethereum/common"
@@ -15,8 +16,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/shopspring/decimal"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
-	wrappers "github.com/umee-network/peggo/solidity/wrappers/Peggy.sol"
-	"github.com/umee-network/umee/x/peggy/types"
+	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
 // The total power in the Peggy bridge is normalized to u32 max every
@@ -25,7 +25,7 @@ import (
 const totalPeggyPower int64 = math.MaxUint32
 
 var (
-	peggyABI, _ = abi.JSON(strings.NewReader(wrappers.PeggyABI))
+	peggyABI, _ = abi.JSON(strings.NewReader(wrappers.GravityABI))
 
 	ErrInsufficientVotingPowerToPass = errors.New("insufficient voting power")
 )
@@ -40,18 +40,18 @@ type Contract interface {
 	// detecting identical transactions in the mempool.
 	EncodeTransactionBatch(
 		ctx context.Context,
-		currentValset *types.Valset,
-		batch *types.OutgoingTxBatch,
-		confirms []*types.MsgConfirmBatch,
+		currentValset types.Valset,
+		batch types.OutgoingTxBatch,
+		confirms []types.MsgConfirmBatch,
 	) ([]byte, error)
 
 	// EncodeValsetUpdate encodes a valset update into a tx byte data. This is specially helpful for estimating gas and
 	// detecting identical transactions in the mempool.
 	EncodeValsetUpdate(
 		ctx context.Context,
-		oldValset *types.Valset,
-		newValset *types.Valset,
-		confirms []*types.MsgValsetConfirm,
+		oldValset types.Valset,
+		newValset types.Valset,
+		confirms []types.MsgValsetConfirm,
 	) ([]byte, error)
 
 	GetTxBatchNonce(
@@ -68,7 +68,7 @@ type Contract interface {
 	GetPeggyID(
 		ctx context.Context,
 		callerAddress ethcmn.Address,
-	) (ethcmn.Hash, error)
+	) (string, error)
 
 	GetERC20Symbol(
 		ctx context.Context,
@@ -98,7 +98,7 @@ type peggyContract struct {
 
 	logger             zerolog.Logger
 	peggyAddress       ethcmn.Address
-	ethPeggy           *wrappers.Peggy
+	ethPeggy           *wrappers.Gravity
 	pendingTxInputList PendingTxInputList
 
 	mtx               sync.Mutex
@@ -109,7 +109,7 @@ func NewPeggyContract(
 	logger zerolog.Logger,
 	ethCommitter committer.EVMCommitter,
 	peggyAddress ethcmn.Address,
-	ethPeggy *wrappers.Peggy,
+	ethPeggy *wrappers.Gravity,
 ) (Contract, error) {
 	return &peggyContract{
 		logger:       logger.With().Str("module", "peggy_contract").Logger(),
@@ -164,19 +164,19 @@ func (s *peggyContract) GetValsetNonce(
 func (s *peggyContract) GetPeggyID(
 	ctx context.Context,
 	callerAddress ethcmn.Address,
-) (ethcmn.Hash, error) {
+) (string, error) {
 
-	peggyID, err := s.ethPeggy.StatePeggyId(&bind.CallOpts{
+	peggyID, err := s.ethPeggy.StateGravityId(&bind.CallOpts{
 		From:    callerAddress,
 		Context: ctx,
 	})
 
 	if err != nil {
 		err = errors.Wrap(err, "StatePeggyId call failed")
-		return ethcmn.Hash{}, err
+		return "", err
 	}
 
-	return peggyID, nil
+	return string(peggyID[:]), nil
 }
 
 func (s *peggyContract) GetERC20Symbol(

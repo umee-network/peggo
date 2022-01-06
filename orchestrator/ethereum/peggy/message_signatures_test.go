@@ -3,10 +3,10 @@ package peggy
 import (
 	"testing"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
-	"github.com/umee-network/umee/x/peggy/types"
 )
 
 func TestEncodeValsetConfirm(t *testing.T) {
@@ -32,15 +32,15 @@ func TestEncodeValsetConfirm(t *testing.T) {
 func TestEncodeTxBatchConfirm(t *testing.T) {
 	peggyID := ethcmn.HexToHash("0x756d65652d706567677969640000000000000000000000000000000000000000")
 
-	txBatch := &types.OutgoingTxBatch{
-		Transactions: []*types.OutgoingTransferTx{
+	txBatch := types.OutgoingTxBatch{
+		Transactions: []types.OutgoingTransferTx{
 			{
 				DestAddress: "0x02fa1b44e2EF8436e6f35D5F56607769c658c225",
-				Erc20Token: &types.ERC20Token{
+				Erc20Token: types.ERC20Token{
 					Contract: "0x4884e2a214dc5040f52a41c3f21c765283170b6e",
 					Amount:   sdk.NewInt(100000),
 				},
-				Erc20Fee: &types.ERC20Token{
+				Erc20Fee: types.ERC20Token{
 					Contract: "0x4884e2a214dc5040f52a41c3f21c765283170b6e",
 					Amount:   sdk.NewInt(2000),
 				},

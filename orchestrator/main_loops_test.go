@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
-	"github.com/umee-network/umee/x/peggy/types"
 )
 
 func TestERC20ToDenom(t *testing.T) {

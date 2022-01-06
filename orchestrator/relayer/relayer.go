@@ -10,7 +10,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 
-	peggytypes "github.com/umee-network/umee/x/peggy/types"
+	peggytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 )
 
 type PeggyRelayer interface {
@@ -20,11 +20,11 @@ type PeggyRelayer interface {
 
 	RelayBatches(
 		ctx context.Context,
-		currentValset *peggytypes.Valset,
+		currentValset peggytypes.Valset,
 		possibleBatches map[ethcmn.Address][]SubmittableBatch,
 	) error
 
-	RelayValsets(ctx context.Context, currentValset *peggytypes.Valset) error
+	RelayValsets(ctx context.Context, currentValset peggytypes.Valset) error
 
 	// SetPriceFeeder sets the (optional) price feeder used when performing profitable
 	// batch calculations.

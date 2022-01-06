@@ -5,10 +5,10 @@ import (
 	"errors"
 	"time"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/avast/retry-go"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/umee-network/peggo/orchestrator/loops"
-	"github.com/umee-network/umee/x/peggy/types"
 )
 
 const (
@@ -18,11 +18,11 @@ const (
 
 	// Run every approximately 5 Ethereum blocks to allow time to receive new blocks.
 	// If we run this faster we wouldn't be getting new blocks, which is not efficient.
-	ethOracleLoopMultiplier = 5
+	ethOracleLoopMultiplier = 1
 
 	// Run every approximately 3 Cosmos blocks; so we sign batches and valset updates ASAP but not run these requests
 	// too often that we make too many requests to Cosmos.
-	ethSignerLoopMultiplier = 3
+	ethSignerLoopMultiplier = 1
 )
 
 // Start combines the all major roles required to make
@@ -74,9 +74,9 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 	}
 
 	if err := retry.Do(func() (err error) {
-		lastCheckedBlock, err = p.GetLastCheckedBlock(ctx)
+		lastCheckedBlock, err = p.GetLastCheckedBlock(ctx, getEthBlockDelay(peggyParams.BridgeChainId))
 		if lastCheckedBlock == 0 {
-			lastCheckedBlock = peggyParams.BridgeContractStartHeight
+			lastCheckedBlock = p.startingEthBlock
 		}
 
 		return err
@@ -113,7 +113,7 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 		//	   last iteration.
 		if time.Since(lastResync) >= 48*time.Hour {
 			if err := retry.Do(func() (err error) {
-				lastCheckedBlock, err = p.GetLastCheckedBlock(ctx)
+				lastCheckedBlock, err = p.GetLastCheckedBlock(ctx, getEthBlockDelay(peggyParams.BridgeChainId))
 				return err
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 				logger.Err(err).Uint("retry", n).Msg("failed to get last checked block; retrying...")
@@ -139,7 +139,7 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "EthSignerMainLoop").Logger()
 
-	var peggyID ethcmn.Hash
+	var peggyID string
 	if err := retry.Do(func() (err error) {
 		peggyID, err = p.peggyContract.GetPeggyID(ctx, p.peggyContract.FromAddress())
 		return err
@@ -150,10 +150,10 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 		return err
 	}
 
-	logger.Debug().Hex("peggyID", peggyID[:]).Msg("received peggyID")
+	logger.Debug().Str("peggyID", peggyID).Msg("received peggyID")
 
 	return loops.RunLoop(ctx, p.logger, p.cosmosBlockTime*ethSignerLoopMultiplier, func() error {
-		var oldestUnsignedValsets []*types.Valset
+		var oldestUnsignedValsets []types.Valset
 		if err := retry.Do(func() error {
 			oldestValsets, err := p.cosmosQueryClient.LastPendingValsetRequestByAddr(
 				ctx,
@@ -196,7 +196,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 			}
 		}
 
-		var oldestUnsignedTransactionBatch *types.OutgoingTxBatch
+		var oldestUnsignedTransactionBatch []types.OutgoingTxBatch
 		if err := retry.Do(func() error {
 			// sign the last unsigned batch, TODO check if we already have signed this
 			txBatch, err := p.cosmosQueryClient.LastPendingBatchRequestByAddr(
@@ -226,12 +226,12 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 			return err
 		}
 
-		if oldestUnsignedTransactionBatch != nil {
+		for _, batch := range oldestUnsignedTransactionBatch {
 			logger.Info().
-				Uint64("batch_nonce", oldestUnsignedTransactionBatch.BatchNonce).
+				Uint64("batch_nonce", batch.BatchNonce).
 				Msg("sending TransactionBatch confirm for BatchNonce")
 			if err := retry.Do(func() error {
-				return p.peggyBroadcastClient.SendBatchConfirm(ctx, p.ethFrom, peggyID, oldestUnsignedTransactionBatch)
+				return p.peggyBroadcastClient.SendBatchConfirm(ctx, p.ethFrom, peggyID, batch)
 			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 				logger.Err(err).
 					Uint("retry", n).
@@ -257,7 +257,7 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 		var pg loops.ParanoidGroup
 
 		pg.Go(func() error {
-			var unbatchedTokensWithFees []*types.BatchFees
+			var unbatchedTokensWithFees []types.BatchFees
 
 			if err := retry.Do(func() (err error) {
 				batchFeesResp, err := p.cosmosQueryClient.BatchFees(ctx, &types.QueryBatchFeeRequest{})
@@ -359,7 +359,7 @@ func getEthBlockDelay(chainID uint64) uint64 {
 	// up to num validators blocks. Number is higher than Ethereum based
 	// on experience with operational issues
 	case 4, 5:
-		return 10
+		return 4
 
 	// assume the safe option (POW) where we don't know
 	default:
