@@ -92,10 +92,10 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.initNodes()
 	s.initEthereum()
 	s.runEthContainer()
-	s.runContractDeployment()
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
+	s.runContractDeployment()
 	// s.registerValidatorOrchAddresses() // this is done in the genesis.json
 	s.runOrchestrators()
 }
