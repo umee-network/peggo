@@ -50,6 +50,8 @@ func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
 			fmt.Sprintf("tcp://%s:9090", s.valResources[0].Container.Name[1:]),
 			"--tendermint-rpc",
 			fmt.Sprintf("http://%s:26657", s.valResources[0].Container.Name[1:]),
+			"--contract-address",
+			s.gravityContractAddr,
 		},
 	})
 	s.Require().NoError(err)

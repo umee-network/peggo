@@ -88,8 +88,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	// 4. Create and initialize Umee validator genesis files.
 	// 5. Start Umee network.
 	// 6. Register each validator's Ethereum key.
-	// 7. Invoke the initialize method on the Peggy contract.
-	// 8. Create and start peggo (orchestrator) containers.
+	// 7. Create and start peggo (orchestrator) containers.
 	s.initNodes()
 	s.initEthereum()
 	s.runEthContainer()
@@ -97,8 +96,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
-	s.registerValidatorOrchAddresses()
-	s.initPeggy()
+	// s.registerValidatorOrchAddresses() // this is done in the genesis.json
 	s.runOrchestrators()
 }
 
@@ -201,9 +199,16 @@ func (s *IntegrationTestSuite) initGenesis() {
 	var peggyGenState gravitytypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &peggyGenState))
 
-	peggyGenState.Params.BridgeEthereumAddress = s.gravityContractAddr
-	peggyGenState.Params.BridgeContractStartHeight = 0
 	peggyGenState.Params.BridgeChainId = uint64(ethChainID)
+	peggyGenState.DelegateKeys = []gravitytypes.MsgSetOrchestratorAddress{}
+
+	for i := range s.chain.validators {
+		peggyGenState.DelegateKeys = append(peggyGenState.DelegateKeys, gravitytypes.MsgSetOrchestratorAddress{
+			Validator:    s.chain.validators[i].keyInfo.GetAddress().String(),
+			Orchestrator: s.chain.orchestrators[i].keyInfo.GetAddress().String(),
+			EthAddress:   s.chain.validators[i].ethereumKey.address,
+		})
+	}
 
 	bz, err := cdc.MarshalJSON(&peggyGenState)
 	s.Require().NoError(err)
@@ -537,92 +542,6 @@ func (s *IntegrationTestSuite) registerValidatorOrchAddresses() {
 	}
 }
 
-func (s *IntegrationTestSuite) initPeggy() {
-	s.T().Log("initializing Peggy contract...")
-
-	resource, err := s.dkrPool.RunWithOptions(
-		&dockertest.RunOptions{
-			Name:       "peggy-contract-init",
-			NetworkID:  s.dkrNet.Network.ID,
-			Repository: "umeenet/peggo",
-			// NOTE: container names are prefixed with '/'
-			Entrypoint: []string{
-				"peggo",
-				"bridge",
-				"init-peggy",
-				"--eth-pk",
-				ethMinerPK[2:], // remove 0x prefix
-				"--eth-rpc",
-				fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
-				"--cosmos-chain-id",
-				s.chain.id,
-				"--cosmos-grpc",
-				fmt.Sprintf("tcp://%s:9090", s.valResources[0].Container.Name[1:]),
-				"--tendermint-rpc",
-				fmt.Sprintf("http://%s:26657", s.valResources[0].Container.Name[1:]),
-			},
-		},
-		noRestart,
-	)
-	s.Require().NoError(err)
-
-	s.T().Logf("started Peggy contract initializer: %s", resource.Container.ID)
-
-	// wait for the container to finish executing
-	container := resource.Container
-	for container.State.Running {
-		time.Sleep(10 * time.Second)
-
-		container, err = s.dkrPool.Client.InspectContainer(resource.Container.ID)
-		s.Require().NoError(err)
-	}
-
-	var (
-		outBuf bytes.Buffer
-		errBuf bytes.Buffer
-	)
-
-	s.Require().NoErrorf(s.dkrPool.Client.Logs(
-		docker.LogsOptions{
-			Container:    resource.Container.ID,
-			OutputStream: &outBuf,
-			ErrorStream:  &errBuf,
-			Stdout:       true,
-			Stderr:       true,
-		},
-	),
-		"failed to get Peggy initializer logs; stdout: %s, stderr: %s",
-		outBuf.String(), errBuf.String(),
-	)
-
-	re := regexp.MustCompile(`Transaction: (0x.+)`)
-	tokens := re.FindStringSubmatch(errBuf.String())
-	s.Require().Len(tokens, 2)
-
-	txHash := tokens[1]
-	s.Require().NotEmpty(txHash)
-
-	s.Require().Eventually(
-		func() bool {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-
-			if err := queryEthTx(ctx, s.ethClient, txHash); err != nil {
-				return false
-			}
-
-			return true
-		},
-		time.Minute,
-		time.Second,
-		"failed to confirm Peggy initialization transaction",
-	)
-
-	s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
-
-	s.T().Log("initialized Peggy (Gravity Bridge) contract")
-}
-
 func (s *IntegrationTestSuite) runOrchestrators() {
 	s.T().Log("starting orchestrator containers...")
 
@@ -661,6 +580,8 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--profit-multiplier=0.0",
 					"--relayer-loop-multiplier=1.0",
 					"--requester-loop-multiplier=1.0",
+					"--contract-address",
+					s.gravityContractAddr,
 				},
 			},
 			noRestart,
