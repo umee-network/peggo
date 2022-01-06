@@ -597,12 +597,14 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 	for _, resource := range s.orchResources {
 		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
 
+		// TODO: temporary to find out what's failing
+		var (
+			outBuf bytes.Buffer
+			errBuf bytes.Buffer
+		)
+
 		s.Require().Eventuallyf(
 			func() bool {
-				var (
-					outBuf bytes.Buffer
-					errBuf bytes.Buffer
-				)
 
 				err := s.dkrPool.Client.Logs(
 					docker.LogsOptions{
@@ -621,8 +623,9 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 			},
 			5*time.Minute,
 			time.Second,
-			"orchestrator %s not healthy",
+			"orchestrator %s not healthy. check: %s",
 			resource.Container.ID,
+			errBuf.String(),
 		)
 	}
 }
