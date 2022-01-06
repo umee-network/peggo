@@ -13,12 +13,12 @@ import (
 
 const defaultBlocksToSearch = 2000
 
-// FindLatestValset finds the latest valset on the Peggy contract by looking back through the event
+// FindLatestValset finds the latest valset on the Gravity contract by looking back through the event
 // history and finding the most recent ValsetUpdatedEvent. Most of the time this will be very fast
 // as the latest update will be in recent blockchain history and the search moves from the present
 // backwards in time. In the case that the validator set has not been updated for a very long time
 // this will take longer.
-func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, error) {
+func (s *gravityRelayer) FindLatestValset(ctx context.Context) (*types.Valset, error) {
 	latestHeader, err := s.ethProvider.HeaderByNumber(ctx, nil)
 	if err != nil {
 		err = errors.Wrap(err, "failed to get latest header")
@@ -26,9 +26,9 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 	}
 	currentBlock := latestHeader.Number.Uint64()
 
-	peggyFilterer, err := wrappers.NewGravityFilterer(s.gravityContract.Address(), s.ethProvider)
+	gravityFilterer, err := wrappers.NewGravityFilterer(s.gravityContract.Address(), s.ethProvider)
 	if err != nil {
-		err = errors.Wrap(err, "failed to init Peggy events filterer")
+		err = errors.Wrap(err, "failed to init Gravity events filterer")
 		return nil, err
 	}
 
@@ -58,7 +58,7 @@ func (s *peggyRelayer) FindLatestValset(ctx context.Context) (*types.Valset, err
 		}
 
 		var valsetUpdatedEvents []*wrappers.GravityValsetUpdatedEvent
-		iter, err := peggyFilterer.FilterValsetUpdatedEvent(&bind.FilterOpts{
+		iter, err := gravityFilterer.FilterValsetUpdatedEvent(&bind.FilterOpts{
 			Start: endSearchBlock,
 			End:   &currentBlock,
 		}, nil)
@@ -124,13 +124,13 @@ func (a GravityValsetUpdatedEvents) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 // This function exists to provide a warning if Cosmos and Ethereum have different validator sets
 // for a given nonce. In the mundane version of this warning the validator sets disagree on sorting order
 // which can happen if some relayer uses an unstable sort, or in a case of a mild griefing attack.
-// The Peggy contract validates signatures in order of highest to lowest power. That way it can exit
+// The Gravity contract validates signatures in order of highest to lowest power. That way it can exit
 // the loop early once a vote has enough power, if a relayer where to submit things in the reverse order
 // they could grief users of the contract into paying more in gas.
 // The other (and far worse) way a disagreement here could occur is if validators are colluding to steal
-// funds from the Peggy contract and have submitted a hijacking update. If slashing for off Cosmos chain
+// funds from the Gravity contract and have submitted a hijacking update. If slashing for off Cosmos chain
 // Ethereum signatures is implemented you would put that handler here.
-func (s *peggyRelayer) checkIfValsetsDiffer(cosmosValset, ethereumValset *types.Valset) {
+func (s *gravityRelayer) checkIfValsetsDiffer(cosmosValset, ethereumValset *types.Valset) {
 	if cosmosValset == nil && ethereumValset.Nonce == 0 {
 		// bootstrapping case
 		return

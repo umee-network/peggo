@@ -1,4 +1,4 @@
-package peggy
+package gravity
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 )
 
 // EncodeValsetConfirm takes the required input data and produces the required
-// signature to confirm a validator set update on the Peggy Ethereum contract.
+// signature to confirm a validator set update on the Gravity Ethereum contract.
 // This value will then be signed before being submitted to Cosmos, verified,
 // and then relayed to Ethereum.
 func EncodeValsetConfirm(gravityID string, valset types.Valset) ethcmn.Hash {
@@ -75,9 +75,9 @@ func EncodeValsetConfirm(gravityID string, valset types.Valset) ethcmn.Hash {
 }
 
 // EncodeTxBatchConfirm takes the required input data and produces the required
-// signature to confirm a transaction batch on the Peggy Ethereum contract. This
-// value will then be signed before being submitted to Cosmos, verified, and
-// then relayed to Ethereum.
+// signature to confirm a transaction batch on the Gravity Ethereum contract.
+// This value will then be signed before being submitted to Cosmos, verified,
+// and then relayed to Ethereum.
 func EncodeTxBatchConfirm(gravityID string, batch types.OutgoingTxBatch) []byte {
 	abi, err := abi.JSON(strings.NewReader(types.OutgoingBatchTxCheckpointABIJSON))
 	if err != nil {

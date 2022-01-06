@@ -1,4 +1,4 @@
-package peggy
+package gravity
 
 import (
 	"context"
@@ -36,10 +36,10 @@ func TestEncodeTransactionBatch(t *testing.T) {
 		mockEvmProvider,
 	)
 
-	valset := &types.Valset{
+	valset := types.Valset{
 		Nonce:  1,
 		Height: 1111,
-		Members: []*types.BridgeValidator{
+		Members: []types.BridgeValidator{
 			{
 				EthereumAddress: ethcmn.HexToAddress("0x0").Hex(),
 				Power:           1111111111,
@@ -56,7 +56,7 @@ func TestEncodeTransactionBatch(t *testing.T) {
 		RewardAmount: sdk.NewInt(0),
 	}
 
-	confirms := []*types.MsgConfirmBatch{
+	confirms := []types.MsgConfirmBatch{
 		{
 			EthSigner: ethcmn.HexToAddress("0x0").Hex(),
 			Signature: "0xaae54ee7e285fbb0275279143abc4c554e5314e7b417ecac83a5984a964facbaad68866a2841c3e83ddf125a2985566261c4014f9f960ec60253aebcda9513a9b4",
@@ -67,19 +67,19 @@ func TestEncodeTransactionBatch(t *testing.T) {
 		},
 	}
 
-	batch := &types.OutgoingTxBatch{
+	batch := types.OutgoingTxBatch{
 		BatchNonce:    1,
 		BatchTimeout:  11111,
 		Block:         1234567,
 		TokenContract: ethcmn.HexToAddress("0x1").Hex(),
-		Transactions: []*types.OutgoingTransferTx{
+		Transactions: []types.OutgoingTransferTx{
 			{
 				DestAddress: ethcmn.HexToAddress("0x2").Hex(),
-				Erc20Token: &types.ERC20Token{
+				Erc20Token: types.ERC20Token{
 					Contract: ethcmn.HexToAddress("0x1").Hex(),
 					Amount:   sdk.NewInt(10000),
 				},
-				Erc20Fee: &types.ERC20Token{
+				Erc20Fee: types.ERC20Token{
 					Contract: ethcmn.HexToAddress("0x1").Hex(),
 					Amount:   sdk.NewInt(100),
 				},
@@ -87,8 +87,8 @@ func TestEncodeTransactionBatch(t *testing.T) {
 		},
 	}
 
-	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	ethGravity, _ := wrappers.NewGravity(ethcmn.Address{}, ethCommitter.Provider())
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethGravity)
 
 	txData, err := gravityContract.EncodeTransactionBatch(
 		context.Background(),
@@ -105,15 +105,15 @@ func TestEncodeTransactionBatch(t *testing.T) {
 }
 
 func TestGetBatchCheckpointValues(t *testing.T) {
-	batch := &types.OutgoingTxBatch{
-		Transactions: []*types.OutgoingTransferTx{
+	batch := types.OutgoingTxBatch{
+		Transactions: []types.OutgoingTransferTx{
 			{
 				DestAddress: ethcmn.HexToAddress("0x2").Hex(),
-				Erc20Token: &types.ERC20Token{
+				Erc20Token: types.ERC20Token{
 					Contract: ethcmn.HexToAddress("0x1").Hex(),
 					Amount:   sdk.NewInt(10000),
 				},
-				Erc20Fee: &types.ERC20Token{
+				Erc20Fee: types.ERC20Token{
 					Contract: ethcmn.HexToAddress("0x1").Hex(),
 					Amount:   sdk.NewInt(100),
 				},
@@ -130,8 +130,8 @@ func TestGetBatchCheckpointValues(t *testing.T) {
 func TestCheckBatchSigsAndRepack(t *testing.T) {
 	// TODO: These are not real signatures. Would be cool to use real data here.
 
-	valset := &types.Valset{
-		Members: []*types.BridgeValidator{
+	valset := types.Valset{
+		Members: []types.BridgeValidator{
 			{
 				EthereumAddress: ethcmn.HexToAddress("0x0").Hex(),
 				Power:           1111111111,
@@ -147,7 +147,7 @@ func TestCheckBatchSigsAndRepack(t *testing.T) {
 		},
 	}
 
-	confirms := []*types.MsgConfirmBatch{
+	confirms := []types.MsgConfirmBatch{
 		{
 			EthSigner: ethcmn.HexToAddress("0x0").Hex(),
 			Signature: "0xaae54ee7e285fbb0275279143abc4c554e5314e7b417ecac83a5984a964facbaad68866a2841c3e83ddf125a2985566261c4014f9f960ec60253aebcda9513a9b4",

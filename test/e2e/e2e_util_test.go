@@ -20,7 +20,6 @@ import (
 	"github.com/ory/dockertest/v3/docker"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
-	peggycli "github.com/umee-network/umee/x/peggy/client/cli"
 )
 
 func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
@@ -138,12 +137,11 @@ func (s *IntegrationTestSuite) registerOrchAddresses(valIdx int, umeeFee string)
 		Cmd: []string{
 			"umeed",
 			"tx",
-			"peggy",
+			"gravity",
 			"set-orchestrator-address",
 			valAddr.String(),
 			valAddr.String(),
 			s.chain.validators[valIdx].ethereumKey.address,
-			fmt.Sprintf("--%s=%s", peggycli.FlagEthPrivKey, s.chain.validators[valIdx].ethereumKey.privateKey),
 			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
 			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
 			"--keyring-backend=test",

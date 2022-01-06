@@ -27,7 +27,7 @@ const (
 
 // Start combines the all major roles required to make
 // up the Orchestrator, all of these are async loops.
-func (p *peggyOrchestrator) Start(ctx context.Context) error {
+func (p *gravityOrchestrator) Start(ctx context.Context) error {
 	var pg loops.ParanoidGroup
 
 	pg.Go(func() error {
@@ -48,7 +48,7 @@ func (p *peggyOrchestrator) Start(ctx context.Context) error {
 
 // EthOracleMainLoop is responsible for making sure that Ethereum events are retrieved from the Ethereum blockchain
 // and ferried over to Cosmos where they will be used to issue tokens or process batches.
-func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
+func (p *gravityOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "EthOracleMainLoop").Logger()
 	lastResync := time.Now()
 
@@ -60,14 +60,14 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 	if err := retry.Do(func() (err error) {
 		gravityParamsResp, err := p.cosmosQueryClient.Params(ctx, &types.QueryParamsRequest{})
 		if err != nil || gravityParamsResp == nil {
-			logger.Fatal().Err(err).Msg("failed to query peggy params, is umeed running?")
+			logger.Fatal().Err(err).Msg("failed to query Gravity params, is umeed running?")
 		}
 
 		gravityParams = gravityParamsResp.Params
 
 		return err
 	}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-		logger.Err(err).Uint("retry", n).Msg("failed to get Peggy params; retrying...")
+		logger.Err(err).Uint("retry", n).Msg("failed to get Gravity params; retrying...")
 	})); err != nil {
 		logger.Err(err).Msg("got error, loop exits")
 		return err
@@ -136,15 +136,15 @@ func (p *peggyOrchestrator) EthOracleMainLoop(ctx context.Context) (err error) {
 // EthSignerMainLoop simply signs off on any batches or validator sets provided by the validator
 // since these are provided directly by a trusted Cosmsos node they can simply be assumed to be
 // valid and signed off on.
-func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
+func (p *gravityOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "EthSignerMainLoop").Logger()
 
 	var gravityID string
 	if err := retry.Do(func() (err error) {
-		gravityID, err = p.gravityContract.GetPeggyID(ctx, p.gravityContract.FromAddress())
+		gravityID, err = p.gravityContract.GetGravityID(ctx, p.gravityContract.FromAddress())
 		return err
 	}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-		logger.Err(err).Uint("retry", n).Msg("failed to get PeggyID from Ethereum contract; retrying...")
+		logger.Err(err).Uint("retry", n).Msg("failed to get GravityID from Ethereum contract; retrying...")
 	})); err != nil {
 		logger.Err(err).Msg("got error, loop exits")
 		return err
@@ -246,7 +246,7 @@ func (p *peggyOrchestrator) EthSignerMainLoop(ctx context.Context) (err error) {
 	})
 }
 
-func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) {
+func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "BatchRequesterLoop").Logger()
 
 	return loops.RunLoop(ctx, p.logger, p.batchRequesterLoopDuration, func() error {
@@ -302,7 +302,7 @@ func (p *peggyOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) 
 	})
 }
 
-func (p *peggyOrchestrator) RelayerMainLoop(ctx context.Context) (err error) {
+func (p *gravityOrchestrator) RelayerMainLoop(ctx context.Context) (err error) {
 	if p.relayer != nil {
 		return p.relayer.Start(ctx)
 	}
@@ -313,7 +313,7 @@ func (p *peggyOrchestrator) RelayerMainLoop(ctx context.Context) (err error) {
 // ERC20ToDenom attempts to return the denomination that maps to an ERC20 token
 // contract on the Cosmos chain. First, we check the cache. If the token address
 // does not exist in the cache, we query the Cosmos chain and cache the result.
-func (p *peggyOrchestrator) ERC20ToDenom(ctx context.Context, tokenAddr ethcmn.Address) (string, error) {
+func (p *gravityOrchestrator) ERC20ToDenom(ctx context.Context, tokenAddr ethcmn.Address) (string, error) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 

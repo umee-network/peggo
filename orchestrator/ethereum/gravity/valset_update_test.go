@@ -1,4 +1,4 @@
-package peggy
+package gravity
 
 import (
 	"context"
@@ -36,10 +36,10 @@ func TestEncodeValsetUpdate(t *testing.T) {
 		mockEvmProvider,
 	)
 
-	valset := &types.Valset{
+	valset := types.Valset{
 		Nonce:  1,
 		Height: 1111,
-		Members: []*types.BridgeValidator{
+		Members: []types.BridgeValidator{
 			{
 				EthereumAddress: ethcmn.HexToAddress("0x0").Hex(),
 				Power:           1111111111,
@@ -56,10 +56,10 @@ func TestEncodeValsetUpdate(t *testing.T) {
 		RewardAmount: sdk.NewInt(0),
 	}
 
-	newValset := &types.Valset{
+	newValset := types.Valset{
 		Nonce:  2,
 		Height: 2222,
-		Members: []*types.BridgeValidator{
+		Members: []types.BridgeValidator{
 			{
 				EthereumAddress: ethcmn.HexToAddress("0x0").Hex(),
 				Power:           1111111111,
@@ -72,7 +72,7 @@ func TestEncodeValsetUpdate(t *testing.T) {
 		RewardAmount: sdk.NewInt(0),
 	}
 
-	confirms := []*types.MsgValsetConfirm{
+	confirms := []types.MsgValsetConfirm{
 		{
 			EthAddress: ethcmn.HexToAddress("0x0").Hex(),
 			Signature:  "0xaae54ee7e285fbb0275279143abc4c554e5314e7b417ecac83a5984a964facbaad68866a2841c3e83ddf125a2985566261c4014f9f960ec60253aebcda9513a9b4",
@@ -83,9 +83,9 @@ func TestEncodeValsetUpdate(t *testing.T) {
 		},
 	}
 
-	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
+	ethGravity, _ := wrappers.NewGravity(ethcmn.Address{}, ethCommitter.Provider())
 
-	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethGravity)
 	txData, err := gravityContract.EncodeValsetUpdate(
 		context.Background(),
 		valset,
@@ -102,8 +102,8 @@ func TestEncodeValsetUpdate(t *testing.T) {
 }
 
 func TestValidatorsAndPowers(t *testing.T) {
-	valset := &types.Valset{
-		Members: []*types.BridgeValidator{
+	valset := types.Valset{
+		Members: []types.BridgeValidator{
 			{
 				EthereumAddress: ethcmn.HexToAddress("0x0").Hex(),
 				Power:           123456,
@@ -134,8 +134,8 @@ func TestValidatorsAndPowers(t *testing.T) {
 func TestCheckValsetSigsAndRepack(t *testing.T) {
 	// TODO: These are not real signatures. Would be cool to use real data here.
 
-	valset := &types.Valset{
-		Members: []*types.BridgeValidator{
+	valset := types.Valset{
+		Members: []types.BridgeValidator{
 			{
 				EthereumAddress: ethcmn.HexToAddress("0x0").Hex(),
 				Power:           1111111111,
@@ -151,7 +151,7 @@ func TestCheckValsetSigsAndRepack(t *testing.T) {
 		},
 	}
 
-	confirms := []*types.MsgValsetConfirm{
+	confirms := []types.MsgValsetConfirm{
 		{
 			EthAddress: ethcmn.HexToAddress("0x0").Hex(),
 			Signature:  "0xaae54ee7e285fbb0275279143abc4c554e5314e7b417ecac83a5984a964facbaad68866a2841c3e83ddf125a2985566261c4014f9f960ec60253aebcda9513a9b4",

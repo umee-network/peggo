@@ -10,7 +10,7 @@ import (
 )
 
 // GetLastCheckedBlock retrieves the Ethereum block height from the last claim event this oracle has relayed to Cosmos.
-func (p *peggyOrchestrator) GetLastCheckedBlock(
+func (p *gravityOrchestrator) GetLastCheckedBlock(
 	ctx context.Context,
 	ethBlockConfirmationDelay uint64,
 ) (uint64, error) {
@@ -49,13 +49,13 @@ func (p *peggyOrchestrator) GetLastCheckedBlock(
 			endSearch = currentBlock - p.ethBlocksPerLoop
 		}
 
-		peggyFilterer, err := wrappers.NewGravityFilterer(p.gravityContract.Address(), p.ethProvider)
+		gravityFilterer, err := wrappers.NewGravityFilterer(p.gravityContract.Address(), p.ethProvider)
 		if err != nil {
-			err = errors.Wrap(err, "failed to init Peggy events filterer")
+			err = errors.Wrap(err, "failed to init Gravity events filterer")
 			return 0, err
 		}
 
-		iterSendToCosmos, err := peggyFilterer.FilterSendToCosmosEvent(&bind.FilterOpts{
+		iterSendToCosmos, err := gravityFilterer.FilterSendToCosmosEvent(&bind.FilterOpts{
 			Start: endSearch,
 			End:   &currentBlock,
 		}, nil, nil)
@@ -81,7 +81,7 @@ func (p *peggyOrchestrator) GetLastCheckedBlock(
 
 		iterSendToCosmos.Close()
 
-		iterTXBatchExec, err := peggyFilterer.FilterTransactionBatchExecutedEvent(&bind.FilterOpts{
+		iterTXBatchExec, err := gravityFilterer.FilterTransactionBatchExecutedEvent(&bind.FilterOpts{
 			Start: endSearch,
 			End:   &currentBlock,
 		}, nil, nil)
@@ -115,7 +115,7 @@ func (p *peggyOrchestrator) GetLastCheckedBlock(
 		// TODO: Facu doesn't understand this comment.
 		var valsetUpdatedEvents []*wrappers.GravityValsetUpdatedEvent
 		{
-			iter, err := peggyFilterer.FilterValsetUpdatedEvent(&bind.FilterOpts{
+			iter, err := gravityFilterer.FilterValsetUpdatedEvent(&bind.FilterOpts{
 				Start: endSearch,
 				End:   &currentBlock,
 			}, nil)
@@ -157,7 +157,7 @@ func (p *peggyOrchestrator) GetLastCheckedBlock(
 			}
 		}
 
-		iterErc20Deploy, err := peggyFilterer.FilterERC20DeployedEvent(&bind.FilterOpts{
+		iterErc20Deploy, err := gravityFilterer.FilterERC20DeployedEvent(&bind.FilterOpts{
 			Start: endSearch,
 			End:   &currentBlock,
 		}, nil)

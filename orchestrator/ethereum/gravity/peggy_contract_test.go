@@ -1,4 +1,4 @@
-package peggy
+package gravity
 
 import (
 	"context"
@@ -17,8 +17,8 @@ import (
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
-func TestPeggyPowerToPercent(t *testing.T) {
-	percent := peggyPowerToPercent(big.NewInt(213192100))
+func TestGravityPowerToPercent(t *testing.T) {
+	percent := gravityPowerToPercent(big.NewInt(213192100))
 	assert.Equal(t, percent, float32(4.9637656))
 
 }
@@ -53,8 +53,8 @@ func TestGetTxBatchNonce(t *testing.T) {
 		mockEvmProvider,
 	)
 
-	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	ethGravity, _ := wrappers.NewGravity(ethcmn.Address{}, ethCommitter.Provider())
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethGravity)
 	nonce, err := gravityContract.GetTxBatchNonce(context.Background(), ethcmn.HexToAddress("0x0"), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
@@ -92,8 +92,8 @@ func TestGetValsetNonce(t *testing.T) {
 		mockEvmProvider,
 	)
 
-	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	ethGravity, _ := wrappers.NewGravity(ethcmn.Address{}, ethCommitter.Provider())
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethGravity)
 	nonce, err := gravityContract.GetValsetNonce(context.Background(), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
@@ -101,11 +101,11 @@ func TestGetValsetNonce(t *testing.T) {
 
 }
 
-func TestGetGetPeggyID(t *testing.T) {
+func TestGetGetGravityID(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	gravityID := ethcmn.HexToHash("0x756d65652d706567677969640000000000000000000000000000000000000000")
+	gravityID := "defaultgravityid"
 
 	mockEvmProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
 	mockEvmProvider.EXPECT().PendingNonceAt(gomock.Any(), ethcmn.HexToAddress("0x0")).Return(uint64(0), nil)
@@ -116,7 +116,7 @@ func TestGetGetPeggyID(t *testing.T) {
 			nil,
 		).
 		Return(
-			gravityID.Bytes(),
+			gravityID,
 			nil,
 		)
 
@@ -130,9 +130,9 @@ func TestGetGetPeggyID(t *testing.T) {
 		mockEvmProvider,
 	)
 
-	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
-	res, err := gravityContract.GetPeggyID(context.Background(), ethcmn.HexToAddress("0x0"))
+	ethGravity, _ := wrappers.NewGravity(ethcmn.Address{}, ethCommitter.Provider())
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethGravity)
+	res, err := gravityContract.GetGravityID(context.Background(), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
 	assert.Equal(t, gravityID, res)
@@ -175,8 +175,8 @@ func TestGetERC20Symbol(t *testing.T) {
 		mockEvmProvider,
 	)
 
-	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	ethGravity, _ := wrappers.NewGravity(ethcmn.Address{}, ethCommitter.Provider())
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethGravity)
 	symbol, err := gravityContract.GetERC20Symbol(context.Background(), ethcmn.HexToAddress("0x1"), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
@@ -219,8 +219,8 @@ func TestGetERC20Decimals(t *testing.T) {
 		mockEvmProvider,
 	)
 
-	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	ethGravity, _ := wrappers.NewGravity(ethcmn.Address{}, ethCommitter.Provider())
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethGravity)
 	decimals, err := gravityContract.GetERC20Decimals(context.Background(), ethcmn.HexToAddress("0x1"), ethcmn.HexToAddress("0x0"))
 
 	assert.Nil(t, err)
@@ -245,8 +245,8 @@ func TestAddress(t *testing.T) {
 		mockEvmProvider,
 	)
 
-	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
-	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	ethGravity, _ := wrappers.NewGravity(ethcmn.Address{}, ethCommitter.Provider())
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethGravity)
 
 	assert.Equal(t, ethcmn.Address{}, gravityContract.Address())
 }

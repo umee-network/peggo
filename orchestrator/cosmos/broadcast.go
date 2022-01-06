@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/cmd/peggo/client"
-	peggy "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
+	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/keystore"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
@@ -81,7 +81,7 @@ func NewGravityBroadcastClient(
 	ethPersonalSignFn keystore.PersonalSignFn,
 ) GravityBroadcastClient {
 	return &gravityBroadcastClient{
-		logger:            logger.With().Str("module", "peggy_broadcast_client").Logger(),
+		logger:            logger.With().Str("module", "gravity_broadcast_client").Logger(),
 		daemonQueryClient: queryClient,
 		broadcastClient:   broadcastClient,
 		ethSignerFn:       ethSignerFn,
@@ -100,7 +100,7 @@ func (s *gravityBroadcastClient) SendValsetConfirm(
 	valset types.Valset,
 ) error {
 
-	confirmHash := peggy.EncodeValsetConfirm(gravityID, valset)
+	confirmHash := gravity.EncodeValsetConfirm(gravityID, valset)
 	signature, err := s.ethPersonalSignFn(ethFrom, confirmHash.Bytes())
 	if err != nil {
 		err = errors.New("failed to sign validator address")
@@ -143,7 +143,7 @@ func (s *gravityBroadcastClient) SendBatchConfirm(
 	batch types.OutgoingTxBatch,
 ) error {
 
-	confirmHash := peggy.EncodeTxBatchConfirm(gravityID, batch)
+	confirmHash := gravity.EncodeTxBatchConfirm(gravityID, batch)
 	signature, err := s.ethPersonalSignFn(ethFrom, confirmHash)
 	if err != nil {
 		err = errors.New("failed to sign validator address")

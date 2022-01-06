@@ -9,7 +9,7 @@ import (
 
 // RelayValsets checks the last validator set on Ethereum, if it's lower than our latest validator
 // set then we should package and submit the update as an Ethereum transaction
-func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset types.Valset) error {
+func (s *gravityRelayer) RelayValsets(ctx context.Context, currentValset types.Valset) error {
 	// we should determine if we need to relay one
 	// to Ethereum for that we will find the latest confirmed valset and compare it to the ethereum chain
 	latestValsets, err := s.cosmosQueryClient.LastValsetRequests(ctx, &types.QueryLastValsetRequestsRequest{})
@@ -106,11 +106,11 @@ func (s *peggyRelayer) RelayValsets(ctx context.Context, currentValset types.Val
 			if err != nil {
 				s.logger.Err(err).
 					Str("tx_hash", txHash.Hex()).
-					Msg("failed to sign and submit (Peggy updateValset) to EVM")
+					Msg("failed to sign and submit (Gravity updateValset) to EVM")
 				return err
 			}
 
-			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Tx (Peggy updateValset)")
+			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Tx (Gravity updateValset)")
 
 			// update our local tracker of the latest valset
 			s.lastSentValsetNonce = latestCosmosConfirmed.Nonce

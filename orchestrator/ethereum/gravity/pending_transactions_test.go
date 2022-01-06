@@ -1,4 +1,4 @@
-package peggy
+package gravity
 
 import (
 	"os"
@@ -62,9 +62,9 @@ func TestIsPendingTxInput(t *testing.T) {
 		mockEvmProvider,
 	)
 
-	ethPeggy, _ := wrappers.NewPeggy(ethcmn.Address{}, ethCommitter.Provider())
+	ethGravity, _ := wrappers.NewGravity(ethcmn.Address{}, ethCommitter.Provider())
 
-	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethPeggy)
+	gravityContract, _ := NewGravityContract(logger, ethCommitter, ethcmn.Address{}, ethGravity)
 	gravityContract.IsPendingTxInput([]byte{}, time.Second)
 
 	// Add a TX

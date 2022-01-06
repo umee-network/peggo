@@ -21,7 +21,7 @@ import (
 	"github.com/umee-network/peggo/mocks"
 	"github.com/umee-network/peggo/orchestrator/cosmos"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
-	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
+	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
@@ -124,7 +124,7 @@ func TestCheckForEvents(t *testing.T) {
 			ethProvider,
 		)
 
-		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
+		gravityContract, _ := gravity.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -144,16 +144,13 @@ func TestCheckForEvents(t *testing.T) {
 		)
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
-		mockQClient.EXPECT().LastEventByAddr(gomock.Any(), &types.QueryLastEventByAddrRequest{
+		mockQClient.EXPECT().LastEventNonceByAddr(gomock.Any(), &types.QueryLastEventNonceByAddrRequest{
 			Address: gravityBroadcastClient.AccFromAddress().String(),
-		}).Return(&types.QueryLastEventByAddrResponse{
-			LastClaimEvent: &types.LastClaimEvent{
-				EthereumEventNonce:  1,
-				EthereumEventHeight: 123,
-			},
+		}).Return(&types.QueryLastEventNonceByAddrResponse{
+			EventNonce: 1,
 		}, nil)
 
-		orch := NewPeggyOrchestrator(
+		orch := NewGravityOrchestrator(
 			logger,
 			mockQClient,
 			gravityBroadcastClient,
@@ -213,7 +210,7 @@ func TestCheckForEvents(t *testing.T) {
 			ethProvider,
 		)
 
-		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
+		gravityContract, _ := gravity.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -231,7 +228,7 @@ func TestCheckForEvents(t *testing.T) {
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
 
-		orch := NewPeggyOrchestrator(
+		orch := NewGravityOrchestrator(
 			logger,
 			mockQClient,
 			gravityBroadcastClient,
@@ -319,7 +316,7 @@ func TestCheckForEvents(t *testing.T) {
 			ethProvider,
 		)
 
-		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
+		gravityContract, _ := gravity.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -336,7 +333,7 @@ func TestCheckForEvents(t *testing.T) {
 		)
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
-		orch := NewPeggyOrchestrator(
+		orch := NewGravityOrchestrator(
 			logger,
 			mockQClient,
 			gravityBroadcastClient,
@@ -438,7 +435,7 @@ func TestCheckForEvents(t *testing.T) {
 			ethProvider,
 		)
 
-		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
+		gravityContract, _ := gravity.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -455,7 +452,7 @@ func TestCheckForEvents(t *testing.T) {
 		)
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
-		orch := NewPeggyOrchestrator(
+		orch := NewGravityOrchestrator(
 			logger,
 			mockQClient,
 			gravityBroadcastClient,
@@ -571,7 +568,7 @@ func TestCheckForEvents(t *testing.T) {
 			ethProvider,
 		)
 
-		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
+		gravityContract, _ := gravity.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -588,7 +585,7 @@ func TestCheckForEvents(t *testing.T) {
 		)
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
-		orch := NewPeggyOrchestrator(
+		orch := NewGravityOrchestrator(
 			logger,
 			mockQClient,
 			gravityBroadcastClient,
@@ -612,7 +609,7 @@ func TestCheckForEvents(t *testing.T) {
 func TestFilterSendToCosmosEventsByNonce(t *testing.T) {
 	// In testEv we'll add 2 valid and 1 past event.
 	// This should result in only 2 events after the filter.
-	testEv := []*wrappers.PeggySendToCosmosEvent{
+	testEv := []*wrappers.GravitySendToCosmosEvent{
 		{EventNonce: big.NewInt(3)},
 		{EventNonce: big.NewInt(4)},
 		{EventNonce: big.NewInt(5)},
@@ -625,7 +622,7 @@ func TestFilterSendToCosmosEventsByNonce(t *testing.T) {
 func TestFilterTransactionBatchExecutedEventsByNonce(t *testing.T) {
 	// In testEv we'll add 2 valid and 1 past event.
 	// This should result in only 2 events after the filter.
-	testEv := []*wrappers.PeggyTransactionBatchExecutedEvent{
+	testEv := []*wrappers.GravityTransactionBatchExecutedEvent{
 		{EventNonce: big.NewInt(3)},
 		{EventNonce: big.NewInt(4)},
 		{EventNonce: big.NewInt(5)},
@@ -651,7 +648,7 @@ func TestFilterValsetUpdateEventsByNonce(t *testing.T) {
 func TestFilterERC20DeployedEventsByNonce(t *testing.T) {
 	// In testEv we'll add 2 valid and 1 past event.
 	// This should result in only 2 events after the filter.
-	testEv := []*wrappers.PeggyERC20DeployedEvent{
+	testEv := []*wrappers.GravityERC20DeployedEvent{
 		{EventNonce: big.NewInt(3)},
 		{EventNonce: big.NewInt(4)},
 		{EventNonce: big.NewInt(5)},

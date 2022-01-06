@@ -78,8 +78,8 @@ flag for more information.
 
 If the coin doesn't have a corresponding ERC20 equivalent on the Ethereum
 network, the transaction will fail. This is only required for Cosmos originated
-coins and anyone can call the `deployERC20` function on the Peggy contract to
-fix this (Peggo has a helper command for this, see
+coins and anyone can call the `deployERC20` function on the Gravity Bridge
+contract to fix this (Peggo has a helper command for this, see
 `peggo bridge deploy-erc20 --help` for more details).
 
 This process takes longer than transfers the other way around because they get
@@ -94,9 +94,9 @@ validator is configured to batch and relay transactions of this token.
 
 Any ERC20 token can be sent to Umee and it's done using the command
 `peggo bridge send-to-cosmos`, use the `--help` flag for more information. It
-can also be done by calling the `sendToCosmos` method on the Gravity contract.
+can also be done by calling the `sendToCosmos` method on the Gravity Bridge contract.
 
-The ERC20 tokens will be locked in the Gravity contract and new coins will be
+The ERC20 tokens will be locked in the Gravity Bridge contract and new coins will be
 minted on Umee with the denomination `gravity{token_address}`. This process takes
 around 3 minutes or 12 Ethereum blocks.
 
@@ -119,10 +119,10 @@ Umee using the `sendToCosmos` function on Gravity.
 
 **Withdraw** (`TransactionBatchExecutedEvent`): emitted when a batch of
 transactions is sent from Umee to Ethereum using the `submitBatch` function on
-the Gravity contract by a validator. This serves as a confirmation to Umee that
+the Gravity Bridge contract by a validator. This serves as a confirmation to Umee that
 the batch was sent successfully.
 
-**Valset update** (`ValsetUpdatedEvent`): emitted on init of the Gravity contract
+**Valset update** (`ValsetUpdatedEvent`): emitted on init of the Gravity Bridge contract
 and on every execution of the `updateValset` function.
 
 **Deployed ERC 20** (`ERC20DeployedEvent`): emitted when executing the function
@@ -132,7 +132,7 @@ coin. This enables transfers from Umee to Ethereum.
 
 #### Umee
 
- **Validator sets**: Umee informs the Gravity contract who are the current
+ **Validator sets**: Umee informs the Gravity Bridge contract who are the current
  validators and their power. This results in an execution of the `updateValset`
  function.
 
@@ -141,4 +141,4 @@ coin. This enables transfers from Umee to Ethereum.
  will send a message to Umee requesting a new batch.
 
  **Batches**: Peggo queries Umee for any batches ready to be relayed and relays
- them over to Ethereum using the `submitBatch` function on the Gravity contract.
+ them over to Ethereum using the `submitBatch` function on the Gravity Bridge contract.

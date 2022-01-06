@@ -11,9 +11,9 @@ import (
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
-// CheckForEvents checks for events such as a deposit to the Peggy Ethereum contract or a validator set update
+// CheckForEvents checks for events such as a deposit to the Gravity Ethereum contract or a validator set update
 // or a transaction batch update. It then responds to these events by performing actions on the Cosmos chain if required
-func (p *peggyOrchestrator) CheckForEvents(
+func (p *gravityOrchestrator) CheckForEvents(
 	ctx context.Context,
 	startingBlock uint64,
 	ethBlockConfirmationDelay uint64,
@@ -36,15 +36,15 @@ func (p *peggyOrchestrator) CheckForEvents(
 		currentBlock = startingBlock + p.ethBlocksPerLoop
 	}
 
-	peggyFilterer, err := wrappers.NewGravityFilterer(p.gravityContract.Address(), p.ethProvider)
+	gravityFilterer, err := wrappers.NewGravityFilterer(p.gravityContract.Address(), p.ethProvider)
 	if err != nil {
-		err = errors.Wrap(err, "failed to init Peggy events filterer")
+		err = errors.Wrap(err, "failed to init Gravity events filterer")
 		return 0, err
 	}
 
 	var erc20DeployedEvents []*wrappers.GravityERC20DeployedEvent
 	{
-		iter, err := peggyFilterer.FilterERC20DeployedEvent(&bind.FilterOpts{
+		iter, err := gravityFilterer.FilterERC20DeployedEvent(&bind.FilterOpts{
 			Start: startingBlock,
 			End:   &currentBlock,
 		}, nil)
@@ -78,7 +78,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 	var sendToCosmosEvents []*wrappers.GravitySendToCosmosEvent
 	{
 
-		iter, err := peggyFilterer.FilterSendToCosmosEvent(&bind.FilterOpts{
+		iter, err := gravityFilterer.FilterSendToCosmosEvent(&bind.FilterOpts{
 			Start: startingBlock,
 			End:   &currentBlock,
 		}, nil, nil)
@@ -111,7 +111,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 
 	var transactionBatchExecutedEvents []*wrappers.GravityTransactionBatchExecutedEvent
 	{
-		iter, err := peggyFilterer.FilterTransactionBatchExecutedEvent(&bind.FilterOpts{
+		iter, err := gravityFilterer.FilterTransactionBatchExecutedEvent(&bind.FilterOpts{
 			Start: startingBlock,
 			End:   &currentBlock,
 		}, nil, nil)
@@ -144,7 +144,7 @@ func (p *peggyOrchestrator) CheckForEvents(
 
 	var valsetUpdatedEvents []*wrappers.GravityValsetUpdatedEvent
 	{
-		iter, err := peggyFilterer.FilterValsetUpdatedEvent(&bind.FilterOpts{
+		iter, err := gravityFilterer.FilterValsetUpdatedEvent(&bind.FilterOpts{
 			Start: startingBlock,
 			End:   &currentBlock,
 		}, nil)

@@ -1,4 +1,4 @@
-package peggy
+package gravity
 
 import (
 	"context"
@@ -60,7 +60,7 @@ func (s *gravityContract) EncodeTransactionBatch(
 		})
 	}
 
-	txData, err := peggyABI.Pack("submitBatch",
+	txData, err := gravityABI.Pack("submitBatch",
 		currentValsetArs,
 		sigArray,
 		amounts,
@@ -71,7 +71,7 @@ func (s *gravityContract) EncodeTransactionBatch(
 		batchTimeout,
 	)
 	if err != nil {
-		s.logger.Err(err).Msg("ABI Pack (Peggy submitBatch) method")
+		s.logger.Err(err).Msg("ABI Pack (Gravity submitBatch) method")
 		return nil, err
 	}
 
@@ -146,7 +146,7 @@ func checkAndRepackSigs(valset types.Valset, confirms []genericConfirm) (*Repack
 			sigs.s = append(sigs.s, [32]byte{})
 		}
 	}
-	if peggyPowerToPercent(powerOfGoodSigs) < 66 {
+	if gravityPowerToPercent(powerOfGoodSigs) < 66 {
 		err = ErrInsufficientVotingPowerToPass
 		return sigs, err
 	}

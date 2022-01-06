@@ -1,4 +1,4 @@
-package peggy
+package gravity
 
 import (
 	"context"
@@ -19,13 +19,13 @@ import (
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
-// The total power in the Peggy bridge is normalized to u32 max every
+// The total power in the Gravity bridge is normalized to u32 max every
 // time a validator set is created. This value of up to u32 max is then
 // stored in a i64 to prevent overflow during computation.
-const totalPeggyPower int64 = math.MaxUint32
+const totalGravityPower int64 = math.MaxUint32
 
 var (
-	peggyABI, _ = abi.JSON(strings.NewReader(wrappers.GravityABI))
+	gravityABI, _ = abi.JSON(strings.NewReader(wrappers.GravityABI))
 
 	ErrInsufficientVotingPowerToPass = errors.New("insufficient voting power")
 )
@@ -33,7 +33,7 @@ var (
 type Contract interface {
 	committer.EVMCommitter
 
-	// Address returns the Peggy contract address
+	// Address returns the Gravity contract address
 	Address() ethcmn.Address
 
 	// EncodeTransactionBatch encodes a batch into a tx byte data. This is specially helpful for estimating gas and
@@ -65,7 +65,7 @@ type Contract interface {
 		callerAddress ethcmn.Address,
 	) (*big.Int, error)
 
-	GetPeggyID(
+	GetGravityID(
 		ctx context.Context,
 		callerAddress ethcmn.Address,
 	) (string, error)
@@ -83,7 +83,7 @@ type Contract interface {
 	) (decimals uint8, err error)
 
 	// SubscribeToPendingTxs starts a websocket connection to Alchemy's service that listens for new pending txs made
-	// to the Peggy contract.
+	// to the Gravity contract.
 	SubscribeToPendingTxs(ctx context.Context, alchemyWebsocketURL string) error
 
 	// IsPendingTxInput returns true if the input data is found in the pending tx list. If the tx is found but the tx is
@@ -98,7 +98,7 @@ type gravityContract struct {
 
 	logger             zerolog.Logger
 	gravityAddress     ethcmn.Address
-	ethPeggy           *wrappers.Gravity
+	ethGravity         *wrappers.Gravity
 	pendingTxInputList PendingTxInputList
 
 	mtx               sync.Mutex
@@ -109,13 +109,13 @@ func NewGravityContract(
 	logger zerolog.Logger,
 	ethCommitter committer.EVMCommitter,
 	gravityAddress ethcmn.Address,
-	ethPeggy *wrappers.Gravity,
+	ethGravity *wrappers.Gravity,
 ) (Contract, error) {
 	return &gravityContract{
-		logger:         logger.With().Str("module", "peggy_contract").Logger(),
+		logger:         logger.With().Str("module", "gravity_contract").Logger(),
 		EVMCommitter:   ethCommitter,
 		gravityAddress: gravityAddress,
-		ethPeggy:       ethPeggy,
+		ethGravity:     ethGravity,
 	}, nil
 }
 
@@ -130,7 +130,7 @@ func (s *gravityContract) GetTxBatchNonce(
 	callerAddress ethcmn.Address,
 ) (*big.Int, error) {
 
-	nonce, err := s.ethPeggy.LastBatchNonce(&bind.CallOpts{
+	nonce, err := s.ethGravity.LastBatchNonce(&bind.CallOpts{
 		From:    callerAddress,
 		Context: ctx,
 	}, erc20ContractAddress)
@@ -148,7 +148,7 @@ func (s *gravityContract) GetValsetNonce(
 	callerAddress ethcmn.Address,
 ) (*big.Int, error) {
 
-	nonce, err := s.ethPeggy.StateLastValsetNonce(&bind.CallOpts{
+	nonce, err := s.ethGravity.StateLastValsetNonce(&bind.CallOpts{
 		From:    callerAddress,
 		Context: ctx,
 	})
@@ -161,18 +161,18 @@ func (s *gravityContract) GetValsetNonce(
 }
 
 // Gets the gravityID
-func (s *gravityContract) GetPeggyID(
+func (s *gravityContract) GetGravityID(
 	ctx context.Context,
 	callerAddress ethcmn.Address,
 ) (string, error) {
 
-	gravityID, err := s.ethPeggy.StateGravityId(&bind.CallOpts{
+	gravityID, err := s.ethGravity.StateGravityId(&bind.CallOpts{
 		From:    callerAddress,
 		Context: ctx,
 	})
 
 	if err != nil {
-		err = errors.Wrap(err, "StatePeggyId call failed")
+		err = errors.Wrap(err, "StateGravityId call failed")
 		return "", err
 	}
 
@@ -259,9 +259,9 @@ func sigToVRS(sigHex string) (v uint8, r, s ethcmn.Hash) {
 	return
 }
 
-// peggyPowerToPercent takes in an amount of power in the peggy bridge, returns a percentage of total
-func peggyPowerToPercent(total *big.Int) float32 {
+// gravityPowerToPercent takes in an amount of power in the Gravity Bridge, returns a percentage of total
+func gravityPowerToPercent(total *big.Int) float32 {
 	d := decimal.NewFromBigInt(total, 0)
-	f, _ := d.Div(decimal.NewFromInt(totalPeggyPower)).Shift(2).Float64()
+	f, _ := d.Div(decimal.NewFromInt(totalGravityPower)).Shift(2).Float64()
 	return float32(f)
 }

@@ -7,13 +7,13 @@ import (
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/orchestrator/coingecko"
-	peggy "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
+	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 )
 
-type PeggyRelayer interface {
+type GravityRelayer interface {
 	Start(ctx context.Context) error
 
 	FindLatestValset(ctx context.Context) (*gravitytypes.Valset, error)
@@ -31,10 +31,10 @@ type PeggyRelayer interface {
 	SetPriceFeeder(*coingecko.PriceFeed)
 }
 
-type peggyRelayer struct {
+type gravityRelayer struct {
 	logger             zerolog.Logger
 	cosmosQueryClient  gravitytypes.QueryClient
-	gravityContract    peggy.Contract
+	gravityContract    gravity.Contract
 	ethProvider        provider.EVMProvider
 	valsetRelayEnabled bool
 	batchRelayEnabled  bool
@@ -49,19 +49,19 @@ type peggyRelayer struct {
 	lastSentValsetNonce uint64
 }
 
-func NewPeggyRelayer(
+func NewGravityRelayer(
 	logger zerolog.Logger,
 	gravityQueryClient gravitytypes.QueryClient,
-	gravityContract peggy.Contract,
+	gravityContract gravity.Contract,
 	valsetRelayEnabled bool,
 	batchRelayEnabled bool,
 	loopDuration time.Duration,
 	pendingTxWait time.Duration,
 	profitMultiplier float64,
-	options ...func(PeggyRelayer),
-) PeggyRelayer {
-	relayer := &peggyRelayer{
-		logger:             logger.With().Str("module", "peggy_relayer").Logger(),
+	options ...func(GravityRelayer),
+) GravityRelayer {
+	relayer := &gravityRelayer{
+		logger:             logger.With().Str("module", "gravity_relayer").Logger(),
 		cosmosQueryClient:  gravityQueryClient,
 		gravityContract:    gravityContract,
 		ethProvider:        gravityContract.Provider(),

@@ -1,4 +1,4 @@
-package peggy
+package gravity
 
 import (
 	"context"
@@ -78,14 +78,14 @@ func (s *gravityContract) EncodeValsetUpdate(
 		})
 	}
 
-	txData, err := peggyABI.Pack("updateValset",
+	txData, err := gravityABI.Pack("updateValset",
 		newValsetArgs,
 		currentValsetArgs,
 		sigArray,
 	)
 
 	if err != nil {
-		s.logger.Err(err).Msg("ABI Pack (Peggy updateValset) method")
+		s.logger.Err(err).Msg("ABI Pack (Gravity updateValset) method")
 		return nil, err
 	}
 

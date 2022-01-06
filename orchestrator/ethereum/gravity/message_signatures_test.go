@@ -1,4 +1,4 @@
-package peggy
+package gravity
 
 import (
 	"testing"
@@ -10,11 +10,11 @@ import (
 )
 
 func TestEncodeValsetConfirm(t *testing.T) {
-	gravityID := ethcmn.HexToHash("0x756d65652d706567677969640000000000000000000000000000000000000000")
+	gravityID := "defaultgravityid"
 
-	valset := &types.Valset{
+	valset := types.Valset{
 		Nonce: 5,
-		Members: []*types.BridgeValidator{
+		Members: []types.BridgeValidator{
 			{Power: 1, EthereumAddress: "0x02fa1b44e2EF8436e6f35D5F56607769c658c225"},
 			{Power: 123, EthereumAddress: "0x4f3a9f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f8f"},
 		},
@@ -30,7 +30,7 @@ func TestEncodeValsetConfirm(t *testing.T) {
 }
 
 func TestEncodeTxBatchConfirm(t *testing.T) {
-	gravityID := ethcmn.HexToHash("0x756d65652d706567677969640000000000000000000000000000000000000000")
+	gravityID := "defaultgravityid"
 
 	txBatch := types.OutgoingTxBatch{
 		Transactions: []types.OutgoingTransferTx{
@@ -51,5 +51,5 @@ func TestEncodeTxBatchConfirm(t *testing.T) {
 	result := EncodeTxBatchConfirm(gravityID, txBatch)
 
 	// Check the result with a previously calculated one.
-	assert.Equal(t, "0x2c8418bc8093a21b04e82d0527b039084bca48cbbb6d413011a98181f7af5081", result.Hex())
+	assert.Equal(t, "0x2c8418bc8093a21b04e82d0527b039084bca48cbbb6d413011a98181f7af5081", ethcmn.Bytes2Hex(result))
 }

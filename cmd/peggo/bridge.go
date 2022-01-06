@@ -163,7 +163,7 @@ func deployGravityCmd() *cobra.Command {
 				return fmt.Errorf("failed deploy Gravity Bridge contract: %w", err)
 			}
 
-			_, _ = fmt.Fprintf(os.Stderr, `Peggy Gravity Bridge contract successfully deployed!
+			_, _ = fmt.Fprintf(os.Stderr, `Gravity Bridge contract successfully deployed!
 Address: %s
 Transaction: %s
 `,
@@ -314,7 +314,7 @@ func deployERC20RawCmd() *cobra.Command {
 		Use:   "deploy-erc20-raw [gravity-addr] [denom-base] [denom-name] [denom-symbol] [denom-decimals]",
 		Short: "Deploy a Cosmos native asset on Ethereum as an ERC20 token using raw input",
 		Long: `Deploy a Cosmos native asset on Ethereum as an ERC20 token using raw input.
-The Peggy contract address along with all Cosmos native token denomination data
+The Gravity Bridge contract address along with all Cosmos native token denomination data
 must be provided. This can be useful for deploying ERC20 tokens prior to the Umee
 network starting.`,
 		Args: cobra.ExactArgs(5),
@@ -487,7 +487,7 @@ Transaction: %s
 		},
 	}
 
-	cmd.Flags().Bool(flagAutoApprove, true, "Auto approve the ERC20 for Peggy to spend from (using max uint256)")
+	cmd.Flags().Bool(flagAutoApprove, true, "Auto approve the ERC20 for Gravity to spend from (using max uint256)")
 
 	return cmd
 }
@@ -567,7 +567,7 @@ func getGravityParams(gRPCConn *grpc.ClientConn) (*gravitytypes.Params, error) {
 
 	gravityParamsResp, err := gravityQueryClient.Params(ctx, &gravitytypes.QueryParamsRequest{})
 	if err != nil || gravityParamsResp == nil {
-		return nil, fmt.Errorf("failed to query for Peggy params: %w", err)
+		return nil, fmt.Errorf("failed to query for Gravity params: %w", err)
 	}
 
 	return &gravityParamsResp.Params, nil
@@ -576,7 +576,7 @@ func getGravityParams(gRPCConn *grpc.ClientConn) (*gravitytypes.Params, error) {
 func getGravityContract(ethRPC *ethclient.Client, gravityAddr string) (*wrappers.Gravity, error) {
 	contract, err := wrappers.NewGravity(ethcmn.HexToAddress(gravityAddr), ethRPC)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Peggy contract instance: %w", err)
+		return nil, fmt.Errorf("failed to create Gravity contract instance: %w", err)
 	}
 
 	return contract, nil
@@ -596,7 +596,7 @@ func approveERC20(konfig *koanf.Koanf, ethRPC *ethclient.Client, erc20AddrStr, g
 	gravityAddr := ethcmn.HexToAddress(gravityAddrStr)
 
 	// Check if the allowance remaining is greater than half of a Uint256 - it's
-	// as good a test as any. If so, we skip approving Peggy as the spender and
+	// as good a test as any. If so, we skip approving Gravity as the spender and
 	// assume it's already approved.
 	allowance, err := contract.Allowance(nil, auth.From, gravityAddr)
 	if err != nil {

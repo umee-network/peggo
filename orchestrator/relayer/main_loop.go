@@ -10,7 +10,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/loops"
 )
 
-func (s *peggyRelayer) Start(ctx context.Context) error {
+func (s *gravityRelayer) Start(ctx context.Context) error {
 	logger := s.logger.With().Str("loop", "RelayerMainLoop").Logger()
 
 	if s.valsetRelayEnabled {

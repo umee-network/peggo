@@ -16,7 +16,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/mocks"
-	peggyMocks "github.com/umee-network/peggo/mocks/peggy"
+	gravityMocks "github.com/umee-network/peggo/mocks/gravity"
 )
 
 func TestFindLatestValset(t *testing.T) {
@@ -25,7 +25,7 @@ func TestFindLatestValset(t *testing.T) {
 		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
 		ethProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
-		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
+		mockGravityContract := gravityMocks.NewMockContract(mockCtrl)
 
 		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
@@ -35,9 +35,9 @@ func TestFindLatestValset(t *testing.T) {
 		}, nil)
 		ethProvider.EXPECT().PendingNonceAt(gomock.Any(), fromAddress).Return(uint64(0), nil).AnyTimes()
 
-		mockPeggyContract.EXPECT().FromAddress().Return(fromAddress).AnyTimes()
-		mockPeggyContract.EXPECT().Address().Return(gravityAddress).AnyTimes()
-		mockPeggyContract.EXPECT().GetValsetNonce(gomock.Any(), fromAddress).Return(big.NewInt(2), nil)
+		mockGravityContract.EXPECT().FromAddress().Return(fromAddress).AnyTimes()
+		mockGravityContract.EXPECT().Address().Return(gravityAddress).AnyTimes()
+		mockGravityContract.EXPECT().GetValsetNonce(gomock.Any(), fromAddress).Return(big.NewInt(2), nil)
 
 		mockQClient.EXPECT().ValsetRequest(gomock.Any(), &types.QueryValsetRequestRequest{
 			Nonce: uint64(2),
@@ -72,10 +72,10 @@ func TestFindLatestValset(t *testing.T) {
 				nil,
 			).Times(1)
 
-		relayer := peggyRelayer{
+		relayer := gravityRelayer{
 			logger:            logger,
 			cosmosQueryClient: mockQClient,
-			gravityContract:   mockPeggyContract,
+			gravityContract:   mockGravityContract,
 			ethProvider:       ethProvider,
 		}
 
@@ -90,7 +90,7 @@ func TestFindLatestValset(t *testing.T) {
 		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
 		ethProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
-		mockPeggyContract := peggyMocks.NewMockContract(mockCtrl)
+		mockGravityContract := gravityMocks.NewMockContract(mockCtrl)
 
 		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 		fromAddress := ethcmn.HexToAddress("0xd8da6bf26964af9d7eed9e03e53415d37aa96045")
@@ -100,9 +100,9 @@ func TestFindLatestValset(t *testing.T) {
 		}, nil)
 		ethProvider.EXPECT().PendingNonceAt(gomock.Any(), fromAddress).Return(uint64(0), nil).AnyTimes()
 
-		mockPeggyContract.EXPECT().FromAddress().Return(fromAddress).AnyTimes()
-		mockPeggyContract.EXPECT().Address().Return(gravityAddress).AnyTimes()
-		mockPeggyContract.EXPECT().GetValsetNonce(gomock.Any(), fromAddress).Return(big.NewInt(2), nil)
+		mockGravityContract.EXPECT().FromAddress().Return(fromAddress).AnyTimes()
+		mockGravityContract.EXPECT().Address().Return(gravityAddress).AnyTimes()
+		mockGravityContract.EXPECT().GetValsetNonce(gomock.Any(), fromAddress).Return(big.NewInt(2), nil)
 
 		mockQClient.EXPECT().ValsetRequest(gomock.Any(), &types.QueryValsetRequestRequest{
 			Nonce: uint64(2),
@@ -137,10 +137,10 @@ func TestFindLatestValset(t *testing.T) {
 				nil,
 			).Times(1)
 
-		relayer := peggyRelayer{
+		relayer := gravityRelayer{
 			logger:            logger,
 			cosmosQueryClient: mockQClient,
-			gravityContract:   mockPeggyContract,
+			gravityContract:   mockGravityContract,
 			ethProvider:       ethProvider,
 		}
 
@@ -157,7 +157,7 @@ func TestCheckIfValsetsDiffer(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 
-		relayer := peggyRelayer{
+		relayer := gravityRelayer{
 			logger: logger,
 		}
 
@@ -165,13 +165,13 @@ func TestCheckIfValsetsDiffer(t *testing.T) {
 		relayer.checkIfValsetsDiffer(nil, &types.Valset{})
 		relayer.checkIfValsetsDiffer(nil, &types.Valset{Nonce: 2})
 		relayer.checkIfValsetsDiffer(&types.Valset{Nonce: 12}, &types.Valset{Nonce: 11})
-		relayer.checkIfValsetsDiffer(&types.Valset{}, &types.Valset{Members: []*types.BridgeValidator{{EthereumAddress: "0x0"}}})
+		relayer.checkIfValsetsDiffer(&types.Valset{}, &types.Valset{Members: []types.BridgeValidator{{EthereumAddress: "0x0"}}})
 	})
 
 }
 
 func TestBridgeValidator(t *testing.T) {
-	var bridgeValidators BridgeValidators = []*types.BridgeValidator{
+	var bridgeValidators BridgeValidators = []types.BridgeValidator{
 		{
 			EthereumAddress: "0x0",
 			Power:           10000,

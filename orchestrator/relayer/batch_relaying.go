@@ -21,7 +21,7 @@ type SubmittableBatch struct {
 // old enough that the signatures do not reflect the current validator set on Ethereum. In both the later and the former
 // case the correct solution is to wait through timeouts, new signatures, or a later valid batch being submitted old
 // batches will always be resolved.
-func (s *peggyRelayer) getBatchesAndSignatures(
+func (s *gravityRelayer) getBatchesAndSignatures(
 	ctx context.Context,
 	currentValset types.Valset,
 ) (map[ethcmn.Address][]SubmittableBatch, error) {
@@ -103,7 +103,7 @@ func (s *peggyRelayer) getBatchesAndSignatures(
 // Keep in mind that many other relayers are making this same computation and some may have different standards for
 // their profit margin, therefore there may be a race not only to submit individual batches but also batches in
 // different orders.
-func (s *peggyRelayer) RelayBatches(
+func (s *gravityRelayer) RelayBatches(
 	ctx context.Context,
 	currentValset types.Valset,
 	possibleBatches map[ethcmn.Address][]SubmittableBatch,
@@ -181,11 +181,11 @@ func (s *peggyRelayer) RelayBatches(
 
 			txHash, err := s.gravityContract.SendTx(ctx, s.gravityContract.Address(), txData, estimatedGasCost, gasPrice)
 			if err != nil {
-				s.logger.Err(err).Str("tx_hash", txHash.Hex()).Msg("failed to sign and submit (Peggy submitBatch) to EVM")
+				s.logger.Err(err).Str("tx_hash", txHash.Hex()).Msg("failed to sign and submit (Gravity submitBatch) to EVM")
 				return err
 			}
 
-			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Tx (Peggy submitBatch)")
+			s.logger.Info().Str("tx_hash", txHash.Hex()).Msg("sent Tx (Gravity submitBatch)")
 
 			// update our local tracker of the latest batch
 			s.lastSentBatchNonce = batch.Batch.BatchNonce
@@ -199,7 +199,7 @@ func (s *peggyRelayer) RelayBatches(
 // IsBatchProfitable gets the current prices in USD of ETH and the ERC20 token and compares the value of the estimated
 // gas cost of the transaction to the fees paid by the batch. If the estimated gas cost is greater than the batch's
 // fees, the batch is not profitable and should not be submitted.
-func (s *peggyRelayer) IsBatchProfitable(
+func (s *gravityRelayer) IsBatchProfitable(
 	ctx context.Context,
 	batch types.OutgoingTxBatch,
 	ethGasCost uint64,

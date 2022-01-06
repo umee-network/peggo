@@ -21,7 +21,7 @@ func TestERC20ToDenom(t *testing.T) {
 			ERC20ToDenom(gomock.Any(), &types.QueryERC20ToDenomRequest{Erc20: "0x0000000000000000000000000000000000000000"}).
 			Return(&types.QueryERC20ToDenomResponse{Denom: "umee"}, nil)
 
-		orch := peggyOrchestrator{cosmosQueryClient: mockQClient}
+		orch := gravityOrchestrator{cosmosQueryClient: mockQClient}
 
 		denom, err := orch.ERC20ToDenom(context.Background(), ethcmn.HexToAddress("0x0"))
 
@@ -44,7 +44,7 @@ func TestERC20ToDenom(t *testing.T) {
 			ERC20ToDenom(gomock.Any(), &types.QueryERC20ToDenomRequest{Erc20: "0x0000000000000000000000000000000000000000"}).
 			Return(nil, nil)
 
-		orch := peggyOrchestrator{cosmosQueryClient: mockQClient}
+		orch := gravityOrchestrator{cosmosQueryClient: mockQClient}
 
 		denom, err := orch.ERC20ToDenom(context.Background(), ethcmn.HexToAddress("0x0"))
 

@@ -102,11 +102,11 @@ func getOrchestratorCmd() *cobra.Command {
 			gRPCConn := daemonClient.QueryClient()
 			waitForService(ctx, gRPCConn)
 
-			peggyQuerier := gravitytypes.NewQueryClient(gRPCConn)
+			gravityQuerier := gravitytypes.NewQueryClient(gRPCConn)
 
 			gravityParams, err := getGravityParams(gRPCConn)
 			if err != nil {
-				return fmt.Errorf("failed to query for Peggy params: %w", err)
+				return fmt.Errorf("failed to query for Gravity params: %w", err)
 			}
 
 			ethChainID := gravityParams.BridgeChainId
@@ -140,7 +140,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 			gravityBroadcaster := cosmos.NewGravityBroadcastClient(
 				logger,
-				peggyQuerier,
+				gravityQuerier,
 				daemonClient,
 				signerFn,
 				personalSignFn,
@@ -150,7 +150,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 			ethGravity, err := wrappers.NewGravity(gravityAddr, ethCommitter.Provider())
 			if err != nil {
-				return fmt.Errorf("failed to create a new instance of Peggy: %w", err)
+				return fmt.Errorf("failed to create a new instance of Gravity: %w", err)
 			}
 
 			gravityContract, err := gravity.NewGravityContract(logger, ethCommitter, gravityAddr, ethGravity)
@@ -175,9 +175,9 @@ func getOrchestratorCmd() *cobra.Command {
 			// Here we cast the float64 to a Duration (int64); as we are dealing with ms, we'll lose as much as 1ms.
 			relayerLoopDuration := time.Duration(ethBlockTimeF64*relayerLoopMultiplier) * time.Millisecond
 
-			relayer := relayer.NewPeggyRelayer(
+			relayer := relayer.NewGravityRelayer(
 				logger,
-				peggyQuerier,
+				gravityQuerier,
 				gravityContract,
 				konfig.Bool(flagRelayValsets),
 				konfig.Bool(flagRelayBatches),
@@ -203,9 +203,9 @@ func getOrchestratorCmd() *cobra.Command {
 			// Here we cast the float64 to a Duration (int64); as we are dealing with ms, we'll lose as much as 1ms.
 			batchRequesterLoopDuration := time.Duration(cosmosBlockTimeF64*requesterLoopMultiplier) * time.Millisecond
 
-			orch := orchestrator.NewPeggyOrchestrator(
+			orch := orchestrator.NewGravityOrchestrator(
 				logger,
-				peggyQuerier,
+				gravityQuerier,
 				gravityBroadcaster,
 				gravityContract,
 				ethKeyFromAddress,
@@ -225,7 +225,7 @@ func getOrchestratorCmd() *cobra.Command {
 				return startOrchestrator(errCtx, logger, orch)
 			})
 
-			// If we have the alchemy WS endpoint, start listening for txs against the Peggy contract.
+			// If we have the alchemy WS endpoint, start listening for txs against the Gravity Bridge contract.
 			alchemyWS := konfig.String(flagEthAlchemyWS)
 			if alchemyWS != "" {
 				g.Go(func() error {
@@ -271,7 +271,7 @@ func trapSignal(cancel context.CancelFunc) {
 	}()
 }
 
-func startOrchestrator(ctx context.Context, logger zerolog.Logger, orch orchestrator.PeggyOrchestrator) error {
+func startOrchestrator(ctx context.Context, logger zerolog.Logger, orch orchestrator.GravityOrchestrator) error {
 	srvErrCh := make(chan error, 1)
 	go func() {
 		logger.Info().Msg("starting orchestrator...")

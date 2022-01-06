@@ -1,4 +1,4 @@
-package peggy
+package gravity
 
 import (
 	"bytes"
@@ -22,12 +22,12 @@ type RPCTransaction struct {
 	Input hexutil.Bytes `json:"input"`
 }
 
-// AddPendingTxInput adds pending submitBatch and updateBatch calls to the Peggy contract to the list of pending
+// AddPendingTxInput adds pending submitBatch and updateBatch calls to the Gravity contract to the list of pending
 // transactions, any other transaction is ignored.
 func (p *PendingTxInputList) AddPendingTxInput(pendingTx *RPCTransaction) {
 
-	submitBatchMethod := peggyABI.Methods["submitBatch"]
-	valsetUpdateMethod := peggyABI.Methods["updateValset"]
+	submitBatchMethod := gravityABI.Methods["submitBatch"]
+	valsetUpdateMethod := gravityABI.Methods["updateValset"]
 
 	// If it's not a submitBatch or updateValset transaction, ignore it.
 	// The first four bytes of the call data for a function call specifies the function to be called.
@@ -43,7 +43,7 @@ func (p *PendingTxInputList) AddPendingTxInput(pendingTx *RPCTransaction) {
 	}
 
 	*p = append(*p, pendingTxInput)
-	// Persisting top 100 pending txs of peggy contract only.
+	// Persisting top 100 pending txs of Gravity contract only.
 	if len(*p) > 100 {
 		(*p)[0] = PendingTxInput{} // to avoid memory leak
 		// Dequeue pending tx input

@@ -84,11 +84,10 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	//
 	// 1. Initialize Umee validator nodes.
 	// 2. Launch an Ethereum container that mines.
-	// 3. Deploy the Peggy (Gravity Bridge) contract
-	// 4. Create and initialize Umee validator genesis files.
-	// 5. Start Umee network.
-	// 6. Register each validator's Ethereum key.
-	// 7. Create and start peggo (orchestrator) containers.
+	// 3. Create and initialize Umee validator genesis files (setting delegate keys for validators).
+	// 4. Start Umee network.
+	// 5. Deploy the Gravity Bridge contract
+	// 6. Create and start peggo (orchestrator) containers.
 	s.initNodes()
 	s.initEthereum()
 	s.runEthContainer()
@@ -96,7 +95,6 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.initValidatorConfigs()
 	s.runValidators()
 	s.runContractDeployment()
-	// s.registerValidatorOrchAddresses() // this is done in the genesis.json
 	s.runOrchestrators()
 }
 
@@ -196,21 +194,21 @@ func (s *IntegrationTestSuite) initGenesis() {
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
 
-	var peggyGenState gravitytypes.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &peggyGenState))
+	var gravityGenState gravitytypes.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
 
-	peggyGenState.Params.BridgeChainId = uint64(ethChainID)
-	peggyGenState.DelegateKeys = []gravitytypes.MsgSetOrchestratorAddress{}
+	gravityGenState.Params.BridgeChainId = uint64(ethChainID)
+	gravityGenState.DelegateKeys = []gravitytypes.MsgSetOrchestratorAddress{}
 
 	for i := range s.chain.validators {
-		peggyGenState.DelegateKeys = append(peggyGenState.DelegateKeys, gravitytypes.MsgSetOrchestratorAddress{
+		gravityGenState.DelegateKeys = append(gravityGenState.DelegateKeys, gravitytypes.MsgSetOrchestratorAddress{
 			Validator:    sdk.ValAddress(s.chain.validators[i].keyInfo.GetAddress()).String(),
 			Orchestrator: s.chain.validators[i].keyInfo.GetAddress().String(),
 			EthAddress:   s.chain.validators[i].ethereumKey.address,
 		})
 	}
 
-	bz, err := cdc.MarshalJSON(&peggyGenState)
+	bz, err := cdc.MarshalJSON(&gravityGenState)
 	s.Require().NoError(err)
 	appGenState[gravitytypes.ModuleName] = bz
 
@@ -451,7 +449,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 
 	resource, err := s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
-			Name:       "peggy-contract-deployer",
+			Name:       "gravity-contract-deployer",
 			NetworkID:  s.dkrNet.Network.ID,
 			Repository: "umeenet/peggo",
 			// NOTE: container names are prefixed with '/'
@@ -595,7 +593,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 		s.T().Logf("started orchestrator container: %s", resource.Container.ID)
 	}
 
-	match := "sent Tx (Peggy updateValset)"
+	match := "sent Tx (Gravity updateValset)"
 	for _, resource := range s.orchResources {
 		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
 

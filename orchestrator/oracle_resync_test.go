@@ -16,7 +16,7 @@ import (
 	"github.com/umee-network/peggo/mocks"
 	"github.com/umee-network/peggo/orchestrator/cosmos"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
-	"github.com/umee-network/peggo/orchestrator/ethereum/peggy"
+	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 )
 
 func TestGetLastCheckedBlock(t *testing.T) {
@@ -29,13 +29,11 @@ func TestGetLastCheckedBlock(t *testing.T) {
 		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
-		mockQClient.EXPECT().LastEventByAddr(gomock.Any(), &types.QueryLastEventByAddrRequest{
+
+		mockQClient.EXPECT().LastEventNonceByAddr(gomock.Any(), &types.QueryLastEventNonceByAddrRequest{
 			Address: sdk.AccAddress{}.String(),
-		}).Return(&types.QueryLastEventByAddrResponse{
-			LastClaimEvent: &types.LastClaimEvent{
-				EthereumEventNonce:  1,
-				EthereumEventHeight: 123,
-			},
+		}).Return(&types.QueryLastEventNonceByAddrResponse{
+			EventNonce: 1,
 		}, nil)
 
 		ethProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
@@ -51,7 +49,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			ethProvider,
 		)
 
-		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
+		gravityContract, _ := gravity.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -67,7 +65,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			mockPersonalSignFn,
 		)
 
-		orch := NewPeggyOrchestrator(
+		orch := NewGravityOrchestrator(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			mockQClient,
 			gravityBroadcastClient,
@@ -82,7 +80,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			100,
 		)
 
-		block, err := orch.GetLastCheckedBlock(context.Background())
+		block, err := orch.GetLastCheckedBlock(context.Background(), 0)
 		assert.Nil(t, err)
 		assert.Equal(t, uint64(123), block)
 	})
@@ -96,13 +94,11 @@ func TestGetLastCheckedBlock(t *testing.T) {
 		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
-		mockQClient.EXPECT().LastEventByAddr(gomock.Any(), &types.QueryLastEventByAddrRequest{
+
+		mockQClient.EXPECT().LastEventNonceByAddr(gomock.Any(), &types.QueryLastEventNonceByAddrRequest{
 			Address: sdk.AccAddress{}.String(),
-		}).Return(&types.QueryLastEventByAddrResponse{
-			LastClaimEvent: &types.LastClaimEvent{
-				EthereumEventNonce:  1,
-				EthereumEventHeight: 123,
-			},
+		}).Return(&types.QueryLastEventNonceByAddrResponse{
+			EventNonce: 1,
 		}, errors.New("some error"))
 
 		ethProvider := mocks.NewMockEVMProviderWithRet(mockCtrl)
@@ -118,7 +114,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			ethProvider,
 		)
 
-		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
+		gravityContract, _ := gravity.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -134,7 +130,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			mockPersonalSignFn,
 		)
 
-		orch := NewPeggyOrchestrator(
+		orch := NewGravityOrchestrator(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			mockQClient,
 			gravityBroadcastClient,
@@ -149,7 +145,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			100,
 		)
 
-		block, err := orch.GetLastCheckedBlock(context.Background())
+		block, err := orch.GetLastCheckedBlock(context.Background(), 0)
 		assert.EqualError(t, err, "some error")
 		assert.Equal(t, uint64(0), block)
 	})
@@ -163,7 +159,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 		gravityAddress := ethcmn.HexToAddress("0x3bdf8428734244c9e5d82c95d125081939d6d42d")
 
 		mockQClient := mocks.NewMockQueryClient(mockCtrl)
-		mockQClient.EXPECT().LastEventByAddr(gomock.Any(), &types.QueryLastEventByAddrRequest{
+		mockQClient.EXPECT().LastEventNonceByAddr(gomock.Any(), &types.QueryLastEventNonceByAddrRequest{
 			Address: sdk.AccAddress{}.String(),
 		}).Return(nil, nil)
 
@@ -180,7 +176,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			ethProvider,
 		)
 
-		gravityContract, _ := peggy.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
+		gravityContract, _ := gravity.NewGravityContract(logger, ethCommitter, gravityAddress, nil)
 
 		mockCosmos := mocks.NewMockCosmosClient(mockCtrl)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{}).AnyTimes()
@@ -196,7 +192,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			mockPersonalSignFn,
 		)
 
-		orch := NewPeggyOrchestrator(
+		orch := NewGravityOrchestrator(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			mockQClient,
 			gravityBroadcastClient,
@@ -211,7 +207,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			100,
 		)
 
-		block, err := orch.GetLastCheckedBlock(context.Background())
+		block, err := orch.GetLastCheckedBlock(context.Background(), 0)
 		assert.EqualError(t, err, "no last event response returned")
 		assert.Equal(t, uint64(0), block)
 	})
