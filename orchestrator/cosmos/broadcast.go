@@ -16,7 +16,7 @@ import (
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
-type PeggyBroadcastClient interface {
+type GravityBroadcastClient interface {
 	AccFromAddress() sdk.AccAddress
 
 	// SendValsetConfirm broadcasts in a confirmation for a specific validator set for a specific block height.
@@ -73,13 +73,13 @@ type (
 	}
 )
 
-func NewPeggyBroadcastClient(
+func NewGravityBroadcastClient(
 	logger zerolog.Logger,
 	queryClient types.QueryClient,
 	broadcastClient client.CosmosClient,
 	ethSignerFn keystore.SignerFn,
 	ethPersonalSignFn keystore.PersonalSignFn,
-) PeggyBroadcastClient {
+) GravityBroadcastClient {
 	return &gravityBroadcastClient{
 		logger:            logger.With().Str("module", "peggy_broadcast_client").Logger(),
 		daemonQueryClient: queryClient,

@@ -43,7 +43,7 @@ sign claims going from Ethereum to Umee and to sign any transactions sent to
 Ethereum (batches or validator set updates).
 
 ```shell
-$ umeed tx peggy set-orchestrator-address \
+$ umeed tx gravity set-orchestrator-address \
   {validatorAddress} \
   {validatorAddress} \
   {ethAddress} \
@@ -58,7 +58,7 @@ $ umeed tx peggy set-orchestrator-address \
 ### Run the orchestrator
 
 ```shell
-$ peggo orchestrator \
+$ peggo orchestrator {gravityAddress} \
   --eth-pk=$ETH_PK \
   --eth-rpc=$ETH_RPC \
   --relay-batches=true \
@@ -73,7 +73,7 @@ $ peggo orchestrator \
 
 ### Send a transfer from Umee to Ethereum
 
-This is done using the command `umeed tx peggy send-to-eth`, use the `--help`
+This is done using the command `umeed tx gravity send-to-eth`, use the `--help`
 flag for more information.
 
 If the coin doesn't have a corresponding ERC20 equivalent on the Ethereum
@@ -94,10 +94,10 @@ validator is configured to batch and relay transactions of this token.
 
 Any ERC20 token can be sent to Umee and it's done using the command
 `peggo bridge send-to-cosmos`, use the `--help` flag for more information. It
-can also be done by calling the `sendToCosmos` method on the Peggy contract.
+can also be done by calling the `sendToCosmos` method on the Gravity contract.
 
-The ERC20 tokens will be locked in the Peggy contract and new coins will be
-minted on Umee with the denomination `peggy{token_address}`. This process takes
+The ERC20 tokens will be locked in the Gravity contract and new coins will be
+minted on Umee with the denomination `gravity{token_address}`. This process takes
 around 3 minutes or 12 Ethereum blocks.
 
 ## How it works
@@ -106,7 +106,7 @@ Peggo allows transfers of assets back and forth between Ethereum and Umee.
 It supports both assets originating on Umee and assets originating on Ethereum
 (any ERC20 token).
 
-It works by scanning the events of the contract deployed on Ethereum (Peggy) and
+It works by scanning the events of the contract deployed on Ethereum (Gravity) and
 relaying them as messages to the Umee chain; and relaying transaction batches and
 validator sets from Umee to Ethereum.
 
@@ -115,24 +115,24 @@ validator sets from Umee to Ethereum.
 #### Ethereum
 
 **Deposits** (`SendToCosmosEvent`): emitted when sending tokens from Ethereum to
-Umee using the `sendToCosmos` function on Peggy.
+Umee using the `sendToCosmos` function on Gravity.
 
 **Withdraw** (`TransactionBatchExecutedEvent`): emitted when a batch of
 transactions is sent from Umee to Ethereum using the `submitBatch` function on
-the Peggy contract by a validator. This serves as a confirmation to Umee that
+the Gravity contract by a validator. This serves as a confirmation to Umee that
 the batch was sent successfully.
 
-**Valset update** (`ValsetUpdatedEvent`): emitted on init of the Peggy contract
+**Valset update** (`ValsetUpdatedEvent`): emitted on init of the Gravity contract
 and on every execution of the `updateValset` function.
 
 **Deployed ERC 20** (`ERC20DeployedEvent`): emitted when executing the function
 `deployERC20`. This event signals Umee that there's a new ERC20 deployed from
-Peggy, so Umee can map the token contract address to the corresponding native
+Gravity, so Umee can map the token contract address to the corresponding native
 coin. This enables transfers from Umee to Ethereum.
 
 #### Umee
 
- **Validator sets**: Umee informs the Peggy contract who are the current
+ **Validator sets**: Umee informs the Gravity contract who are the current
  validators and their power. This results in an execution of the `updateValset`
  function.
 
@@ -141,4 +141,4 @@ coin. This enables transfers from Umee to Ethereum.
  will send a message to Umee requesting a new batch.
 
  **Batches**: Peggo queries Umee for any batches ready to be relayed and relays
- them over to Ethereum using the `submitBatch` function on the Peggy contract.
+ them over to Ethereum using the `submitBatch` function on the Gravity contract.

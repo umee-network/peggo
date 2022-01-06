@@ -59,7 +59,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewGravityBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,
@@ -126,7 +126,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewGravityBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,
@@ -188,7 +188,7 @@ func TestGetLastCheckedBlock(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewGravityBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,

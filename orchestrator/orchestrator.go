@@ -28,7 +28,7 @@ type PeggyOrchestrator interface {
 type peggyOrchestrator struct {
 	logger                     zerolog.Logger
 	cosmosQueryClient          gravitytypes.QueryClient
-	gravityBroadcastClient     sidechain.PeggyBroadcastClient
+	gravityBroadcastClient     sidechain.GravityBroadcastClient
 	gravityContract            peggy.Contract
 	ethProvider                provider.EVMProvider
 	ethFrom                    ethcmn.Address
@@ -48,7 +48,7 @@ type peggyOrchestrator struct {
 func NewPeggyOrchestrator(
 	logger zerolog.Logger,
 	cosmosQueryClient gravitytypes.QueryClient,
-	gravityBroadcastClient sidechain.PeggyBroadcastClient,
+	gravityBroadcastClient sidechain.GravityBroadcastClient,
 	gravityContract peggy.Contract,
 	ethFrom ethcmn.Address,
 	ethSignerFn keystore.SignerFn,

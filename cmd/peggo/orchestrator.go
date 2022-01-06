@@ -21,7 +21,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/coingecko"
 	"github.com/umee-network/peggo/orchestrator/cosmos"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
-	peggy "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
+	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	"github.com/umee-network/peggo/orchestrator/relayer"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
@@ -138,7 +138,7 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
 
-			gravityBroadcaster := cosmos.NewPeggyBroadcastClient(
+			gravityBroadcaster := cosmos.NewGravityBroadcastClient(
 				logger,
 				peggyQuerier,
 				daemonClient,
@@ -148,12 +148,12 @@ func getOrchestratorCmd() *cobra.Command {
 
 			gravityAddr := ethcmn.HexToAddress(args[0])
 
-			ethPeggy, err := wrappers.NewGravity(gravityAddr, ethCommitter.Provider())
+			ethGravity, err := wrappers.NewGravity(gravityAddr, ethCommitter.Provider())
 			if err != nil {
 				return fmt.Errorf("failed to create a new instance of Peggy: %w", err)
 			}
 
-			gravityContract, err := peggy.NewGravityContract(logger, ethCommitter, gravityAddr, ethPeggy)
+			gravityContract, err := gravity.NewGravityContract(logger, ethCommitter, gravityAddr, ethGravity)
 			if err != nil {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}

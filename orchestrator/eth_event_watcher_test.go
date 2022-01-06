@@ -135,7 +135,7 @@ func TestCheckForEvents(t *testing.T) {
 		// TODO: making this more specific might be useful for testing?
 		mockCosmos.EXPECT().SyncBroadcastMsg(gomock.Any()).Return(&sdk.TxResponse{}, nil).AnyTimes()
 
-		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewGravityBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,
@@ -221,7 +221,7 @@ func TestCheckForEvents(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewGravityBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,
@@ -327,7 +327,7 @@ func TestCheckForEvents(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewGravityBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,
@@ -446,7 +446,7 @@ func TestCheckForEvents(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewGravityBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,
@@ -579,7 +579,7 @@ func TestCheckForEvents(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		gravityBroadcastClient := cosmos.NewPeggyBroadcastClient(
+		gravityBroadcastClient := cosmos.NewGravityBroadcastClient(
 			logger,
 			nil,
 			mockCosmos,

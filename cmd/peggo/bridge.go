@@ -160,10 +160,10 @@ func deployGravityCmd() *cobra.Command {
 
 			address, tx, _, err := wrappers.DeployGravity(auth, ethRPC, gravityIDBytes32, validators, powers)
 			if err != nil {
-				return fmt.Errorf("failed deploy Peggy (Gravity Bridge) contract: %w", err)
+				return fmt.Errorf("failed deploy Gravity Bridge contract: %w", err)
 			}
 
-			_, _ = fmt.Fprintf(os.Stderr, `Peggy (Gravity Bridge) contract successfully deployed!
+			_, _ = fmt.Fprintf(os.Stderr, `Peggy Gravity Bridge contract successfully deployed!
 Address: %s
 Transaction: %s
 `,

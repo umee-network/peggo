@@ -33,7 +33,7 @@ func TestSendValsetConfirm(t *testing.T) {
 			return []byte{}, nil
 		}
 
-		s := NewPeggyBroadcastClient(
+		s := NewGravityBroadcastClient(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			nil,
 			mockCosmos,
@@ -58,7 +58,7 @@ func TestSendValsetConfirm(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		s := NewPeggyBroadcastClient(
+		s := NewGravityBroadcastClient(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			nil,
 			mockCosmos,
@@ -85,7 +85,7 @@ func TestSendValsetConfirm(t *testing.T) {
 			return []byte{}, nil
 		}
 
-		s := NewPeggyBroadcastClient(
+		s := NewGravityBroadcastClient(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			nil,
 			mockCosmos,
@@ -116,7 +116,7 @@ func TestSendBatchConfirm(t *testing.T) {
 			return []byte{}, nil
 		}
 
-		s := NewPeggyBroadcastClient(
+		s := NewGravityBroadcastClient(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			nil,
 			mockCosmos,
@@ -139,7 +139,7 @@ func TestSendBatchConfirm(t *testing.T) {
 			return []byte{}, errors.New("some error during signing")
 		}
 
-		s := NewPeggyBroadcastClient(
+		s := NewGravityBroadcastClient(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			nil,
 			mockCosmos,
@@ -164,7 +164,7 @@ func TestSendBatchConfirm(t *testing.T) {
 			return []byte{}, nil
 		}
 
-		s := NewPeggyBroadcastClient(
+		s := NewGravityBroadcastClient(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			nil,
 			mockCosmos,
@@ -240,7 +240,7 @@ func TestSendEthereumClaims(t *testing.T) {
 
 	mockCosmos.EXPECT().SyncBroadcastMsg(HasBiggerNonce(0)).Return(&sdk.TxResponse{}, nil).Times(1)
 
-	s := NewPeggyBroadcastClient(
+	s := NewGravityBroadcastClient(
 		zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 		nil,
 		mockCosmos,
@@ -386,7 +386,7 @@ func TestSendRequestBatch(t *testing.T) {
 		mockCosmos.EXPECT().QueueBroadcastMsg(gomock.Any()).Return(nil)
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{})
 
-		s := NewPeggyBroadcastClient(
+		s := NewGravityBroadcastClient(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			nil,
 			mockCosmos,
@@ -407,7 +407,7 @@ func TestSendRequestBatch(t *testing.T) {
 		mockCosmos.EXPECT().QueueBroadcastMsg(gomock.Any()).Return(errors.New("some error during broadcast"))
 		mockCosmos.EXPECT().FromAddress().Return(sdk.AccAddress{})
 
-		s := NewPeggyBroadcastClient(
+		s := NewGravityBroadcastClient(
 			zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}),
 			nil,
 			mockCosmos,
