@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -604,6 +603,8 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 			errBuf bytes.Buffer
 		)
 
+		errTest := ""
+
 		s.Require().Eventuallyf(
 			func() bool {
 
@@ -619,17 +620,15 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 				if err != nil {
 					return false
 				}
-				log.Println(outBuf.String())
-				log.Println(errBuf.String())
 
+				errTest = errBuf.String()
 				return strings.Contains(errBuf.String(), match)
 			},
 			5*time.Minute,
 			time.Second,
 			"orchestrator %s not healthy. check: %s and %s",
 			resource.Container.ID,
-			errBuf.String(),
-			outBuf.String(),
+			errTest,
 		)
 	}
 }
