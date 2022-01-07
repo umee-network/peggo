@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -618,6 +619,8 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 				if err != nil {
 					return false
 				}
+				log.Println(outBuf.String())
+				log.Println(errBuf.String())
 
 				return strings.Contains(errBuf.String(), match)
 			},
