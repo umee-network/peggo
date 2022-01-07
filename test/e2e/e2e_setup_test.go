@@ -603,9 +603,6 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 			errBuf bytes.Buffer
 		)
 
-		errTest := ""
-		outputTest := ""
-
 		s.Require().Eventuallyf(
 			func() bool {
 
@@ -622,16 +619,12 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					return false
 				}
 
-				errTest = errBuf.String()
-				outputTest = outBuf.String()
 				return strings.Contains(errBuf.String(), match)
 			},
 			5*time.Minute,
 			time.Second,
-			"orchestrator %s not healthy. check: %s and %s",
+			"orchestrator %s not healthy",
 			resource.Container.ID,
-			errTest,
-			outputTest,
 		)
 	}
 }
