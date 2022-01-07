@@ -593,7 +593,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 		s.T().Logf("started orchestrator container: %s", resource.Container.ID)
 	}
 
-	match := "sent Tx (Gravity updateValset)"
+	match := "oracle sent set of claims successfully"
 	for _, resource := range s.orchResources {
 		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
 
