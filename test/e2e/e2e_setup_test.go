@@ -623,9 +623,10 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 			},
 			5*time.Minute,
 			time.Second,
-			"orchestrator %s not healthy. check: %s",
+			"orchestrator %s not healthy. check: %s and %s",
 			resource.Container.ID,
 			errBuf.String(),
+			outBuf.String(),
 		)
 	}
 }
