@@ -604,6 +604,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 		)
 
 		errTest := ""
+		outputTest := ""
 
 		s.Require().Eventuallyf(
 			func() bool {
@@ -622,6 +623,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 				}
 
 				errTest = errBuf.String()
+				outputTest = outBuf.String()
 				return strings.Contains(errBuf.String(), match)
 			},
 			5*time.Minute,
@@ -629,6 +631,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 			"orchestrator %s not healthy. check: %s and %s",
 			resource.Container.ID,
 			errTest,
+			outputTest,
 		)
 	}
 }
