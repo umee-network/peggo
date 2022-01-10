@@ -18,11 +18,11 @@ const (
 
 	// Run every approximately 5 Ethereum blocks to allow time to receive new blocks.
 	// If we run this faster we wouldn't be getting new blocks, which is not efficient.
-	ethOracleLoopMultiplier = 1
+	ethOracleLoopMultiplier = 5
 
 	// Run every approximately 3 Cosmos blocks; so we sign batches and valset updates ASAP but not run these requests
 	// too often that we make too many requests to Cosmos.
-	ethSignerLoopMultiplier = 1
+	ethSignerLoopMultiplier = 3
 )
 
 // Start combines the all major roles required to make
