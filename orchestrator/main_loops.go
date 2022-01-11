@@ -343,13 +343,16 @@ func (p *gravityOrchestrator) ERC20ToDenom(ctx context.Context, tokenAddr ethcmn
 
 // getEthBlockDelay returns the right amount of Ethereum blocks to wait until we
 // consider a block final. This depends on the chain we are talking to.
-// Copying from https://github.com/althea-net/cosmos-gravity-bridge/blob/main/orchestrator/orchestrator/src/ethereum_event_watcher.rs#L222
+// Copying from https://github.com/Gravity-Bridge/Gravity-Bridge/blob/main/orchestrator/orchestrator/src/ethereum_event_watcher.rs#L248
+// DO NOT MODIFY. Changing any of these values puts the network in DANGER and
+// does not provide any advantage over other validators. This is a safety
+// mechanism to prevent relaying an event that is not yet considered final.
 func getEthBlockDelay(chainID uint64) uint64 {
 	switch chainID {
 	// Mainline Ethereum, Ethereum classic, or the Ropsten, Kotti, Mordor testnets
 	// all POW Chains
 	case 1, 3, 6, 7:
-		return 6
+		return 13
 
 	// Dev, our own Gravity Ethereum testnet, and Hardhat respectively
 	// all single signer chains with no chance of any reorgs
@@ -364,6 +367,6 @@ func getEthBlockDelay(chainID uint64) uint64 {
 
 	// assume the safe option (POW) where we don't know
 	default:
-		return 6
+		return 13
 	}
 }
