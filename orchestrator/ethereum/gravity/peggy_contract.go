@@ -2,7 +2,6 @@ package gravity
 
 import (
 	"context"
-	"math"
 	"math/big"
 	"strings"
 	"sync"
@@ -17,11 +16,6 @@ import (
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
-
-// The total power in the Gravity bridge is normalized to u32 max every
-// time a validator set is created. This value of up to u32 max is then
-// stored in a i64 to prevent overflow during computation.
-const totalGravityPower int64 = math.MaxUint32
 
 // gravityPowerToPass is a mirror of constant_powerThreshold in Gravity.sol
 const gravityPowerToPass int64 = 2863311530
