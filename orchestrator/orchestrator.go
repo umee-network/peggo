@@ -38,7 +38,6 @@ type gravityOrchestrator struct {
 	cosmosBlockTime            time.Duration
 	ethereumBlockTime          time.Duration
 	batchRequesterLoopDuration time.Duration
-	startingEthBlock           uint64
 	ethBlocksPerLoop           uint64
 
 	mtx             sync.Mutex
@@ -75,7 +74,6 @@ func NewGravityOrchestrator(
 		ethereumBlockTime:          ethereumBlockTime,
 		batchRequesterLoopDuration: batchRequesterLoopDuration,
 		ethBlocksPerLoop:           uint64(ethBlocksPerLoop),
-		startingEthBlock:           uint64(6149808),
 	}
 
 	for _, option := range options {

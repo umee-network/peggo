@@ -75,9 +75,6 @@ func (p *gravityOrchestrator) EthOracleMainLoop(ctx context.Context) (err error)
 
 	if err := retry.Do(func() (err error) {
 		lastCheckedBlock, err = p.GetLastCheckedBlock(ctx, getEthBlockDelay(gravityParams.BridgeChainId))
-		if lastCheckedBlock == 0 {
-			lastCheckedBlock = p.startingEthBlock
-		}
 
 		return err
 	}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
