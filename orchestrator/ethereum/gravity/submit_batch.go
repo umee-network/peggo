@@ -34,8 +34,10 @@ func (s *gravityContract) EncodeTransactionBatch(
 
 	sigs, err := checkBatchSigsAndRepack(currentValset, confirms)
 	if err != nil {
-		err = errors.Wrap(err, "confirmations check failed")
-		return nil, err
+		s.logger.Debug().
+			AnErr("err", err).
+			Msg("confirmations check failed")
+		return nil, nil
 	}
 
 	amounts, destinations, fees := getBatchCheckpointValues(batch)

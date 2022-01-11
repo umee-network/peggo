@@ -262,7 +262,8 @@ func sigToVRS(sigHex string) (v uint8, r, s ethcmn.Hash) {
 	return
 }
 
-// gravityPowerToPercent takes in an amount of power in the Gravity Bridge, returns a percentage of total
+// gravityPowerToPercent takes in an amount of power in the Gravity Bridge, returns a percentage of total. Use this for
+// printing values to users only, for accurate calculations use gravityPowerToPass
 func gravityPowerToPercent(total *big.Int) float32 {
 	d := decimal.NewFromBigInt(total, 0)
 	f, _ := d.Div(decimal.NewFromInt(totalGravityPower)).Shift(2).Float64()
