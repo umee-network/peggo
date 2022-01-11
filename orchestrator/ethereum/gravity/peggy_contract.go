@@ -268,3 +268,8 @@ func gravityPowerToPercent(total *big.Int) float32 {
 	f, _ := d.Div(decimal.NewFromInt(totalGravityPower)).Shift(2).Float64()
 	return float32(f)
 }
+
+// isEnoughPower compares a power value to the power required to pass (a constant)
+func isEnoughPower(total *big.Int) bool {
+	return total.Cmp(big.NewInt(gravityPowerToPass)) == 1
+}

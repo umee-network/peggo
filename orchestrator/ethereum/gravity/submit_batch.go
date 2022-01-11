@@ -146,10 +146,11 @@ func checkAndRepackSigs(valset types.Valset, confirms []genericConfirm) (*Repack
 			sigs.s = append(sigs.s, [32]byte{})
 		}
 	}
-	if gravityPowerToPercent(powerOfGoodSigs) < 66 {
-		err = ErrInsufficientVotingPowerToPass
+
+	if isEnoughPower(powerOfGoodSigs) {
 		return sigs, err
 	}
 
+	err = ErrInsufficientVotingPowerToPass
 	return sigs, err
 }
