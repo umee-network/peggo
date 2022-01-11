@@ -139,6 +139,24 @@ func (p *gravityOrchestrator) GetLastCheckedBlock(
 			iter.Close()
 		}
 
+		// there's no easy way to reverse the list, so we have to do it manually
+		for i := 0; i < len(valsetUpdatedEvents)/2; i++ {
+			j := len(valsetUpdatedEvents) - i - 1
+			valsetUpdatedEvents[i], valsetUpdatedEvents[j] = valsetUpdatedEvents[j], valsetUpdatedEvents[i]
+		}
+
+		for _, valset := range valsetUpdatedEvents {
+			bootstrapping := valset.NewValsetNonce.Uint64() == 0 && lastEventNonce == 1
+			commonCase := valset.EventNonce.Uint64() == lastEventNonce
+
+			if commonCase || bootstrapping {
+				return valset.Raw.BlockNumber, nil
+			} else if valset.NewValsetNonce.Uint64() == 0 && lastEventNonce > 1 {
+				// TODO: avoid panic until we find the cause
+				p.logger.Panic().Msg("could not find the last event relayed")
+			}
+		}
+
 		iterErc20Deploy, err := gravityFilterer.FilterERC20DeployedEvent(&bind.FilterOpts{
 			Start: endSearch,
 			End:   &currentBlock,
@@ -164,23 +182,6 @@ func (p *gravityOrchestrator) GetLastCheckedBlock(
 		}
 
 		iterErc20Deploy.Close()
-
-		// there's no easy way to reverse the list, so we have to do it manually
-		for i := 0; i < len(valsetUpdatedEvents)/2; i++ {
-			j := len(valsetUpdatedEvents) - i - 1
-			valsetUpdatedEvents[i], valsetUpdatedEvents[j] = valsetUpdatedEvents[j], valsetUpdatedEvents[i]
-		}
-
-		for _, valset := range valsetUpdatedEvents {
-			bootstrapping := valset.NewValsetNonce.Uint64() == 0 && lastEventNonce == 1
-			commonCase := valset.EventNonce.Uint64() == lastEventNonce
-
-			if commonCase || bootstrapping {
-				return valset.Raw.BlockNumber, nil
-			} else if valset.NewValsetNonce.Uint64() == 0 && lastEventNonce > 1 {
-				p.logger.Panic().Msg("could not find the last event relayed")
-			}
-		}
 
 		currentBlock = endSearch
 	}
