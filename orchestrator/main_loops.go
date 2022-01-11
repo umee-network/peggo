@@ -73,9 +73,36 @@ func (p *gravityOrchestrator) EthOracleMainLoop(ctx context.Context) (err error)
 		return err
 	}
 
+	// Wait until the contract is available
+	if p.bridgeStartHeight != 0 {
+		for {
+			latestHeader, err := p.ethProvider.HeaderByNumber(ctx, nil)
+			if err != nil {
+				logger.Err(err).Msg("failed to get latest header, loop exits")
+				return err
+			}
+
+			currentBlock := latestHeader.Number.Uint64() - getEthBlockDelay(gravityParams.BridgeChainId)
+
+			if currentBlock < p.bridgeStartHeight {
+				wait := p.ethereumBlockTime * time.Duration(p.bridgeStartHeight-currentBlock)
+				logger.Error().
+					Uint64("current_block", currentBlock).
+					Uint64("start_height", p.bridgeStartHeight).
+					Uint64("blocks_left", p.bridgeStartHeight-currentBlock).
+					Dur("wait_time", wait).
+					Msg("waiting for contract to be available")
+				time.Sleep(wait)
+				continue
+			}
+
+			logger.Info().Msg("contract is available; oracle loop starts")
+			break
+		}
+	}
+
 	if err := retry.Do(func() (err error) {
 		lastCheckedBlock, err = p.GetLastCheckedBlock(ctx, getEthBlockDelay(gravityParams.BridgeChainId))
-
 		return err
 	}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
 		logger.Err(err).Uint("retry", n).Msg("failed to get last checked block; retrying...")

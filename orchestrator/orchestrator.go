@@ -39,6 +39,7 @@ type gravityOrchestrator struct {
 	ethereumBlockTime          time.Duration
 	batchRequesterLoopDuration time.Duration
 	ethBlocksPerLoop           uint64
+	bridgeStartHeight          uint64
 
 	mtx             sync.Mutex
 	erc20DenomCache map[string]string
@@ -57,6 +58,7 @@ func NewGravityOrchestrator(
 	ethereumBlockTime time.Duration,
 	batchRequesterLoopDuration time.Duration,
 	ethBlocksPerLoop int64,
+	bridgeStartHeight int64,
 	options ...func(GravityOrchestrator),
 ) GravityOrchestrator {
 
@@ -74,6 +76,7 @@ func NewGravityOrchestrator(
 		ethereumBlockTime:          ethereumBlockTime,
 		batchRequesterLoopDuration: batchRequesterLoopDuration,
 		ethBlocksPerLoop:           uint64(ethBlocksPerLoop),
+		bridgeStartHeight:          uint64(bridgeStartHeight),
 	}
 
 	for _, option := range options {

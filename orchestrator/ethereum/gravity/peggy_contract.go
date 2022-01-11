@@ -24,6 +24,9 @@ import (
 // stored in a i64 to prevent overflow during computation.
 const totalGravityPower int64 = math.MaxUint32
 
+// gravityPowerToPass is a mirror of constant_powerThreshold in Gravity.sol
+const gravityPowerToPass int64 = 2863311530
+
 var (
 	gravityABI, _ = abi.JSON(strings.NewReader(wrappers.GravityABI))
 
