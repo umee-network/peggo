@@ -14,7 +14,6 @@ import (
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
-	"github.com/shopspring/decimal"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
@@ -260,14 +259,6 @@ func sigToVRS(sigHex string) (v uint8, r, s ethcmn.Hash) {
 	s = ethcmn.BytesToHash(signatureBytes[32:64])
 
 	return
-}
-
-// gravityPowerToPercent takes in an amount of power in the Gravity Bridge, returns a percentage of total. Use this for
-// printing values to users only, for accurate calculations use gravityPowerToPass
-func gravityPowerToPercent(total *big.Int) float32 {
-	d := decimal.NewFromBigInt(total, 0)
-	f, _ := d.Div(decimal.NewFromInt(totalGravityPower)).Shift(2).Float64()
-	return float32(f)
 }
 
 // isEnoughPower compares a power value to the power required to pass (a constant)
