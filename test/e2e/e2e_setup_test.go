@@ -371,10 +371,6 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 		"0.0.0.0",
 		"--networkId",
 		"15",
-		// "-b",
-		// "15",
-		"-v",
-		"--debug",
 	}
 
 	entrypoint = append(entrypoint, "--account", "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7,0x3635C9ADC5DEA00000")
@@ -403,28 +399,39 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 	s.Require().NoError(err)
 
 	s.ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
+	s.Require().NoError(err)
 
-	// Wait for the Ethereum node to start producing blocks; DAG completion takes
-	// about two minutes.
-	// s.Require().Eventually(
-	// 	func() bool {
-	// 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	// 		defer cancel()
+	match := "Listening on 0.0.0.0:8545"
 
-	// 		height, err := s.ethClient.BlockNumber(ctx)
-	// 		if err != nil {
-	// 			log.Panic(err)
-	// 			return false
-	// 		}
+	var (
+		outBuf bytes.Buffer
+		errBuf bytes.Buffer
+	)
 
-	// 		return height > 1
-	// 	},
-	// 	5*time.Minute,
-	// 	10*time.Second,
-	// 	"ganache node failed to produce a block",
-	// )
-	time.Sleep(time.Second * 10)
-	s.T().Logf("started Ethereum container: %s", s.ethResource.Container.ID)
+	// Wait for Ganache to start running.
+	s.Require().Eventually(
+		func() bool {
+
+			err := s.dkrPool.Client.Logs(
+				docker.LogsOptions{
+					Container:    s.ethResource.Container.ID,
+					OutputStream: &outBuf,
+					ErrorStream:  &errBuf,
+					Stdout:       true,
+					Stderr:       true,
+				},
+			)
+			if err != nil {
+				return false
+			}
+
+			return strings.Contains(outBuf.String(), match)
+		},
+		1*time.Minute,
+		5*time.Second,
+		"ganache node failed to start",
+	)
+	s.T().Logf("started Ganache container: %s", s.ethResource.Container.ID)
 }
 
 func (s *IntegrationTestSuite) runEthContainer() {
