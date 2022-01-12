@@ -80,17 +80,27 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.dkrNet, err = s.dkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", s.chain.id))
 	s.Require().NoError(err)
 
+	useGanache := false
+	if str := os.Getenv("PEGGO_E2E_USE_GANACHE"); len(str) > 0 {
+		useGanache, err = strconv.ParseBool(str)
+		s.Require().NoError(err)
+	}
+
 	// The boostrapping phase is as follows:
 	//
 	// 1. Initialize Umee validator nodes.
-	// 2. Launch an Ethereum container that mines.
+	// 2. Launch an Ethereum (or Ganache) container that mines.
 	// 3. Create and initialize Umee validator genesis files (setting delegate keys for validators).
 	// 4. Start Umee network.
 	// 5. Deploy the Gravity Bridge contract
 	// 6. Create and start peggo (orchestrator) containers.
 	s.initNodes()
-	s.initEthereum()
-	s.runEthContainer()
+	if useGanache {
+		s.runGanacheContainer()
+	} else {
+		s.initEthereum()
+		s.runEthContainer()
+	}
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
@@ -314,6 +324,107 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
+}
+
+// func (s *IntegrationTestSuite) initEthereum() {
+// 	// generate ethereum keys for validators add them to the ethereum genesis
+// 	ethGenesis := EthereumGenesis{
+// 		Difficulty: "0x400",
+// 		GasLimit:   "0xB71B00",
+// 		Config:     EthereumConfig{ChainID: ethChainID},
+// 		Alloc:      make(map[string]Allocation, len(s.chain.validators)+1),
+// 	}
+
+// 	alloc := Allocation{
+// 		Balance: "0x1337000000000000000000",
+// 	}
+
+// 	ethGenesis.Alloc["0xBf660843528035a5A4921534E156a27e64B231fE"] = alloc
+// 	for _, val := range s.chain.validators {
+// 		s.Require().NoError(val.generateEthereumKey())
+// 		ethGenesis.Alloc[val.ethereumKey.address] = alloc
+// 	}
+
+// 	ethGenBz, err := json.MarshalIndent(ethGenesis, "", "  ")
+// 	s.Require().NoError(err)
+
+// 	// write out the genesis file
+// 	s.Require().NoError(writeFile(filepath.Join(s.chain.configDir(), "eth_genesis.json"), ethGenBz))
+// }
+
+func (s *IntegrationTestSuite) runGanacheContainer() {
+	s.T().Log("starting Ganache container...")
+
+	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	s.Require().NoError(err)
+	s.tmpDirs = append(s.tmpDirs, tmpDir)
+
+	_, err = copyFile(
+		filepath.Join("./docker/", "ganache.Dockerfile"),
+		filepath.Join(tmpDir, "ganache.Dockerfile"),
+	)
+	s.Require().NoError(err)
+
+	entrypoint := []string{
+		"ganache-cli",
+		"-h",
+		"0.0.0.0",
+		"--networkId",
+		"15",
+		// "-b",
+		// "15",
+		"-v",
+		"--debug",
+	}
+
+	entrypoint = append(entrypoint, "--account", "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7,0x3635C9ADC5DEA00000")
+	for _, val := range s.chain.validators {
+		s.Require().NoError(val.generateEthereumKey())
+		entrypoint = append(entrypoint, "--account", val.ethereumKey.privateKey+",0x3635C9ADC5DEA00000")
+	}
+
+	s.ethResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
+		&dockertest.BuildOptions{
+			Dockerfile: "ganache.Dockerfile",
+			ContextDir: tmpDir,
+		},
+		&dockertest.RunOptions{
+			Name:         "ganache",
+			NetworkID:    s.dkrNet.Network.ID,
+			ExposedPorts: []string{"8545"},
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				"8545/tcp": {{HostIP: "", HostPort: "8545"}},
+			},
+			Env:        []string{},
+			Entrypoint: entrypoint,
+		},
+		noRestart,
+	)
+	s.Require().NoError(err)
+
+	s.ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
+
+	// Wait for the Ethereum node to start producing blocks; DAG completion takes
+	// about two minutes.
+	// s.Require().Eventually(
+	// 	func() bool {
+	// 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	// 		defer cancel()
+
+	// 		height, err := s.ethClient.BlockNumber(ctx)
+	// 		if err != nil {
+	// 			log.Panic(err)
+	// 			return false
+	// 		}
+
+	// 		return height > 1
+	// 	},
+	// 	5*time.Minute,
+	// 	10*time.Second,
+	// 	"ganache node failed to produce a block",
+	// )
+	time.Sleep(time.Second * 10)
+	s.T().Logf("started Ethereum container: %s", s.ethResource.Container.ID)
 }
 
 func (s *IntegrationTestSuite) runEthContainer() {
