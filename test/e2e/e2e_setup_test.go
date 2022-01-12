@@ -326,32 +326,6 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 	}
 }
 
-// func (s *IntegrationTestSuite) initEthereum() {
-// 	// generate ethereum keys for validators add them to the ethereum genesis
-// 	ethGenesis := EthereumGenesis{
-// 		Difficulty: "0x400",
-// 		GasLimit:   "0xB71B00",
-// 		Config:     EthereumConfig{ChainID: ethChainID},
-// 		Alloc:      make(map[string]Allocation, len(s.chain.validators)+1),
-// 	}
-
-// 	alloc := Allocation{
-// 		Balance: "0x1337000000000000000000",
-// 	}
-
-// 	ethGenesis.Alloc["0xBf660843528035a5A4921534E156a27e64B231fE"] = alloc
-// 	for _, val := range s.chain.validators {
-// 		s.Require().NoError(val.generateEthereumKey())
-// 		ethGenesis.Alloc[val.ethereumKey.address] = alloc
-// 	}
-
-// 	ethGenBz, err := json.MarshalIndent(ethGenesis, "", "  ")
-// 	s.Require().NoError(err)
-
-// 	// write out the genesis file
-// 	s.Require().NoError(writeFile(filepath.Join(s.chain.configDir(), "eth_genesis.json"), ethGenBz))
-// }
-
 func (s *IntegrationTestSuite) runGanacheContainer() {
 	s.T().Log("starting Ganache container...")
 
