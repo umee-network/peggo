@@ -81,7 +81,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.dkrNet, err = s.dkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", s.chain.id))
 	s.Require().NoError(err)
 
-	useGanache := false
+	var useGanache bool
 	if str := os.Getenv("PEGGO_E2E_USE_GANACHE"); len(str) > 0 {
 		useGanache, err = strconv.ParseBool(str)
 		s.Require().NoError(err)
