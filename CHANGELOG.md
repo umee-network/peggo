@@ -41,6 +41,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Bug fixes
+
+- [#128] Fix "nonce too low" error and other issues related to relaying.
+
 ## [v0.1.1](https://github.com/umee-network/peggo/releases/tag/v0.1.1) - 2021-12-22
 
 ### Bug Fixes
