@@ -191,7 +191,6 @@ func (s *gravityRelayer) RelayBatches(
 			txHash, err := s.gravityContract.SendTx(ctx, s.gravityContract.Address(), txData, estimatedGasCost, gasPrice)
 			if err != nil {
 				s.logger.Err(err).Str("tx_hash", txHash.Hex()).Msg("failed to sign and submit (Gravity submitBatch) to EVM")
-				return err
 				continue
 			}
 
