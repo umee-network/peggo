@@ -2,6 +2,8 @@
 
 First release of Peggo with compatibility for the official [Gravity Bridge](https://github.com/Gravity-Bridge/Gravity-Bridge) module.
 
+## Changelog
+
 ### Features
 
 - [#118] Target the [Gravity Bridge](https://github.com/Gravity-Bridge/Gravity-Bridge) module.
