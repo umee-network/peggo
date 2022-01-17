@@ -41,8 +41,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-<<<<<<< HEAD
-=======
 ### Features
 
 - [#118] Target the [Gravity Bridge](https://github.com/Gravity-Bridge/Gravity-Bridge) module.
@@ -56,7 +54,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [#128] Fix "nonce too low" error and other issues related to relaying.
 
->>>>>>> ced6cac (fix: Relaying issues (#128))
 ## [v0.1.1](https://github.com/umee-network/peggo/releases/tag/v0.1.1) - 2021-12-22
 
 ### Bug Fixes
