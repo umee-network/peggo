@@ -29,6 +29,11 @@ func (p *PendingTxInputList) AddPendingTxInput(pendingTx *RPCTransaction) {
 	submitBatchMethod := gravityABI.Methods["submitBatch"]
 	valsetUpdateMethod := gravityABI.Methods["updateValset"]
 
+	if len(pendingTx.Input) < 4 {
+		// Return if transaction doesn't contain enough data (method IDs are 4 bytes long).
+		return
+	}
+
 	// If it's not a submitBatch or updateValset transaction, ignore it.
 	// The first four bytes of the call data for a function call specifies the function to be called.
 	// Ref: https://docs.soliditylang.org/en/develop/abi-spec.html#function-selector

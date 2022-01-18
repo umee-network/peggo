@@ -32,7 +32,8 @@ func (s *gravityRelayer) RelayValsets(ctx context.Context, currentValset types.V
 			return err
 		}
 		if sigs == nil {
-			return errors.New("no valset confirms found")
+			s.logger.Debug().Msg("no valset confirms found")
+			continue
 		}
 
 		if len(sigs.Confirms) == 0 {
