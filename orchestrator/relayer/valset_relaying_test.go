@@ -65,7 +65,7 @@ func TestRelayValsets(t *testing.T) {
 		mockGravityContract.EXPECT().FromAddress().Return(fromAddress).AnyTimes()
 		mockGravityContract.EXPECT().
 			EncodeValsetUpdate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return([]byte{1, 2, 3}, nil)
+			Return([]byte{1, 2, 3}, nil).Times(2)
 		mockGravityContract.EXPECT().Address().Return(gravityAddress).AnyTimes()
 		mockGravityContract.EXPECT().
 			EstimateGas(gomock.Any(), gravityAddress, []byte{1, 2, 3}).
@@ -184,7 +184,7 @@ func TestRelayValsets(t *testing.T) {
 		assert.EqualError(t, err, "failed to get valset confirms at nonce 3: some error")
 	})
 
-	t.Run("error. no valset confirms found", func(t *testing.T) {
+	t.Run("no error. no valset confirms found", func(t *testing.T) {
 
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
@@ -225,7 +225,7 @@ func TestRelayValsets(t *testing.T) {
 		}
 
 		err := relayer.RelayValsets(context.Background(), types.Valset{})
-		assert.EqualError(t, err, "no valset confirms found")
+		assert.Nil(t, err)
 	})
 
 	t.Run("error while sending tx", func(t *testing.T) {
@@ -278,7 +278,7 @@ func TestRelayValsets(t *testing.T) {
 		mockGravityContract.EXPECT().FromAddress().Return(fromAddress).AnyTimes()
 		mockGravityContract.EXPECT().
 			EncodeValsetUpdate(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return([]byte{1, 2, 3}, nil)
+			Return([]byte{1, 2, 3}, nil).Times(2)
 		mockGravityContract.EXPECT().Address().Return(gravityAddress).AnyTimes()
 		mockGravityContract.EXPECT().
 			EstimateGas(gomock.Any(), gravityAddress, []byte{1, 2, 3}).
