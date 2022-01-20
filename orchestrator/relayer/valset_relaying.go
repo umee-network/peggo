@@ -2,6 +2,7 @@ package relayer
 
 import (
 	"context"
+	"log"
 
 	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/pkg/errors"
@@ -20,55 +21,24 @@ func (s *gravityRelayer) RelayValsets(ctx context.Context, currentValset types.V
 		return errors.New("no valsets found")
 	}
 
-	var latestCosmosSigs []types.MsgValsetConfirm
-	var latestCosmosConfirmed *types.Valset
-	for _, set := range latestValsets.Valsets {
-		sigs, err := s.cosmosQueryClient.ValsetConfirmsByNonce(ctx, &types.QueryValsetConfirmsByNonceRequest{
-			Nonce: set.Nonce,
-		})
+	latestCosmosConfirmed, latestCosmosSigs, err := s.findLatestValidValset(
+		ctx,
+		currentValset,
+		latestValsets.Valsets[0].Nonce,
+	)
 
-		if err != nil {
-			err = errors.Wrapf(err, "failed to get valset confirms at nonce %d", set.Nonce)
-			return err
-		}
-		if sigs == nil {
-			s.logger.Debug().Msg("no valset confirms found")
-			continue
-		}
-
-		if len(sigs.Confirms) == 0 {
-			continue
-		}
-
-		if s.lastSentValsetNonce >= set.Nonce {
-			s.logger.Debug().Msg("already relayed this valset; skipping")
-			continue
-		}
-
-		if set.Nonce <= currentValset.Nonce {
-			// This valset update is already confirmed.
-			continue
-		}
-
-		// Use this function to check if the valset is confirmed/valid.
-		_, err = s.gravityContract.EncodeValsetUpdate(
-			ctx,
-			currentValset,
-			set,
-			sigs.Confirms,
-		)
-
-		if err != nil {
-			continue
-		}
-
-		latestCosmosSigs = sigs.Confirms
-		latestCosmosConfirmed = &set
-		break
+	if err != nil {
+		// findLatestValidValset returns an error only in cases we would like to retry.
+		return err
 	}
 
-	if latestCosmosConfirmed == nil {
-		s.logger.Debug().Msg("no confirmed valsets found, nothing to relay")
+	if latestCosmosConfirmed == nil && err == nil {
+		s.logger.Info().Msg("no valset updates to relay")
+		return nil
+	}
+
+	if s.lastSentValsetNonce >= latestCosmosConfirmed.Nonce {
+		s.logger.Debug().Msg("already relayed this valset; skipping")
 		return nil
 	}
 
@@ -143,4 +113,61 @@ func (s *gravityRelayer) RelayValsets(ctx context.Context, currentValset types.V
 	s.lastSentValsetNonce = latestCosmosConfirmed.Nonce
 
 	return nil
+}
+
+func (s *gravityRelayer) findLatestValidValset(
+	ctx context.Context,
+	currentValset types.Valset,
+	latestNonceOnCosmos uint64,
+) (
+	*types.Valset,
+	[]types.MsgValsetConfirm,
+	error,
+) {
+	log.Println("latestNonceOnCosmos", latestNonceOnCosmos)
+	for latestNonce := latestNonceOnCosmos; latestNonce > currentValset.Nonce; latestNonce-- {
+		log.Println("latestNonce", latestNonce)
+		var err error
+		valsetRes, err := s.cosmosQueryClient.ValsetRequest(ctx, &types.QueryValsetRequestRequest{
+			Nonce: latestNonce,
+		})
+
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if valsetRes == nil {
+			return nil, nil, errors.New("no valset found")
+		}
+
+		confirmsRes, err := s.cosmosQueryClient.ValsetConfirmsByNonce(ctx, &types.QueryValsetConfirmsByNonceRequest{
+			Nonce: valsetRes.Valset.Nonce,
+		})
+
+		if err != nil {
+			err = errors.Wrapf(err, "failed to get valset confirms at nonce %d", valsetRes.Valset.Nonce)
+			return nil, nil, err
+		}
+
+		if confirmsRes == nil {
+			continue
+		}
+
+		// Use this function to check if the valset is confirmed and valid.
+		_, err = s.gravityContract.EncodeValsetUpdate(
+			ctx,
+			currentValset,
+			*valsetRes.Valset,
+			confirmsRes.Confirms,
+		)
+
+		if err == nil {
+			// This valset update is confirmed and valid.
+			return valsetRes.Valset, confirmsRes.Confirms, nil
+		}
+
+	}
+
+	// If we couldn't find a valid valset with a greater nonce, then that means we are up to date.
+	return nil, nil, nil
 }
