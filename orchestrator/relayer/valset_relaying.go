@@ -2,7 +2,6 @@ package relayer
 
 import (
 	"context"
-	"log"
 
 	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/pkg/errors"
@@ -124,9 +123,7 @@ func (s *gravityRelayer) findLatestValidValset(
 	[]types.MsgValsetConfirm,
 	error,
 ) {
-	log.Println("latestNonceOnCosmos", latestNonceOnCosmos)
 	for latestNonce := latestNonceOnCosmos; latestNonce > currentValset.Nonce; latestNonce-- {
-		log.Println("latestNonce", latestNonce)
 		var err error
 		valsetRes, err := s.cosmosQueryClient.ValsetRequest(ctx, &types.QueryValsetRequestRequest{
 			Nonce: latestNonce,
