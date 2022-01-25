@@ -345,7 +345,7 @@ network starting.`,
 			denomBase := args[1]
 			denomName := args[2]
 			denomSymbol := args[3]
-			denomDecimals, err := strconv.Atoi(args[4])
+			denomDecimals, err := strconv.ParseUint(args[4], 10, 8)
 			if err != nil {
 				return fmt.Errorf("invalid denom decimals: %w", err)
 			}
