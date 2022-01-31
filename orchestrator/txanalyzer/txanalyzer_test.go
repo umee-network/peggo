@@ -3,11 +3,13 @@ package txanalyzer
 import (
 	"log"
 	"math/big"
+	"os"
 	"testing"
 
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 
@@ -20,9 +22,9 @@ func TestTXAnalyzer(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	provider.NewEVMProvider(ethRPC)
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	txAnalyzer, err := NewTXAnalyzer("", provider.NewEVMProvider(ethRPC), 200000)
+	txAnalyzer, err := NewTXAnalyzer(logger, "", provider.NewEVMProvider(ethRPC), 200000)
 
 	assert.Nil(t, err)
 
