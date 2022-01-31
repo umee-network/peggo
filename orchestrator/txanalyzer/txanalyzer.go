@@ -3,12 +3,12 @@ package txanalyzer
 import (
 	"context"
 	"errors"
-	"log"
 	"math/big"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	badger "github.com/dgraph-io/badger/v3"
 	ethcmn "github.com/ethereum/go-ethereum/common"
+	"github.com/rs/zerolog"
 
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
@@ -25,22 +25,25 @@ var (
 )
 
 type TXAnalyzer struct {
+	logger          zerolog.Logger
 	db              *badger.DB
 	evmProvider     provider.EVMProviderWithRet
 	pruneKeepRecent uint64
 }
 
 func NewTXAnalyzer(
+	logger zerolog.Logger,
 	dbDir string,
 	evmProvider provider.EVMProviderWithRet,
 	pruneKeepRecent uint64,
 ) (*TXAnalyzer, error) {
 	db, err := badger.Open(badger.DefaultOptions(dbDir).WithInMemory(true))
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal().AnErr("err", err).Msg("failed to open db for txanalyzer")
 	}
 
 	return &TXAnalyzer{
+		logger:          logger.With().Str("module", "txanalyzer").Logger(),
 		db:              db,
 		evmProvider:     evmProvider,
 		pruneKeepRecent: pruneKeepRecent,
@@ -221,7 +224,6 @@ func (txa *TXAnalyzer) RecalculateEstimates() error {
 			}
 		}
 	}
-	log.Println("TOTALS!", totals)
 	// We can use the tx count as an accuracy indicator for the gas estimate, if it's 0, then it might be off by a lot.
 	// If it's +20 then it means we might have a pretty accurate estimate as long as we are keeping only recent data.
 
