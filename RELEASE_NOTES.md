@@ -1,18 +1,17 @@
 # Release Notes
 
-First release of Peggo with compatibility for the official [Gravity Bridge](https://github.com/Gravity-Bridge/Gravity-Bridge) module.
+This release introduces bug fixes and improvements.
 
 ## Changelog
 
-### Features
-
-- [#118] Target the [Gravity Bridge](https://github.com/Gravity-Bridge/Gravity-Bridge) module.
-
 ### Improvements
 
-- [#123] Cleanup after GB implementation. Updates and fixes to match Gravity.sol
-- [#125] Enable running tests with Ganache. Use gentx for gravity keys.
+- [#132] Add `cosmos-msgs-per-tx` flag to set how many messages (Ethereum claims)
+  will be sent in each Cosmos transaction.
+- [#134] Improve valset relaying by changing how we search for the last valid
+  valset update.
 
-### Bug fixes
+### Bug Fixes
 
-- [#128] Fix "nonce too low" error and other issues related to relaying.
+- [#134] Fix logs, CLI help and a panic when a non-function call transaction was
+ received during the TX pending check.
