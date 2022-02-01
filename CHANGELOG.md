@@ -42,7 +42,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## [v0.2.2](https://github.com/umee-network/peggo/releases/tag/v0.2.1) - 2022-02-01
+## [v0.2.2](https://github.com/umee-network/peggo/releases/tag/v0.2.2) - 2022-02-01
 
 ### Improvements
 
