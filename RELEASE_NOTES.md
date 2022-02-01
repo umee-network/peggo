@@ -1,17 +1,13 @@
 # Release Notes
 
-This release introduces bug fixes and improvements.
+This release introduces version bumps to some dependencies.
 
 ## Changelog
 
 ### Improvements
 
-- [#132] Add `cosmos-msgs-per-tx` flag to set how many messages (Ethereum claims)
-  will be sent in each Cosmos transaction.
-- [#134] Improve valset relaying by changing how we search for the last valid
-  valset update.
+- [#144] Bump Umee version to 0.7.1 and fix Gravity Bridge to v1.3.5
 
 ### Bug Fixes
 
-- [#134] Fix logs, CLI help and a panic when a non-function call transaction was
- received during the TX pending check.
+- [#139] Fix issue reported by ToB's audit (TOB-001)
