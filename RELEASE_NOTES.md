@@ -1,13 +1,11 @@
 # Release Notes
 
-This release introduces version bumps to some dependencies.
+This release introduces version bumps to Umee, Cosmos SDK and Gravity Bridge.
 
 ## Changelog
 
 ### Improvements
 
-- [#144] Bump Umee version to 0.7.1 and fix Gravity Bridge to v1.3.5
-
-### Bug Fixes
-
-- [#139] Fix issue reported by ToB's audit (TOB-001)
+- [#158] Bump Gravity Bridge module to v1.4.1
+- [#161] Bump Cosmos SDK to v0.45.1
+- [#163] Bump Umee to v0.7.4
