@@ -34,6 +34,7 @@ flag (e.g. PEGGO_COSMOS_PK).`,
 		getBridgeCommand(),
 		getQueryCmd(),
 		getTxCmd(),
+		getTxAnalyzerCmd(),
 		getVersionCmd(),
 	)
 

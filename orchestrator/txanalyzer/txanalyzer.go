@@ -2,15 +2,21 @@ package txanalyzer
 
 import (
 	"context"
-	"errors"
+	"log"
 	"math/big"
+	"strings"
+	"time"
 
+	"github.com/avast/retry-go"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	badger "github.com/dgraph-io/badger/v3"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethcmn "github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
+	"github.com/umee-network/peggo/orchestrator/loops"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
@@ -25,32 +31,207 @@ var (
 )
 
 type TXAnalyzer struct {
-	logger          zerolog.Logger
-	db              *badger.DB
-	evmProvider     provider.EVMProviderWithRet
-	pruneKeepRecent uint64
+	logger            zerolog.Logger
+	db                *badger.DB
+	evmProvider       provider.EVMProviderWithRet
+	blocksToKeep      uint64
+	gravityAddress    ethcmn.Address
+	bridgeStartHeight uint64
 }
 
 func NewTXAnalyzer(
 	logger zerolog.Logger,
 	dbDir string,
 	evmProvider provider.EVMProviderWithRet,
-	pruneKeepRecent uint64,
+	gravityAddress ethcmn.Address,
+	blocksToKeep uint64,
 ) (*TXAnalyzer, error) {
-	db, err := badger.Open(badger.DefaultOptions(dbDir).WithInMemory(true))
+	db, err := badger.Open(badger.DefaultOptions(dbDir))
 	if err != nil {
 		logger.Fatal().AnErr("err", err).Msg("failed to open db for txanalyzer")
 	}
 
 	return &TXAnalyzer{
-		logger:          logger.With().Str("module", "txanalyzer").Logger(),
-		db:              db,
-		evmProvider:     evmProvider,
-		pruneKeepRecent: pruneKeepRecent,
+		logger:            logger.With().Str("module", "txanalyzer").Logger(),
+		db:                db,
+		evmProvider:       evmProvider,
+		gravityAddress:    gravityAddress,
+		blocksToKeep:      blocksToKeep,
+		bridgeStartHeight: 6038385,
 	}, nil
 }
 
-func (txa *TXAnalyzer) StoreBatches(batches []wrappers.GravityTransactionBatchExecutedEvent) error {
+func (txa *TXAnalyzer) Start(ctx context.Context) error {
+
+	numDelTxs, err := txa.PruneTXs()
+	if err != nil {
+		return err
+	}
+
+	txa.logger.Info().Int("num_deleted_txs", numDelTxs).Msg("pruned txs")
+
+	unprocessedTxs, err := txa.GetUnprocessedTXsByToken()
+	if err != nil {
+		return err
+	}
+	log.Println("PROCESS UNPROCESSED TXS: ", len(unprocessedTxs))
+
+	err = txa.ProcessTXs(unprocessedTxs)
+	if err != nil {
+		return err
+	}
+
+	var pg loops.ParanoidGroup
+
+	pg.Go(func() error {
+		return txa.TXScanLoop(ctx)
+	})
+
+	pg.Go(func() error {
+		return txa.TXAnalyzeLoop(ctx)
+	})
+
+	return pg.Wait()
+}
+
+func (txa *TXAnalyzer) TXAnalyzeLoop(ctx context.Context) error {
+	// TODO: make this loop duration configurable?
+	return loops.RunLoop(ctx, txa.logger, time.Minute*3, func() error {
+
+		var pg loops.ParanoidGroup
+
+		pg.Go(func() error {
+			numDelTxs, err := txa.PruneTXs()
+			if err != nil {
+				return err
+			}
+
+			txa.logger.Info().Int("num_deleted_txs", numDelTxs).Msg("pruned txs")
+
+			unprocessedTxs, err := txa.GetUnprocessedTXsByToken()
+			if err != nil {
+				return err
+			}
+			log.Println(unprocessedTxs)
+
+			err = txa.ProcessTXs(unprocessedTxs)
+			return err
+		})
+
+		return pg.Wait()
+	})
+}
+
+func (txa *TXAnalyzer) TXScanLoop(ctx context.Context) error {
+	// TODO: make this loop duration configurable?
+	return loops.RunLoop(ctx, txa.logger, time.Minute*15, func() error {
+
+		var pg loops.ParanoidGroup
+
+		txa.logger.Info().Msg("starting tx scan loop")
+
+		pg.Go(func() error {
+
+			if err := retry.Do(func() (err error) {
+				startBlock, err := txa.GetLastProcessedTXBlockHeight()
+				if err != nil {
+					return err
+				}
+
+				lastBlockHeader, err := txa.evmProvider.HeaderByNumber(context.Background(), nil)
+				if err != nil {
+					return err
+				}
+
+				if startBlock == 0 {
+					startBlock = lastBlockHeader.Number.Uint64() - txa.blocksToKeep
+					if startBlock < txa.bridgeStartHeight && txa.bridgeStartHeight != 0 {
+						startBlock = txa.bridgeStartHeight
+					}
+				}
+
+				// TODO: replace - 20 by - getEthBlockDelay()
+				endBlock := lastBlockHeader.Number.Uint64() - 20
+
+				return txa.ScanEvents(ctx, startBlock, endBlock)
+			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
+				txa.logger.Err(err).Uint("retry", n).Msg("failed to get Gravity params; retrying...")
+			})); err != nil {
+				txa.logger.Err(err).Msg("got error, loop exits")
+				return err
+			}
+
+			return nil
+
+		})
+
+		return pg.Wait()
+	})
+
+}
+
+func (txa *TXAnalyzer) ScanEvents(ctx context.Context, startBlock, endBlock uint64) error {
+	txa.logger.Info().Msg("starting to scan events")
+
+	gravityFilterer, err := wrappers.NewGravityFilterer(txa.gravityAddress, txa.evmProvider)
+	if err != nil {
+		log.Println(err)
+		return errors.Wrap(err, "failed to init Gravity events filterer")
+	}
+
+	for {
+		currentBlock := startBlock + 500
+		if currentBlock > endBlock {
+			currentBlock = endBlock
+		}
+
+		transactionBatchExecutedEvents := []*wrappers.GravityTransactionBatchExecutedEvent{}
+		iter, err := gravityFilterer.FilterTransactionBatchExecutedEvent(&bind.FilterOpts{
+			Start: startBlock,
+			End:   &currentBlock,
+		}, nil, nil)
+		if err != nil {
+			txa.logger.Err(err).
+				Uint64("start", startBlock).
+				Uint64("end", endBlock).
+				Msg("failed to scan past TransactionBatchExecuted events from Ethereum")
+
+			if !isUnknownBlockErr(err) {
+				err = errors.Wrap(err, "failed to scan past TransactionBatchExecuted events from Ethereum")
+				return err
+			} else if iter == nil {
+				return errors.New("no iterator returned")
+			}
+		}
+
+		for iter.Next() {
+			transactionBatchExecutedEvents = append(transactionBatchExecutedEvents, iter.Event)
+		}
+
+		iter.Close()
+
+		txa.logger.Debug().
+			Uint64("start_block", startBlock).
+			Uint64("end_block", currentBlock).
+			Int("batches", len(transactionBatchExecutedEvents)).
+			Msg("scanning events")
+
+		err = txa.StoreBatches(transactionBatchExecutedEvents)
+		if err != nil {
+			return err
+		}
+
+		startBlock = currentBlock + 1
+
+		if startBlock > endBlock {
+			break
+		}
+	}
+
+	return nil
+}
+
+func (txa *TXAnalyzer) StoreBatches(batches []*wrappers.GravityTransactionBatchExecutedEvent) error {
 	err := txa.db.Update(func(txn *badger.Txn) error {
 		for _, batch := range batches {
 			err := txn.Set(unprocessedTxKey(batch.Raw.TxHash), batch.Token.Bytes())
@@ -96,6 +277,11 @@ func (txa *TXAnalyzer) GetUnprocessedTXsByToken() (map[ethcmn.Address][]ethcmn.H
 
 func (txa *TXAnalyzer) ProcessTXs(txs map[ethcmn.Address][]ethcmn.Hash) error {
 	for tokenAddr, txHashes := range txs {
+		txa.logger.Info().
+			Str("token", tokenAddr.String()).
+			Int("txs", len(txHashes)).
+			Msg("processing txs")
+
 		for _, txHash := range txHashes {
 			receipt, err := txa.evmProvider.TransactionReceipt(context.Background(), txHash)
 			if err != nil {
@@ -123,6 +309,8 @@ func (txa *TXAnalyzer) ProcessTXs(txs map[ethcmn.Address][]ethcmn.Hash) error {
 			if err != nil {
 				return err
 			}
+			log.Println("done processing tx")
+
 		}
 	}
 	return nil
@@ -136,7 +324,7 @@ func (txa *TXAnalyzer) PruneTXs() (int, error) {
 		return 0, err
 	}
 
-	minimumBlock := lastBlock.Number.Uint64() - txa.pruneKeepRecent
+	minimumBlock := lastBlock.Number.Uint64() - txa.blocksToKeep
 
 	err = txa.db.Update(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
@@ -164,6 +352,27 @@ func (txa *TXAnalyzer) PruneTXs() (int, error) {
 	})
 
 	return count, err
+}
+
+func (txa *TXAnalyzer) GetLastProcessedTXBlockHeight() (uint64, error) {
+	var lastBlock uint64
+	err := txa.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.Prefix = KeyPrefixProcessedTx
+		opts.Reverse = true
+
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Rewind(); it.Valid(); it.Next() {
+			key := it.Item().Key()
+			lastBlock = sdk.BigEndianToUint64(key[1:9])
+			return nil
+		}
+		return nil
+	})
+
+	return lastBlock, err
 }
 
 func (txa *TXAnalyzer) RecalculateEstimates() error {
@@ -293,4 +502,18 @@ func processedTxKey(blockNumber *big.Int, tokenAddr ethcmn.Address, txHash ethcm
 
 func estimateKey(tokenAddr ethcmn.Address) []byte {
 	return append(KeyPrefixEstimate, tokenAddr.Bytes()...)
+}
+
+func isUnknownBlockErr(err error) bool {
+	// Geth error
+	if strings.Contains(err.Error(), "unknown block") {
+		return true
+	}
+
+	// Parity error
+	if strings.Contains(err.Error(), "One of the blocks specified in filter") {
+		return true
+	}
+
+	return false
 }
