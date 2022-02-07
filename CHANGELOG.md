@@ -42,6 +42,14 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v0.2.3](https://github.com/umee-network/peggo/releases/tag/v0.2.2) - 2022-02-07
+
+### Improvements
+
+- [#158] Bump Gravity Bridge module to v1.4.1
+- [#161] Bump Cosmos SDK to v0.45.1
+- [#163] Bump Umee to v0.7.4
+
 ## [v0.2.2](https://github.com/umee-network/peggo/releases/tag/v0.2.2) - 2022-02-01
 
 ### Improvements
