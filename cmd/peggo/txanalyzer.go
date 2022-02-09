@@ -43,10 +43,11 @@ func getTxAnalyzerCmd() *cobra.Command {
 
 			txa, err := txanalyzer.NewTXAnalyzer(
 				logger,
-				"./txanalyzer",
+				".txanalyzer",
 				ethProvider,
 				gravityAddr,
-				172800,
+				1728000, // Keep a month worth of transactions in DB
+				uint64(konfig.Int64(flagBridgeStartHeight)),
 			)
 
 			if err != nil {
@@ -68,6 +69,7 @@ func getTxAnalyzerCmd() *cobra.Command {
 	}
 
 	cmd.Flags().String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
+	cmd.Flags().Int64(flagBridgeStartHeight, 0, "Set an (optional) height to start scanning transactions from. If left unset, the default is to start scanning from 172800 blocks ago (~30 days)")
 
 	return cmd
 }

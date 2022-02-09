@@ -24,19 +24,26 @@ func TestTXAnalyzer(t *testing.T) {
 
 	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	txAnalyzer, err := NewTXAnalyzer(logger, "", provider.NewEVMProvider(ethRPC), 200000)
+	txAnalyzer, err := NewTXAnalyzer(
+		logger,
+		"",
+		provider.NewEVMProvider(ethRPC),
+		ethcmn.HexToAddress("0x0000000000000000000000000000000000000001"),
+		200000,
+		6000000,
+	)
 
 	assert.Nil(t, err)
 
 	// Add some TXs to be processed
-	evt := wrappers.GravityTransactionBatchExecutedEvent{
+	evt := &wrappers.GravityTransactionBatchExecutedEvent{
 		BatchNonce: &big.Int{},
 		Token:      ethcmn.HexToAddress("0xe54fbaecc50731afe54924c40dfd1274f718fe02"),
 		EventNonce: &big.Int{},
 		Raw:        types.Log{TxHash: ethcmn.HexToHash("0x354ee8700da020fb1d1794ad9bed5c82b63274b3b2c61db0f88edc70333bb13a")},
 	}
 
-	err = txAnalyzer.StoreBatches([]wrappers.GravityTransactionBatchExecutedEvent{evt})
+	err = txAnalyzer.StoreBatches([]*wrappers.GravityTransactionBatchExecutedEvent{evt})
 	assert.Nil(t, err)
 
 	// Query the unprocessed txs

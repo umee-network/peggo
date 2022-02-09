@@ -2,9 +2,10 @@ package txanalyzer
 
 import (
 	"context"
-	"log"
 	"math/big"
+	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -37,6 +38,7 @@ type TXAnalyzer struct {
 	blocksToKeep      uint64
 	gravityAddress    ethcmn.Address
 	bridgeStartHeight uint64
+	listenAddr        string
 }
 
 func NewTXAnalyzer(
@@ -45,6 +47,7 @@ func NewTXAnalyzer(
 	evmProvider provider.EVMProviderWithRet,
 	gravityAddress ethcmn.Address,
 	blocksToKeep uint64,
+	bridgeStartHeight uint64,
 ) (*TXAnalyzer, error) {
 	db, err := badger.Open(badger.DefaultOptions(dbDir))
 	if err != nil {
@@ -57,12 +60,12 @@ func NewTXAnalyzer(
 		evmProvider:       evmProvider,
 		gravityAddress:    gravityAddress,
 		blocksToKeep:      blocksToKeep,
-		bridgeStartHeight: 6038385,
+		bridgeStartHeight: bridgeStartHeight,
+		listenAddr:        ":8000",
 	}, nil
 }
 
 func (txa *TXAnalyzer) Start(ctx context.Context) error {
-
 	numDelTxs, err := txa.PruneTXs()
 	if err != nil {
 		return err
@@ -74,9 +77,20 @@ func (txa *TXAnalyzer) Start(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Println("PROCESS UNPROCESSED TXS: ", len(unprocessedTxs))
+
+	for k, v := range unprocessedTxs {
+		txa.logger.Info().
+			Int("num_unprocessed_txs", len(v)).
+			Str("token", k.Hex()).
+			Msg("unprocessed txs")
+	}
 
 	err = txa.ProcessTXs(unprocessedTxs)
+	if err != nil {
+		return err
+	}
+
+	err = txa.RecalculateEstimates()
 	if err != nil {
 		return err
 	}
@@ -89,6 +103,10 @@ func (txa *TXAnalyzer) Start(ctx context.Context) error {
 
 	pg.Go(func() error {
 		return txa.TXAnalyzeLoop(ctx)
+	})
+
+	pg.Go(func() error {
+		return txa.serveEstimates(ctx)
 	})
 
 	return pg.Wait()
@@ -112,10 +130,15 @@ func (txa *TXAnalyzer) TXAnalyzeLoop(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			log.Println(unprocessedTxs)
 
 			err = txa.ProcessTXs(unprocessedTxs)
+			if err != nil {
+				return err
+			}
+
+			err = txa.RecalculateEstimates()
 			return err
+
 		})
 
 		return pg.Wait()
@@ -124,7 +147,7 @@ func (txa *TXAnalyzer) TXAnalyzeLoop(ctx context.Context) error {
 
 func (txa *TXAnalyzer) TXScanLoop(ctx context.Context) error {
 	// TODO: make this loop duration configurable?
-	return loops.RunLoop(ctx, txa.logger, time.Minute*15, func() error {
+	return loops.RunLoop(ctx, txa.logger, time.Minute*5, func() error {
 
 		var pg loops.ParanoidGroup
 
@@ -175,7 +198,7 @@ func (txa *TXAnalyzer) ScanEvents(ctx context.Context, startBlock, endBlock uint
 
 	gravityFilterer, err := wrappers.NewGravityFilterer(txa.gravityAddress, txa.evmProvider)
 	if err != nil {
-		log.Println(err)
+		txa.logger.Err(err).Msg("failed to create gravity filterer")
 		return errors.Wrap(err, "failed to init Gravity events filterer")
 	}
 
@@ -276,6 +299,52 @@ func (txa *TXAnalyzer) GetUnprocessedTXsByToken() (map[ethcmn.Address][]ethcmn.H
 }
 
 func (txa *TXAnalyzer) ProcessTXs(txs map[ethcmn.Address][]ethcmn.Hash) error {
+
+	ch := make(chan []byte)
+	wg := sync.WaitGroup{}
+
+	maxProcs := runtime.GOMAXPROCS(0)
+
+	for i := 0; i < maxProcs; i++ {
+		wg.Add(1)
+		go func() error {
+			for tx := range ch {
+				txHash := ethcmn.BytesToHash(tx[:32])
+				tokenAddr := ethcmn.BytesToAddress(tx[32:])
+				receipt, err := txa.evmProvider.TransactionReceipt(context.Background(), txHash)
+				if err != nil {
+					return err
+				}
+
+				k := processedTxKey(receipt.BlockNumber, tokenAddr, txHash)
+
+				txCount := uint8(len(receipt.Logs) - 2) // -2 removes 2 logs that are not outgoing txs
+				gasUsed := sdk.Uint64ToBigEndian(receipt.GasUsed)
+
+				value := []byte{txCount}
+				value = append(value, gasUsed...)
+
+				// Store the tx's data and delete the unprocessed marker
+				err = txa.db.Update(func(txn *badger.Txn) error {
+					err := txn.Set(k, value)
+					if err != nil {
+						return err
+					}
+
+					err = txn.Delete(unprocessedTxKey(txHash))
+					return err
+				})
+				if err != nil {
+					return err
+				}
+			}
+
+			wg.Done()
+			return nil
+		}()
+
+	}
+
 	for tokenAddr, txHashes := range txs {
 		txa.logger.Info().
 			Str("token", tokenAddr.String()).
@@ -283,36 +352,14 @@ func (txa *TXAnalyzer) ProcessTXs(txs map[ethcmn.Address][]ethcmn.Hash) error {
 			Msg("processing txs")
 
 		for _, txHash := range txHashes {
-			receipt, err := txa.evmProvider.TransactionReceipt(context.Background(), txHash)
-			if err != nil {
-				return err
-			}
-
-			k := processedTxKey(receipt.BlockNumber, tokenAddr, txHash)
-
-			txCount := uint8(len(receipt.Logs) - 2) // -2 removes 2 logs that are not outgoing txs
-			gasUsed := sdk.Uint64ToBigEndian(receipt.GasUsed)
-
-			value := []byte{txCount}
-			value = append(value, gasUsed...)
-
-			// Store the tx's data and delete the unprocessed marker
-			err = txa.db.Update(func(txn *badger.Txn) error {
-				err := txn.Set(k, value)
-				if err != nil {
-					return err
-				}
-
-				err = txn.Delete(unprocessedTxKey(txHash))
-				return err
-			})
-			if err != nil {
-				return err
-			}
-			log.Println("done processing tx")
-
+			ch <- append(txHash.Bytes(), tokenAddr.Bytes()...)
 		}
 	}
+
+	close(ch)
+
+	wg.Wait()
+
 	return nil
 }
 
@@ -364,7 +411,7 @@ func (txa *TXAnalyzer) GetLastProcessedTXBlockHeight() (uint64, error) {
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		for it.Rewind(); it.Valid(); it.Next() {
+		for it.Seek(append(KeyPrefixProcessedTx, 0xFF)); it.ValidForPrefix(KeyPrefixProcessedTx); it.Next() {
 			key := it.Item().Key()
 			lastBlock = sdk.BigEndianToUint64(key[1:9])
 			return nil
