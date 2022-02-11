@@ -85,7 +85,7 @@ func (cp *PriceFeed) QueryUSDPriceByCoinID(coinID string) (float64, error) {
 	price := respBody[coinID].USD
 
 	if price == zeroPrice {
-		return zeroPrice, errors.Errorf("failed to get price for " + coinID)
+		return zeroPrice, errors.Errorf("failed to get price for %s", coinID)
 	}
 
 	return price, nil
