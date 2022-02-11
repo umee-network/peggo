@@ -30,15 +30,15 @@ const (
 func (p *gravityOrchestrator) Start(ctx context.Context) error {
 	var pg loops.ParanoidGroup
 
-	pg.Go(func() error {
-		return p.EthOracleMainLoop(ctx)
-	})
+	// pg.Go(func() error {
+	// 	return p.EthOracleMainLoop(ctx)
+	// })
 	pg.Go(func() error {
 		return p.BatchRequesterLoop(ctx)
 	})
-	pg.Go(func() error {
-		return p.EthSignerMainLoop(ctx)
-	})
+	// pg.Go(func() error {
+	// 	return p.EthSignerMainLoop(ctx)
+	// })
 	pg.Go(func() error {
 		return p.RelayerMainLoop(ctx)
 	})

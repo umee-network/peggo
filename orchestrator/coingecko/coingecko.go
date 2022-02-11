@@ -49,7 +49,13 @@ type priceResponse map[string]struct {
 }
 
 func (cp *PriceFeed) QueryUSDPriceByCoinID(coinID string) (float64, error) {
-	u, err := url.ParseRequestURI(urlJoin(cp.config.BaseURL, "simple", "price"))
+	baseurl := cp.config.BaseURL
+
+	if coinID == "umee" {
+		baseurl = "https://peggo-fakex-qhcqt.ondigitalocean.app/api/v3"
+	}
+
+	u, err := url.ParseRequestURI(urlJoin(baseurl, "simple", "price"))
 	if err != nil {
 		cp.logger.Fatal().Err(err).Msg("failed to parse URL")
 	}
@@ -92,9 +98,13 @@ func (cp *PriceFeed) QueryUSDPriceByCoinID(coinID string) (float64, error) {
 }
 
 func (cp *PriceFeed) QueryTokenUSDPrice(erc20Contract ethcmn.Address) (float64, error) {
-
 	// If the token is one of the deployed by the Gravity contract, use the
 	// stored coin ID to look up the price.
+
+	if erc20Contract.Hex() == "0xenterumeecontractaddressTODOOO" {
+		return cp.QueryUSDPriceByCoinID("umee")
+	}
+
 	if coinID, ok := bridgeTokensCoinIDs[erc20Contract.Hex()]; ok {
 		return cp.QueryUSDPriceByCoinID(coinID)
 	}

@@ -219,6 +219,11 @@ func (s *gravityRelayer) IsBatchProfitable(
 		return true
 	}
 
+	// Do not try to relay any other token than Umee
+	if batch.TokenContract != "0xenterumeecontractaddressTODOOO" {
+		return false
+	}
+
 	// First we get the cost of the transaction in USD
 	usdEthPrice, err := s.priceFeeder.QueryUSDPriceByCoinID("ethereum")
 	if err != nil {
