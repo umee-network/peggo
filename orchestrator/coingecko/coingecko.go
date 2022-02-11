@@ -92,7 +92,6 @@ func (cp *PriceFeed) QueryUSDPriceByCoinID(coinID string) (float64, error) {
 }
 
 func (cp *PriceFeed) QueryTokenUSDPrice(erc20Contract ethcmn.Address) (float64, error) {
-
 	// If the token is one of the deployed by the Gravity contract, use the
 	// stored coin ID to look up the price.
 	if coinID, ok := bridgeTokensCoinIDs[erc20Contract.Hex()]; ok {
