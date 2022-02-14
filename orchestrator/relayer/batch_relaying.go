@@ -220,7 +220,7 @@ func (s *gravityRelayer) IsBatchProfitable(
 	}
 
 	// Do not try to relay any other token than Umee
-	if batch.TokenContract != "0xenterumeecontractaddressTODOOO" {
+	if batch.TokenContract != "0xenterumeecontractaddressTODO" {
 		return false
 	}
 

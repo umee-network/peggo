@@ -101,7 +101,7 @@ func (cp *PriceFeed) QueryTokenUSDPrice(erc20Contract ethcmn.Address) (float64, 
 	// If the token is one of the deployed by the Gravity contract, use the
 	// stored coin ID to look up the price.
 
-	if erc20Contract.Hex() == "0xenterumeecontractaddressTODOOO" {
+	if erc20Contract.Hex() == "0xenterumeecontractaddressTODO" {
 		return cp.QueryUSDPriceByCoinID("umee")
 	}
 
