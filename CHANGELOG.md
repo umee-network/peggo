@@ -48,7 +48,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Deprecated
 
-- [#174] Deprecate --eth-pk in favor of an env var
+- [#174] Deprecate --eth-pk in favor of an env var (`$PEGGO_ETH_PK`)
+
 ## [v0.2.3](https://github.com/umee-network/peggo/releases/tag/v0.2.3) - 2022-02-07
 
 ### Improvements
