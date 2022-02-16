@@ -1,11 +1,15 @@
 # Release Notes
 
-This release introduces version bumps to Umee, Cosmos SDK and Gravity Bridge.
+This release introduces the deprecation of an unsafe flag and some helpers for
+the Coingecko price feed.
 
 ## Changelog
 
 ### Improvements
 
-- [#158] Bump Gravity Bridge module to v1.4.1
-- [#161] Bump Cosmos SDK to v0.45.1
-- [#163] Bump Umee to v0.7.4
+- [#172] Add fallback token addresses (to aid price lookup)
+- [#185] Add fallback token addresses (to aid price lookup) for Umee
+
+### Deprecated
+
+- [#174] Deprecate `--eth-pk` in favor of an env var (`$PEGGO_ETH_PK`)
