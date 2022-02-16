@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	"github.com/umee-network/peggo/cmd/peggo/client"
+	"github.com/umee-network/peggo/orchestrator/relayer"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 	"google.golang.org/grpc"
 )
@@ -138,6 +139,9 @@ func deployGravityCmd() *cobra.Command {
 
 				totalPower uint64
 			)
+
+			// Always sort the validator set
+			relayer.BridgeValidators(currValset.Valset.Members).Sort()
 
 			for i, member := range currValset.Valset.Members {
 				validators[i] = ethcmn.HexToAddress(member.EthereumAddress)
