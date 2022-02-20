@@ -2,7 +2,17 @@
 package peggo
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/binary"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/ethereum/go-ethereum/ethclient"
+	ethrpc "github.com/ethereum/go-ethereum/rpc"
+	"github.com/pkg/errors"
 	"github.com/spf13/pflag"
 )
 
@@ -89,7 +99,7 @@ func ethereumKeyOptsFlagSet() *pflag.FlagSet {
 func ethereumOptsFlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("", pflag.ContinueOnError)
 
-	fs.String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
+	fs.String(flagEthRPC, "http://localhost:8545,http://1.2.3.4:8545", "Specify the RPC address of an Ethereum node")
 	fs.Float64(flagEthGasAdjustment, float64(1.3), "Specify a gas price adjustment for Ethereum transactions")
 	fs.Float64(flagEthGasLimitAdjustment, float64(1.2), "Specify a gas limit adjustment for Ethereum transactions")
 
@@ -99,11 +109,116 @@ func ethereumOptsFlagSet() *pflag.FlagSet {
 func bridgeFlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("", pflag.ContinueOnError)
 
-	fs.String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
+	fs.String(flagEthRPC, "http://localhost:8545,http://1.2.3.4:8545", "Specify the RPC address of an Ethereum node")
 	fs.String(flagEthPK, "", "Provide the Ethereum private key of the orchestrator in hex")
 	fs.Int64(flagEthGasPrice, 0, "The Ethereum gas price to include in the transaction; If zero, gas price will be estimated")
 	fs.Int64(flagEthGasLimit, 6000000, "The Ethereum gas limit to include in the transaction")
 	_ = fs.MarkDeprecated(flagEthPK, "use the env var $PEGGO_ETH_PK instead")
 
 	return fs
+}
+
+func ethereumRPCValidate(rpcs string) (endpoints []string, working int, err error) {
+	rpcsSlice := strings.Split(strings.ReplaceAll(rpcs, " ", ""), ",")
+	working = len(rpcsSlice)
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	for i := range rpcsSlice {
+		endpoint := rpcsSlice[i]
+		_, err := ethclient.Dial(endpoint)
+		if err != nil {
+			log.Println("Could not connect to", endpoint, err)
+			working -= 1
+			continue
+		}
+	}
+	if working == 0 {
+		err = errors.New("No working Ethereum RPC endpoints provided")
+		log.Fatal()
+		return []string{}, 0, err
+	}
+	return rpcsSlice, working, nil
+}
+
+func ethClientFetch(endpoints []string) (*ethclient.Client, error) {
+	// grab a random endpoint from the endpoints slice:
+	endpoint := endpoints[randomGrab(len(endpoints))]
+	client, err := ethclient.Dial(endpoint)
+	if err != nil {
+		log.Println("could not start eth client:", err)
+		return nil, err
+	}
+	log.Println("connected to", endpoint)
+	return client, nil
+}
+
+func ethClientConnect(rawEndpoints string) *ethclient.Client {
+	connectionErrors := 0
+	return func() *ethclient.Client {
+		for {
+			rawEndpoints := rawEndpoints
+			endpoints, working, err := ethereumRPCValidate(rawEndpoints)
+			if err != nil {
+				log.Println(err)
+			}
+			log.Printf("%d of the provided Ethereum rpc endpoints are currently working", working)
+			if connectionErrors > len(endpoints) {
+				log.Println("too many connection errors, please double check your endpoints and try again")
+			}
+			ethRPC, err := ethClientFetch(endpoints)
+			if err != nil {
+				connectionErrors += 1
+				log.Println("failed to dial rpc node: %w", err)
+				continue
+			} else {
+				return ethRPC
+			}
+		}
+	}()
+
+}
+
+func ethRpcClientFetch(endpoints []string) (*ethrpc.Client, error) {
+	// grab a random endpoint from the endpoints slice:
+	endpoint := endpoints[randomGrab(len(endpoints))]
+	client, err := ethrpc.Dial(endpoint)
+	if err != nil {
+		log.Println("could not start eth client:", err)
+		return nil, err
+	}
+	log.Println("connected to", endpoint)
+	return client, nil
+}
+
+func ethRpcClientConnect(rawEndpoints string) *ethrpc.Client {
+	connectionErrors := 0
+	return func() *ethrpc.Client {
+		for {
+			rawEndpoints := rawEndpoints
+			endpoints, working, err := ethereumRPCValidate(rawEndpoints)
+			if err != nil {
+				log.Println(err)
+			}
+			log.Printf("%d of the provided Ethereum rpc endpoints are currently working", working)
+			if connectionErrors > len(endpoints) {
+				log.Println("too many connection errors, please double check your endpoints and try again")
+			}
+			ethRPC, err := ethRpcClientFetch(endpoints)
+			if err != nil {
+				connectionErrors += 1
+				log.Println("failed to dial rpc node: %w", err)
+				continue
+			} else {
+				return ethRPC
+			}
+		}
+	}()
+
+}
+
+func randomGrab(mod int) int {
+	b := make([]byte, 4)
+	_, _ = rand.Read(b)
+	result := int(binary.LittleEndian.Uint32(b)>>1) % mod
+	return result
 }
