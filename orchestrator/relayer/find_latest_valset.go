@@ -142,7 +142,7 @@ func (s *gravityRelayer) checkIfValsetsDiffer(cosmosValset, ethereumValset *type
 	}
 
 	// Do not check if nonces are not equal.
-	// We queried cosmosValset using ethereumValset.Nonce so it is not necessary. 
+	// We queried cosmosValset using ethereumValset.Nonce so it is not necessary.
 	if cosmosValset.Nonce != ethereumValset.Nonce {
 		return
 	}
