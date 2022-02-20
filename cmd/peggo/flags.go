@@ -2,6 +2,8 @@
 package peggo
 
 import (
+	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/spf13/pflag"
 )
@@ -32,6 +34,7 @@ const (
 	flagEthPK                   = "eth-pk"
 	flagEthUseLedger            = "eth-use-ledger"
 	flagEthRPC                  = "eth-rpc"
+	flagEthRPCs                 = "eth-rpcs"
 	flagEthGasAdjustment        = "eth-gas-price-adjustment"
 	flagEthGasLimitAdjustment   = "eth-gas-limit-adjustment"
 	flagEthAlchemyWS            = "eth-alchemy-ws"
@@ -92,6 +95,7 @@ func ethereumOptsFlagSet() *pflag.FlagSet {
 	fs.String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
 	fs.Float64(flagEthGasAdjustment, float64(1.3), "Specify a gas price adjustment for Ethereum transactions")
 	fs.Float64(flagEthGasLimitAdjustment, float64(1.2), "Specify a gas limit adjustment for Ethereum transactions")
+	fs.MarkDeprecated(flagEthRPC, fmt.Sprintf("Use the '%s' flag instead to provide one or more Ethereum RPC instances", flagEthRPCs))
 
 	return fs
 }
