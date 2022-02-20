@@ -182,8 +182,8 @@ func getOrchestratorCmd() *cobra.Command {
 				return err
 			}
 
-			// if this flag is true then the user didn't update to the new relay valset mode
-			// so we'll default to "minimum" if the user didn't specify a mode
+			// If relayValsets is true then the user didn't specify a value for 'valset-relay-mode',
+			// so we'll default to "minimum".
 			if relayValsets && valsetRelayMode == relayer.ValsetRelayModeNone {
 				valsetRelayMode = relayer.ValsetRelayModeMinimum
 			}
