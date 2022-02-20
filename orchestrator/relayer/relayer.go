@@ -21,6 +21,10 @@ const (
 	ValsetRelayModeAll
 )
 
+func (d ValsetRelayMode) String() string {
+	return [...]string{"none", "minimum", "all"}[d]
+}
+
 type GravityRelayer interface {
 	Start(ctx context.Context) error
 

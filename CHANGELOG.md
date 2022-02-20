@@ -44,7 +44,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
-- [#189] Add `--valset-relay-mode`
+- [#189] Add the flag `--valset-relay-mode` which allows a finer control over
+  how valsets will be relayed.
 
 ### Deprecated
 

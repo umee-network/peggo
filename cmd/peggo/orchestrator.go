@@ -311,11 +311,11 @@ func startOrchestrator(ctx context.Context, logger zerolog.Logger, orch orchestr
 
 func validateRelayValsetsMode(mode string) (relayer.ValsetRelayMode, error) {
 	switch mode {
-	case "none":
+	case relayer.ValsetRelayModeNone.String():
 		return relayer.ValsetRelayModeNone, nil
-	case "minimum":
+	case relayer.ValsetRelayModeMinimum.String():
 		return relayer.ValsetRelayModeMinimum, nil
-	case "all":
+	case relayer.ValsetRelayModeAll.String():
 		return relayer.ValsetRelayModeAll, nil
 	default:
 		return relayer.ValsetRelayModeNone, fmt.Errorf("invalid relay valsets mode: %s", mode)
