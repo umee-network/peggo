@@ -49,7 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Deprecated
 
-- [#189] Deprecate `--relay-valsets`
+- [#189] Deprecate the `--relay-valsets` flag.
 
 ### Bug Fixes
 

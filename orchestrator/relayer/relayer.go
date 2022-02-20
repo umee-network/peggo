@@ -13,14 +13,17 @@ import (
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 )
 
+// ValsetRelayMode defines an enumerated validator set relay mode.
 type ValsetRelayMode int64
 
+// Allowed validator set relay modes
 const (
 	ValsetRelayModeNone ValsetRelayMode = iota
 	ValsetRelayModeMinimum
 	ValsetRelayModeAll
 )
 
+// String gets the string representation of the validator set relay mode.
 func (d ValsetRelayMode) String() string {
 	return [...]string{"none", "minimum", "all"}[d]
 }
