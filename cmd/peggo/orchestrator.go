@@ -178,7 +178,6 @@ func getOrchestratorCmd() *cobra.Command {
 
 			relayValsets := konfig.Bool(flagRelayValsets)
 			valsetRelayMode, err := validateRelayValsetsMode(konfig.String(flagValsetRelayMode))
-
 			if err != nil {
 				return err
 			}
