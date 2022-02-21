@@ -2,7 +2,11 @@
 package peggo
 
 import (
+	"strings"
+
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/knadh/koanf"
+	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 )
 
@@ -102,4 +106,15 @@ func bridgeFlagSet() *pflag.FlagSet {
 	fs.Int64(flagEthGasLimit, 6000000, "The Ethereum gas limit to include in the transaction")
 
 	return fs
+}
+
+// parseURL logs a warning if the flag provided is an
+// unencrypted non-local string, and returns the value.
+// Ref: https://github.com/umee-network/peggo/issues/178
+func parseURL(logger zerolog.Logger, konfig *koanf.Koanf, flag string) string {
+	endpoint := konfig.String(flag)
+	if strings.Contains(endpoint, "http://") && !strings.Contains(endpoint, "localhost") {
+		logger.Warn().Str(flag, endpoint).Msg("flag is unsafe; unencrypted non-local url used")
+	}
+	return endpoint
 }

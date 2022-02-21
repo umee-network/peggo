@@ -72,8 +72,13 @@ func deployGravityCmd() *cobra.Command {
 				return err
 			}
 
-			tmRPCEndpoint := konfig.String(flagTendermintRPC)
-			cosmosGRPC := konfig.String(flagCosmosGRPC)
+			logger, err := getLogger(cmd)
+			if err != nil {
+				return err
+			}
+
+			tmRPCEndpoint := parseURL(logger, konfig, flagTendermintRPC)
+			cosmosGRPC := parseURL(logger, konfig, flagCosmosGRPC)
 
 			tmRPC, err := rpchttp.New(tmRPCEndpoint, "/websocket")
 			if err != nil {
@@ -82,11 +87,6 @@ func deployGravityCmd() *cobra.Command {
 
 			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s\n", tmRPCEndpoint)
 			clientCtx = clientCtx.WithClient(tmRPC).WithNodeURI(tmRPCEndpoint)
-
-			logger, err := getLogger(cmd)
-			if err != nil {
-				return err
-			}
 
 			daemonClient, err := client.NewCosmosClient(clientCtx, logger, cosmosGRPC)
 			if err != nil {
@@ -212,8 +212,13 @@ func deployERC20Cmd() *cobra.Command {
 				return err
 			}
 
-			tmRPCEndpoint := konfig.String(flagTendermintRPC)
-			cosmosGRPC := konfig.String(flagCosmosGRPC)
+			logger, err := getLogger(cmd)
+			if err != nil {
+				return err
+			}
+
+			tmRPCEndpoint := parseURL(logger, konfig, flagTendermintRPC)
+			cosmosGRPC := parseURL(logger, konfig, flagCosmosGRPC)
 
 			tmRPC, err := rpchttp.New(tmRPCEndpoint, "/websocket")
 			if err != nil {
@@ -222,11 +227,6 @@ func deployERC20Cmd() *cobra.Command {
 
 			fmt.Fprintf(os.Stderr, "Connected to Tendermint RPC: %s\n", tmRPCEndpoint)
 			clientCtx = clientCtx.WithClient(tmRPC).WithNodeURI(tmRPCEndpoint)
-
-			logger, err := getLogger(cmd)
-			if err != nil {
-				return err
-			}
 
 			daemonClient, err := client.NewCosmosClient(clientCtx, logger, cosmosGRPC)
 			if err != nil {

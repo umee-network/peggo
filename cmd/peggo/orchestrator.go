@@ -63,8 +63,8 @@ func getOrchestratorCmd() *cobra.Command {
 				return err
 			}
 
-			tmRPCEndpoint := konfig.String(flagTendermintRPC)
-			cosmosGRPC := konfig.String(flagCosmosGRPC)
+			tmRPCEndpoint := parseURL(logger, konfig, flagTendermintRPC)
+			cosmosGRPC := parseURL(logger, konfig, flagCosmosGRPC)
 			cosmosGasPrices := konfig.String(flagCosmosGasPrices)
 
 			tmRPC, err := rpchttp.New(tmRPCEndpoint, "/websocket")
@@ -269,7 +269,7 @@ func getOrchestratorCmd() *cobra.Command {
 }
 
 func trapSignal(cancel context.CancelFunc) {
-	var sigCh = make(chan os.Signal, 1)
+	sigCh := make(chan os.Signal, 1)
 
 	signal.Notify(sigCh, syscall.SIGTERM)
 	signal.Notify(sigCh, syscall.SIGINT)
