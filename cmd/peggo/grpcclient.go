@@ -27,5 +27,5 @@ func getEthClient(konfig *koanf.Koanf) (*ethclient.Client, error) {
 	// also, if there are other reasons we want to avoid an endpoint (e.g. dialing succeeds
 	// but the rpcs are behaving badly) then this function won't be able to help
 
-	return nil, errors.New("Could not connect to any of the Ethereum RPC endpoints provided")
+	return nil, errors.New("could not connect to any of the Ethereum RPC endpoints provided")
 }
