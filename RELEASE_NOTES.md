@@ -1,15 +1,22 @@
 # Release Notes
 
-This release introduces the deprecation of an unsafe flag and some helpers for
-the Coingecko price feed.
+This release introduces the deprecation of the `--relay-valsets` flag in favor
+of `--valset-relay-mode` which allows a finer control over how valsets will be
+relayed.
+The ERC20 to Coingecko IDs mapping was also updated to accomodate the new ERC20s
+deployed this week.
 
 ## Changelog
 
+### Features
+
+- [#189] Add the flag `--valset-relay-mode` which allows a finer control over
+  how valsets will be relayed.
+
 ### Improvements
 
-- [#172] Add fallback token addresses (to aid price lookup)
-- [#185] Add fallback token addresses (to aid price lookup) for Umee
+- [#201] Add ERC20 mappings for Umee's new tokens.
 
 ### Deprecated
 
-- [#174] Deprecate `--eth-pk` in favor of an env var (`$PEGGO_ETH_PK`)
+- [#189] Deprecate the `--relay-valsets` flag.
