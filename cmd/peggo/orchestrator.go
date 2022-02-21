@@ -11,6 +11,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
+	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
@@ -115,7 +116,9 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
 
-			ethRPC := ethRpcClientConnect(konfig.String(flagEthRPC))
+			clientChannel := make(chan *ethrpc.Client)
+			go ethRpcClientConnect(clientChannel, konfig.String(flagEthRPC))
+			ethRPC := <-clientChannel
 
 			ethProvider := provider.NewEVMProvider(ethRPC)
 

@@ -152,29 +152,27 @@ func ethClientFetch(endpoints []string) (*ethclient.Client, error) {
 	return client, nil
 }
 
-func ethClientConnect(rawEndpoints string) *ethclient.Client {
+func ethClientConnect(msg chan<- *ethclient.Client, rawEndpoints string) {
 	connectionErrors := 0
-	return func() *ethclient.Client {
-		for {
-			rawEndpoints := rawEndpoints
-			endpoints, working, err := ethereumRPCValidate(rawEndpoints)
-			if err != nil {
-				log.Println(err)
-			}
-			log.Printf("%d of the provided Ethereum rpc endpoints are currently working", working)
-			if connectionErrors > len(endpoints) {
-				log.Println("too many connection errors, please double check your endpoints and try again")
-			}
-			ethRPC, err := ethClientFetch(endpoints)
-			if err != nil {
-				connectionErrors += 1
-				log.Println("failed to dial rpc node: %w", err)
-				continue
-			} else {
-				return ethRPC
-			}
+	for {
+		rawEndpoints := rawEndpoints
+		endpoints, working, err := ethereumRPCValidate(rawEndpoints)
+		if err != nil {
+			log.Println(err)
 		}
-	}()
+		log.Printf("%d of the provided Ethereum rpc endpoints are currently working", working)
+		if connectionErrors > len(endpoints) {
+			log.Println("too many connection errors, please double check your endpoints and try again")
+			return
+		}
+		ethRPC, err := ethClientFetch(endpoints)
+		if err != nil {
+			connectionErrors += 1
+			log.Println("failed to dial rpc node: %w", err)
+		} else {
+			msg <- ethRPC
+		}
+	}
 
 }
 
@@ -190,30 +188,27 @@ func ethRpcClientFetch(endpoints []string) (*ethrpc.Client, error) {
 	return client, nil
 }
 
-func ethRpcClientConnect(rawEndpoints string) *ethrpc.Client {
+func ethRpcClientConnect(msg chan<- *ethrpc.Client, rawEndpoints string) {
 	connectionErrors := 0
-	return func() *ethrpc.Client {
-		for {
-			rawEndpoints := rawEndpoints
-			endpoints, working, err := ethereumRPCValidate(rawEndpoints)
-			if err != nil {
-				log.Println(err)
-			}
-			log.Printf("%d of the provided Ethereum rpc endpoints are currently working", working)
-			if connectionErrors > len(endpoints) {
-				log.Println("too many connection errors, please double check your endpoints and try again")
-			}
-			ethRPC, err := ethRpcClientFetch(endpoints)
-			if err != nil {
-				connectionErrors += 1
-				log.Println("failed to dial rpc node: %w", err)
-				continue
-			} else {
-				return ethRPC
-			}
+	for {
+		rawEndpoints := rawEndpoints
+		endpoints, working, err := ethereumRPCValidate(rawEndpoints)
+		if err != nil {
+			log.Println(err)
 		}
-	}()
-
+		log.Printf("%d of the provided Ethereum rpc endpoints are currently working", working)
+		if connectionErrors > len(endpoints) {
+			log.Println("too many connection errors, please double check your endpoints and try again")
+			return
+		}
+		ethRPC, err := ethRpcClientFetch(endpoints)
+		if err != nil {
+			connectionErrors += 1
+			log.Println("failed to dial rpc node: %w", err)
+		} else {
+			msg <- ethRPC
+		}
+	}
 }
 
 func randomGrab(mod int) int {

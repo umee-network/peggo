@@ -112,7 +112,9 @@ func deployGravityCmd() *cobra.Command {
 			}
 
 			// ETH RPC
-			ethRPC := ethClientConnect(konfig.String(flagEthRPC))
+			clientChannel := make(chan *ethclient.Client)
+			go ethClientConnect(clientChannel, konfig.String(flagEthRPC))
+			ethRPC := <-clientChannel
 
 			auth, err := buildTransactOpts(konfig, ethRPC)
 			if err != nil {
@@ -186,7 +188,9 @@ func deployERC20Cmd() *cobra.Command {
 				return err
 			}
 
-			ethRPC := ethClientConnect(konfig.String(flagEthRPC))
+			clientChannel := make(chan *ethclient.Client)
+			go ethClientConnect(clientChannel, konfig.String(flagEthRPC))
+			ethRPC := <-clientChannel
 
 			auth, err := buildTransactOpts(konfig, ethRPC)
 			if err != nil {
@@ -317,7 +321,9 @@ network starting.`,
 				return err
 			}
 
-			ethRPC := ethClientConnect(konfig.String(flagEthRPC))
+			clientChannel := make(chan *ethclient.Client)
+			go ethClientConnect(clientChannel, konfig.String(flagEthRPC))
+			ethRPC := <-clientChannel
 
 			auth, err := buildTransactOpts(konfig, ethRPC)
 			if err != nil {
@@ -375,7 +381,9 @@ func sendToCosmosCmd() *cobra.Command {
 				return err
 			}
 
-			ethRPC := ethClientConnect(konfig.String(flagEthRPC))
+			clientChannel := make(chan *ethclient.Client)
+			go ethClientConnect(clientChannel, konfig.String(flagEthRPC))
+			ethRPC := <-clientChannel
 
 			gravityAddr := args[0]
 
