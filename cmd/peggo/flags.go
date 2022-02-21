@@ -91,6 +91,7 @@ func ethereumOptsFlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("", pflag.ContinueOnError)
 
 	fs.String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
+	fs.StringSlice(flagEthRPCs, []string{"http://localhost:8545"}, "Specify RPC addresses of one or more Ethereum nodes")
 	fs.Float64(flagEthGasAdjustment, float64(1.3), "Specify a gas price adjustment for Ethereum transactions")
 	fs.Float64(flagEthGasLimitAdjustment, float64(1.2), "Specify a gas limit adjustment for Ethereum transactions")
 	_ = fs.MarkDeprecated(flagEthRPC, fmt.Sprintf("Use the '%s' flag instead to provide one or more Ethereum RPC instances", flagEthRPCs))
@@ -102,8 +103,10 @@ func bridgeFlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("", pflag.ContinueOnError)
 
 	fs.String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
+	fs.StringSlice(flagEthRPCs, []string{"http://localhost:8545"}, "Specify RPC addresses of one or more Ethereum nodes")
 	fs.Int64(flagEthGasPrice, 0, "The Ethereum gas price to include in the transaction; If zero, gas price will be estimated")
 	fs.Int64(flagEthGasLimit, 6000000, "The Ethereum gas limit to include in the transaction")
+	_ = fs.MarkDeprecated(flagEthRPC, fmt.Sprintf("Use the '%s' flag instead to provide one or more Ethereum RPC instances", flagEthRPCs))
 
 	return fs
 }
