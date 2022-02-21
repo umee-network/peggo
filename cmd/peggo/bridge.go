@@ -113,10 +113,9 @@ func deployGravityCmd() *cobra.Command {
 			}
 
 			// ETH RPC
-			ethRPCEndpoint := konfig.String(flagEthRPC)
-			ethRPC, err := ethclient.Dial(ethRPCEndpoint)
+			ethRPC, err := getEthClient(konfig)
 			if err != nil {
-				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
+				return err
 			}
 
 			auth, err := buildTransactOpts(konfig, ethRPC)
@@ -194,10 +193,9 @@ func deployERC20Cmd() *cobra.Command {
 				return err
 			}
 
-			ethRPCEndpoint := konfig.String(flagEthRPC)
-			ethRPC, err := ethclient.Dial(ethRPCEndpoint)
+			ethRPC, err := getEthClient(konfig)
 			if err != nil {
-				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
+				return err
 			}
 
 			auth, err := buildTransactOpts(konfig, ethRPC)
@@ -329,10 +327,9 @@ network starting.`,
 				return err
 			}
 
-			ethRPCEndpoint := konfig.String(flagEthRPC)
-			ethRPC, err := ethclient.Dial(ethRPCEndpoint)
+			ethRPC, err := getEthClient(konfig)
 			if err != nil {
-				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
+				return err
 			}
 
 			auth, err := buildTransactOpts(konfig, ethRPC)
@@ -391,10 +388,9 @@ func sendToCosmosCmd() *cobra.Command {
 				return err
 			}
 
-			ethRPCEndpoint := konfig.String(flagEthRPC)
-			ethRPC, err := ethclient.Dial(ethRPCEndpoint)
+			ethRPC, err := getEthClient(konfig)
 			if err != nil {
-				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
+				return err
 			}
 
 			gravityAddr := args[0]
