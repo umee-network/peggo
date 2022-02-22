@@ -1,6 +1,8 @@
 package peggo
 
 import (
+	"fmt"
+
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/knadh/koanf"
@@ -28,15 +30,20 @@ func InitEthRPCManager(konfig *koanf.Koanf) {
 	}
 }
 
-// closes the current client and dials configured ethereum rpc endpoints in a roundrobin fashion until one
-// is connected. returns an error if no endpoints exist or all dials failed
-func (em *EthRPCManager) DialNext() error {
-	rpcs := em.konfig.Strings(flagEthRPCs)
-
+// closes and sets to nil the stored eth RPC client
+func (em *EthRPCManager) CloseClient() {
 	if em.client != nil {
 		em.client.Close()
 		em.client = nil
 	}
+}
+
+// closes the current client and dials configured ethereum rpc endpoints in a roundrobin fashion until one
+// is connected. returns an error if no endpoints ar configured or all dials failed
+func (em *EthRPCManager) DialNext() error {
+	rpcs := em.konfig.Strings(flagEthRPCs)
+
+	em.CloseClient()
 
 	dialIndex := func(i int) bool {
 		if cli, err := rpc.Dial(rpcs[i]); err == nil {
@@ -44,6 +51,7 @@ func (em *EthRPCManager) DialNext() error {
 			em.client = cli
 			return true
 		}
+		// todo: should likely log the error
 		return false
 	}
 
@@ -61,9 +69,10 @@ func (em *EthRPCManager) DialNext() error {
 		}
 	}
 
-	return errors.New("could not dial any of the Ethereum RPC endpoints provided")
+	return errors.New(fmt.Sprintf("could not dial any of the %d Ethereum RPC endpoints configured", len(rpcs)))
 }
 
+// returns the current eth RPC client, dialing one first if nonexistent
 func (em *EthRPCManager) GetClient() (*rpc.Client, error) {
 	if em.client == nil {
 		if err := em.DialNext(); err != nil {
@@ -73,6 +82,7 @@ func (em *EthRPCManager) GetClient() (*rpc.Client, error) {
 	return em.client, nil
 }
 
+// returns the current eth RPC client, dialing one first if nonexistent
 func (em *EthRPCManager) GetEthClient() (*ethclient.Client, error) {
 	cli, err := em.GetClient()
 	if err != nil {
