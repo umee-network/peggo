@@ -11,7 +11,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
-	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
@@ -118,14 +117,13 @@ func getOrchestratorCmd() *cobra.Command {
 
 			// todo #196: change this to try multiple endpoints. Also, is this one more complicated
 			// than the other cmds, i.e. the client is being reused over time?
-			ethRPCEndpoint := konfig.String(flagEthRPC)
-			ethRPC, err := ethrpc.Dial(ethRPCEndpoint)
-			//ethRPC, err := ethManager.GetClient() // todo: wrong type. find out why.
+			// ethRPCEndpoint := konfig.String(flagEthRPC)
+			ethRPC, err := ethManager.GetClient()
 			if err != nil {
 				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
 			}
 
-			fmt.Fprintf(os.Stderr, "Connected to Ethereum RPC: %s\n", ethRPCEndpoint)
+			//fmt.Fprintf(os.Stderr, "Connected to Ethereum RPC: %s\n", ethRPCEndpoint)
 			ethProvider := provider.NewEVMProvider(ethRPC)
 
 			ethGasPriceAdjustment := konfig.Float64(flagEthGasAdjustment)

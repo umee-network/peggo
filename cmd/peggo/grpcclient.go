@@ -2,6 +2,7 @@ package peggo
 
 import (
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/knadh/koanf"
 	"github.com/pkg/errors"
 )
@@ -9,9 +10,10 @@ import (
 var ethManager *EthRPCManager
 
 type EthRPCManager struct {
-	currentEndpoint int               // the slice index of the endpoint currently used
-	client          *ethclient.Client // the current client
-	konfig          *koanf.Koanf
+	currentEndpoint int // the slice index of the endpoint currently used
+	//client          *ethclient.Client // the current client
+	client *rpc.Client
+	konfig *koanf.Koanf
 
 	// TODO: how to detect client failures so we can call DialNext()
 	// maybe wrap methods
@@ -37,7 +39,7 @@ func (em *EthRPCManager) DialNext() error {
 	}
 
 	dialIndex := func(i int) bool {
-		if cli, err := ethclient.Dial(rpcs[i]); err == nil {
+		if cli, err := rpc.Dial(rpcs[i]); err == nil {
 			em.currentEndpoint = i
 			em.client = cli
 			return true
@@ -62,11 +64,19 @@ func (em *EthRPCManager) DialNext() error {
 	return errors.New("could not dial any of the Ethereum RPC endpoints provided")
 }
 
-func (em *EthRPCManager) GetClient() (*ethclient.Client, error) {
+func (em *EthRPCManager) GetClient() (*rpc.Client, error) {
 	if em.client == nil {
 		if err := em.DialNext(); err != nil {
 			return nil, err
 		}
 	}
 	return em.client, nil
+}
+
+func (em *EthRPCManager) GetEthClient() (*ethclient.Client, error) {
+	cli, err := em.GetClient()
+	if err != nil {
+		return nil, err
+	}
+	return ethclient.NewClient(cli), nil
 }
