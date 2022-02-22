@@ -9,11 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	flagFormat = "format"
-
-	pathCosmosSDK = "github.com/cosmos/cosmos-sdk"
-)
+const flagFormat = "format"
 
 var (
 	// Version defines the application version (defined at compile time)
