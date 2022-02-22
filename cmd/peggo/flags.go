@@ -2,6 +2,7 @@
 package peggo
 
 import (
+	"net/url"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -111,10 +112,14 @@ func bridgeFlagSet() *pflag.FlagSet {
 // parseURL logs a warning if the flag provided is an
 // unencrypted non-local string, and returns the value.
 // Ref: https://github.com/umee-network/peggo/issues/178
-func parseURL(logger zerolog.Logger, konfig *koanf.Koanf, flag string) string {
+func parseURL(logger zerolog.Logger, konfig *koanf.Koanf, flag string) (string, error) {
 	endpoint := konfig.String(flag)
-	if strings.Contains(endpoint, "http://") && !strings.Contains(endpoint, "localhost") {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return "", err
+	}
+	if strings.EqualFold(u.Scheme, "http") && !strings.Contains(u.Host, "localhost") {
 		logger.Warn().Str(flag, endpoint).Msg("flag is unsafe; unencrypted non-local url used")
 	}
-	return endpoint
+	return endpoint, nil
 }

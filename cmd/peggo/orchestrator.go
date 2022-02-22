@@ -63,8 +63,15 @@ func getOrchestratorCmd() *cobra.Command {
 				return err
 			}
 
-			tmRPCEndpoint := parseURL(logger, konfig, flagTendermintRPC)
-			cosmosGRPC := parseURL(logger, konfig, flagCosmosGRPC)
+			tmRPCEndpoint, err := parseURL(logger, konfig, flagTendermintRPC)
+			if err != nil {
+				return err
+			}
+			cosmosGRPC, err := parseURL(logger, konfig, flagCosmosGRPC)
+			if err != nil {
+				return err
+			}
+
 			cosmosGasPrices := konfig.String(flagCosmosGasPrices)
 
 			tmRPC, err := rpchttp.New(tmRPCEndpoint, "/websocket")
