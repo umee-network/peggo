@@ -120,6 +120,7 @@ func getOrchestratorCmd() *cobra.Command {
 			// than the other cmds, i.e. the client is being reused over time?
 			ethRPCEndpoint := konfig.String(flagEthRPC)
 			ethRPC, err := ethrpc.Dial(ethRPCEndpoint)
+			//ethRPC, err := ethManager.GetClient() // todo: wrong type. find out why.
 			if err != nil {
 				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
 			}

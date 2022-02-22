@@ -113,7 +113,8 @@ func deployGravityCmd() *cobra.Command {
 			}
 
 			// ETH RPC
-			ethRPC, err := getEthClient(konfig)
+			InitEthRPCManager(konfig)
+			ethRPC, err := ethManager.GetClient()
 			if err != nil {
 				return err
 			}
@@ -193,10 +194,8 @@ func deployERC20Cmd() *cobra.Command {
 				return err
 			}
 
-			ethRPC, err := getEthClient(konfig)
-			if err != nil {
-				return err
-			}
+			InitEthRPCManager(konfig)
+			ethRPC, err := ethManager.GetClient()
 
 			auth, err := buildTransactOpts(konfig, ethRPC)
 			if err != nil {
@@ -327,10 +326,8 @@ network starting.`,
 				return err
 			}
 
-			ethRPC, err := getEthClient(konfig)
-			if err != nil {
-				return err
-			}
+			InitEthRPCManager(konfig)
+			ethRPC, err := ethManager.GetClient()
 
 			auth, err := buildTransactOpts(konfig, ethRPC)
 			if err != nil {
@@ -388,10 +385,8 @@ func sendToCosmosCmd() *cobra.Command {
 				return err
 			}
 
-			ethRPC, err := getEthClient(konfig)
-			if err != nil {
-				return err
-			}
+			InitEthRPCManager(konfig)
+			ethRPC, err := ethManager.GetClient()
 
 			gravityAddr := args[0]
 

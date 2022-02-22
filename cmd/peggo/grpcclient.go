@@ -6,26 +6,67 @@ import (
 	"github.com/pkg/errors"
 )
 
-// dials configured ethereum rpc endpoints, returning a client connected to the first successfully dialed
-func getEthClient(konfig *koanf.Koanf) (*ethclient.Client, error) {
-	rpcs := konfig.Strings(flagEthRPCs)
+var ethManager *EthRPCManager
 
-	for _, endpoint := range rpcs {
-		if cli, err := ethclient.Dial(endpoint); err == nil {
-			return cli, nil
+type EthRPCManager struct {
+	currentEndpoint int               // the slice index of the endpoint currently used
+	client          *ethclient.Client // the current client
+	konfig          *koanf.Koanf
+
+	// TODO: how to detect client failures so we can call DialNext()
+	// maybe wrap methods
+}
+
+// initializes the single instance of EthRPCManager with a given config (uses flagEthRPCs)
+func InitEthRPCManager(konfig *koanf.Koanf) {
+	if ethManager == nil {
+		ethManager = &EthRPCManager{
+			konfig: konfig,
+		}
+	}
+}
+
+// closes the current client and dials configured ethereum rpc endpoints in a roundrobin fashion until one
+// is connected. returns an error if no endpoints exist or all dials failed
+func (em *EthRPCManager) DialNext() error {
+	rpcs := em.konfig.Strings(flagEthRPCs)
+
+	if em.client != nil {
+		em.client.Close()
+		em.client = nil
+	}
+
+	dialIndex := func(i int) bool {
+		if cli, err := ethclient.Dial(rpcs[i]); err == nil {
+			em.currentEndpoint = i
+			em.client = cli
+			return true
+		}
+		return false
+	}
+
+	// first tries all endpoints in the slice after the current index
+	for i := range rpcs {
+		if i > em.currentEndpoint && dialIndex(i) {
+			return nil
 		}
 	}
 
-	// todo #196: this doesn't try to remember if an endpoint is failing frequently
-	// which would be needed to rotate / avoid trying to dial it every single time.
-	//
-	// a cheap way to do basically that would be to store the last endpoint *successfully*
-	// dialed using a var at the top of this file, always trying that first if non-empty,
-	// clearing it on fail, and setting it to a new string whenever a dial succeeds on
-	// an endpoint in the for loop
-	//
-	// also, if there are other reasons we want to avoid an endpoint (e.g. dialing succeeds
-	// but the rpcs are behaving badly) then this function won't be able to help
+	// then tries remaining endpoints from the beginning of the slice
+	for i := range rpcs {
+		if i <= em.currentEndpoint && dialIndex(i) {
+			return nil
+		}
+	}
 
-	return nil, errors.New("could not connect to any of the Ethereum RPC endpoints provided")
+	return errors.New("could not dial any of the Ethereum RPC endpoints provided")
+}
+
+func (em *EthRPCManager) GetClient() (*ethclient.Client, error) {
+	if em.client == nil {
+		if err := em.DialNext(); err != nil {
+			return nil, err
+		}
+	}
+	return em.client, nil
 }
