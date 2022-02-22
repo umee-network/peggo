@@ -20,7 +20,7 @@ endif
 
 ldflags = -X github.com/umee-network/peggo/cmd/peggo.Version=$(VERSION) \
 		  -X github.com/umee-network/peggo/cmd/peggo.Commit=$(COMMIT) \
-			-X github.com/umee-network/peggo/cmd/peggo.SDKVersion=$(SDK_VERSION)
+		  -X github.com/umee-network/peggo/cmd/peggo.SDKVersion=$(SDK_VERSION)
 
 BUILD_FLAGS := -ldflags '$(ldflags)'
 
