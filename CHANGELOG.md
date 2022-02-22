@@ -43,6 +43,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Bug Fixes
+
+- [#209](https://github.com/umee-network/peggo/pull/209) Fix the `version` command to display correctly.
+
 ## [v0.2.5](https://github.com/umee-network/peggo/releases/tag/v0.2.5) - 2022-02-21
 
 ### Features
@@ -60,7 +64,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bug Fixes
 
-- [#209](https://github.com/umee-network/peggo/pull/209) Fix the `version` command to display correctly.
 - [#189] Order validator set before deploying (`peggo bridge deploy-gravity`)
 
 ## [v0.2.4](https://github.com/umee-network/peggo/releases/tag/v0.2.4) - 2022-02-16
