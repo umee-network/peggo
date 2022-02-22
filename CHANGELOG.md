@@ -1,4 +1,5 @@
 <!-- markdownlint-disable MD024 -->
+<!-- markdownlint-disable MD013 -->
 <!--
 Changelog Guiding Principles:
 
@@ -53,6 +54,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bug Fixes
 
+- [#209](https://github.com/umee-network/peggo/pull/209) Fix the `version` command to display correctly.
 - [#189] Order validator set before deploying (`peggo bridge deploy-gravity`)
 
 ## [v0.2.4](https://github.com/umee-network/peggo/releases/tag/v0.2.4) - 2022-02-16
