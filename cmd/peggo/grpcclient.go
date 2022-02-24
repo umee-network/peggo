@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -44,8 +45,8 @@ func (em *EthRPCManager) DialNext() error {
 	if em.konfig == nil {
 		return errors.New("ethRPCManager konfig is nil")
 	}
-	//rpcs := em.konfig.Strings(flagEthRPCs)
-	rpcs := []string{em.konfig.String(flagEthRPC)}
+
+	rpcs := strings.Split(strings.ReplaceAll(em.konfig.String(flagEthRPCs), " ", ""), ",")
 
 	em.CloseClient()
 
