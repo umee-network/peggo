@@ -44,7 +44,8 @@ func (em *EthRPCManager) DialNext() error {
 	if em.konfig == nil {
 		return errors.New("ethRPCManager konfig is nil")
 	}
-	rpcs := em.konfig.Strings(flagEthRPCs)
+	//rpcs := em.konfig.Strings(flagEthRPCs)
+	rpcs := []string{em.konfig.String(flagEthRPC)}
 
 	em.CloseClient()
 

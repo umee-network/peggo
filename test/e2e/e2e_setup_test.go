@@ -545,7 +545,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 				"peggo",
 				"bridge",
 				"deploy-gravity",
-				"--eth-rpcs",
+				"--eth-rpc",
 				fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
 				"--cosmos-grpc",
 				fmt.Sprintf("tcp://%s:9090", s.valResources[0].Container.Name[1:]),
