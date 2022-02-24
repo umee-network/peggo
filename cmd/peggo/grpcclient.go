@@ -16,12 +16,8 @@ var ethManager *EthRPCManager
 
 type EthRPCManager struct {
 	currentEndpoint int // the slice index of the endpoint currently used
-	//client          *ethclient.Client // the current client
-	client *rpc.Client
-	konfig *koanf.Koanf
-
-	// TODO: how to detect client failures so we can call DialNext()
-	// maybe wrap methods
+	client          *rpc.Client
+	konfig          *koanf.Koanf
 }
 
 // initializes the single instance of EthRPCManager with a given config (uses flagEthRPCs).
