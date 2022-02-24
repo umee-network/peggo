@@ -125,7 +125,7 @@ func deployGravityCmd() *cobra.Command {
 				return err
 			}
 
-			auth, err := buildTransactOpts(konfig, ethRPC)
+			auth, err := buildTransactOpts(konfig)
 			if err != nil {
 				return err
 			}
@@ -203,7 +203,7 @@ func deployERC20Cmd() *cobra.Command {
 			InitEthRPCManager(konfig)
 			ethRPC, err := ethManager.GetEthClient()
 
-			auth, err := buildTransactOpts(konfig, ethRPC)
+			auth, err := buildTransactOpts(konfig)
 			if err != nil {
 				return err
 			}
@@ -341,7 +341,7 @@ network starting.`,
 			InitEthRPCManager(konfig)
 			ethRPC, err := ethManager.GetEthClient()
 
-			auth, err := buildTransactOpts(konfig, ethRPC)
+			auth, err := buildTransactOpts(konfig)
 			if err != nil {
 				return err
 			}
@@ -416,7 +416,7 @@ func sendToCosmosCmd() *cobra.Command {
 				}
 			}
 
-			auth, err := buildTransactOpts(konfig, ethRPC)
+			auth, err := buildTransactOpts(konfig)
 			if err != nil {
 				return err
 			}
@@ -459,7 +459,9 @@ Transaction: %s
 	return cmd
 }
 
-func buildTransactOpts(konfig *koanf.Koanf, ethClient *ethclient.Client) (*bind.TransactOpts, error) {
+func buildTransactOpts(konfig *koanf.Koanf) (*bind.TransactOpts, error) {
+	InitEthRPCManager(konfig)
+
 	ethPrivKeyHexStr := konfig.String(flagEthPK)
 
 	privKey, err := ethcrypto.ToECDSA(ethcmn.FromHex(ethPrivKeyHexStr))
@@ -478,7 +480,7 @@ func buildTransactOpts(konfig *koanf.Koanf, ethClient *ethclient.Client) (*bind.
 
 	fromAddress := ethcrypto.PubkeyToAddress(*publicKeyECDSA)
 
-	nonce, err := ethClient.PendingNonceAt(goCtx, fromAddress)
+	nonce, err := ethManager.PendingNonceAt(goCtx, fromAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -486,7 +488,7 @@ func buildTransactOpts(konfig *koanf.Koanf, ethClient *ethclient.Client) (*bind.
 	goCtx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	ethChainID, err := ethClient.ChainID(goCtx)
+	ethChainID, err := ethManager.ChainID(goCtx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Ethereum chain ID: %w", err)
 	}
@@ -507,7 +509,7 @@ func buildTransactOpts(konfig *koanf.Koanf, ethClient *ethclient.Client) (*bind.
 		gasPrice = big.NewInt(gasPriceInt)
 
 	default:
-		gasPrice, err = ethClient.SuggestGasPrice(context.Background())
+		gasPrice, err = ethManager.SuggestGasPrice(context.Background())
 		if err != nil {
 			return nil, fmt.Errorf("failed to get Ethereum gas estimate: %w", err)
 		}
@@ -555,7 +557,7 @@ func approveERC20(konfig *koanf.Koanf, ethRPC *ethclient.Client, erc20AddrStr, g
 		return fmt.Errorf("failed to create ERC20 contract instance: %w", err)
 	}
 
-	auth, err := buildTransactOpts(konfig, ethRPC)
+	auth, err := buildTransactOpts(konfig)
 	if err != nil {
 		return err
 	}

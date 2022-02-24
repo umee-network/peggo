@@ -1,8 +1,11 @@
 package peggo
 
 import (
+	"context"
 	"fmt"
+	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/knadh/koanf"
@@ -21,7 +24,8 @@ type EthRPCManager struct {
 	// maybe wrap methods
 }
 
-// initializes the single instance of EthRPCManager with a given config (uses flagEthRPCs)
+// initializes the single instance of EthRPCManager with a given config (uses flagEthRPCs).
+// no-op if already initialized, even if konfig would be different.
 func InitEthRPCManager(konfig *koanf.Koanf) {
 	if ethManager == nil {
 		ethManager = &EthRPCManager{
@@ -41,6 +45,9 @@ func (em *EthRPCManager) CloseClient() {
 // closes the current client and dials configured ethereum rpc endpoints in a roundrobin fashion until one
 // is connected. returns an error if no endpoints ar configured or all dials failed
 func (em *EthRPCManager) DialNext() error {
+	if em.konfig == nil {
+		return errors.New("ethRPCManager konfig is nil")
+	}
 	rpcs := em.konfig.Strings(flagEthRPCs)
 
 	em.CloseClient()
@@ -89,4 +96,46 @@ func (em *EthRPCManager) GetEthClient() (*ethclient.Client, error) {
 		return nil, err
 	}
 	return ethclient.NewClient(cli), nil
+}
+
+// wraps ethclient.PendingNonceAt, also closing client if PendingNonceAt returns an error
+func (em *EthRPCManager) PendingNonceAt(ctx context.Context, addr common.Address) (uint64, error) {
+	cli, err := em.GetEthClient()
+	if err != nil {
+		return 0, err
+	}
+	nonce, err := cli.PendingNonceAt(ctx, addr)
+	if err != nil {
+		em.CloseClient()
+		return 0, err
+	}
+	return nonce, nil
+}
+
+// wraps ethclient.ChainID, also closing client if ChainID returns an error
+func (em *EthRPCManager) ChainID(ctx context.Context) (*big.Int, error) {
+	cli, err := em.GetEthClient()
+	if err != nil {
+		return nil, err
+	}
+	id, err := cli.ChainID(ctx)
+	if err != nil {
+		em.CloseClient()
+		return nil, err
+	}
+	return id, nil
+}
+
+// wraps ethclient.SuggestGasPrice, also closing client if SuggestGasPrice returns an error
+func (em *EthRPCManager) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
+	cli, err := em.GetEthClient()
+	if err != nil {
+		return nil, err
+	}
+	price, err := cli.SuggestGasPrice(ctx)
+	if err != nil {
+		em.CloseClient()
+		return nil, err
+	}
+	return price, nil
 }
