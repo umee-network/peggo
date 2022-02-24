@@ -1,4 +1,5 @@
 <!-- markdownlint-disable MD024 -->
+<!-- markdownlint-disable MD013 -->
 <!--
 Changelog Guiding Principles:
 
@@ -42,10 +43,21 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Bug Fixes
+
+- [#209](https://github.com/umee-network/peggo/pull/209) Fix the `version` command to display correctly.
+- [#205](https://github.com/umee-network/peggo/pull/205) Make sure users are warned when using unencrypted non-local urls in flags.
+
+## [v0.2.5](https://github.com/umee-network/peggo/releases/tag/v0.2.5) - 2022-02-21
+
 ### Features
 
 - [#189] Add the flag `--valset-relay-mode` which allows a finer control over
   how valsets will be relayed.
+
+### Improvements
+
+- [#201] Add ERC20 mappings for Umee's new tokens.
 
 ### Deprecated
 

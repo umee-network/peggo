@@ -3,8 +3,12 @@ package peggo
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/knadh/koanf"
+	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 )
 
@@ -109,4 +113,19 @@ func bridgeFlagSet() *pflag.FlagSet {
 	_ = fs.MarkDeprecated(flagEthRPC, fmt.Sprintf("Use the '%s' flag instead to provide one or more Ethereum RPC instances", flagEthRPCs))
 
 	return fs
+}
+
+// parseURL logs a warning if the flag provided is an
+// unencrypted non-local string, and returns the value.
+// Ref: https://github.com/umee-network/peggo/issues/178
+func parseURL(logger zerolog.Logger, konfig *koanf.Koanf, flag string) (string, error) {
+	endpoint := konfig.String(flag)
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return "", err
+	}
+	if strings.EqualFold(u.Scheme, "http") && !strings.Contains(u.Host, "localhost") {
+		logger.Warn().Str(flag, endpoint).Msg("flag is unsafe; unencrypted non-local url used")
+	}
+	return endpoint, nil
 }
