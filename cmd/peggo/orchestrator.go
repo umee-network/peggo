@@ -122,15 +122,11 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
 
-			// todo #196: change this to try multiple endpoints. Also, is this one more complicated
-			// than the other cmds, i.e. the client is being reused over time?
-			// ethRPCEndpoint := konfig.String(flagEthRPC)
 			ethRPC, err := ethManager.GetClient()
 			if err != nil {
 				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
 			}
 
-			//fmt.Fprintf(os.Stderr, "Connected to Ethereum RPC: %s\n", ethRPCEndpoint)
 			ethProvider := provider.NewEVMProvider(ethRPC)
 
 			ethGasPriceAdjustment := konfig.Float64(flagEthGasAdjustment)

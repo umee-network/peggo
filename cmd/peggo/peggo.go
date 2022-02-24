@@ -81,7 +81,7 @@ func parseServerConfig(cmd *cobra.Command) (*koanf.Koanf, error) {
 	konfig := koanf.New(".")
 
 	// load from file first (if provided)
-	// TODO: Support config files if/when needed.
+	// TODO: Support config files if/when needed. Koanf also supports watch the config file for changes
 	// if configPath := ctx.String(config.ConfigPath); len(configPath) != 0 {
 	// 	if err := konfig.Load(file.Provider(configPath), toml.Parser()); err != nil {
 	// 		return nil, err
