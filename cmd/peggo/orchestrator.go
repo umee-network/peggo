@@ -231,6 +231,7 @@ func getOrchestratorCmd() *cobra.Command {
 				batchRequesterLoopDuration,
 				konfig.Int64(flagEthBlocksPerLoop),
 				konfig.Int64(flagBridgeStartHeight),
+				coingeckoFeed,
 			)
 
 			ctx, cancel = context.WithCancel(context.Background())
