@@ -2,6 +2,7 @@
 package peggo
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -98,7 +99,7 @@ func ethereumOptsFlagSet() *pflag.FlagSet {
 	fs.Float64(flagEthGasAdjustment, float64(1.3), "Specify a gas price adjustment for Ethereum transactions")
 	fs.Float64(flagEthGasLimitAdjustment, float64(1.2), "Specify a gas limit adjustment for Ethereum transactions")
 
-	// _ = fs.MarkDeprecated(flagEthRPC, fmt.Sprintf("Use the '%s' flag instead to provide one or more Ethereum RPC instances", flagEthRPCs))
+	_ = fs.MarkDeprecated(flagEthRPC, fmt.Sprintf("Use the '%s' flag instead to provide one or more Ethereum RPC instances", flagEthRPCs))
 
 	return fs
 }
@@ -111,7 +112,7 @@ func bridgeFlagSet() *pflag.FlagSet {
 	fs.Int64(flagEthGasPrice, 0, "The Ethereum gas price to include in the transaction; If zero, gas price will be estimated")
 	fs.Int64(flagEthGasLimit, 6000000, "The Ethereum gas limit to include in the transaction")
 
-	// _ = fs.MarkDeprecated(flagEthRPC, fmt.Sprintf("Use the '%s' flag instead to provide one or more Ethereum RPC instances", flagEthRPCs))
+	_ = fs.MarkDeprecated(flagEthRPC, fmt.Sprintf("Use the '%s' flag instead to provide one or more Ethereum RPC instances", flagEthRPCs))
 
 	return fs
 }

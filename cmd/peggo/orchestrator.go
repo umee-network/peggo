@@ -123,7 +123,7 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
 
-			ethRPCEndpoint := konfig.String(flagEthRPC)
+			ethRPCEndpoint := konfig.String(flagEthRPCs)
 			ethRPC, err := ethrpc.Dial(ethRPCEndpoint)
 			if err != nil {
 				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
