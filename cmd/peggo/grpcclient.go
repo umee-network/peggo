@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"os"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -56,13 +57,14 @@ func (em *EthRPCManager) DialNext() error {
 			em.client = cli
 			return true
 		}
-		// todo: should likely log the error
+		fmt.Fprintf(os.Stderr, "Failed to dial to Ethereum RPC: %s\n", rpcs[i])
 		return false
 	}
 
 	// first tries all endpoints in the slice after the current index
 	for i := range rpcs {
 		if i > em.currentEndpoint && dialIndex(i) {
+			fmt.Fprintf(os.Stderr, "Connected to Ethereum RPC: %s\n", rpcs[i])
 			return nil
 		}
 	}
@@ -70,6 +72,7 @@ func (em *EthRPCManager) DialNext() error {
 	// then tries remaining endpoints from the beginning of the slice
 	for i := range rpcs {
 		if i <= em.currentEndpoint && dialIndex(i) {
+			fmt.Fprintf(os.Stderr, "Connected to Ethereum RPC: %s\n", rpcs[i])
 			return nil
 		}
 	}
