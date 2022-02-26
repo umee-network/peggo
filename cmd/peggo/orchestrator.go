@@ -126,7 +126,7 @@ func getOrchestratorCmd() *cobra.Command {
 
 			ethRPC, err := ethManager.GetClient()
 			if err != nil {
-				return fmt.Errorf("failed to dial Ethereum RPC node: %w", err)
+				return err
 			}
 
 			ethProvider := provider.NewEVMProvider(ethRPC)

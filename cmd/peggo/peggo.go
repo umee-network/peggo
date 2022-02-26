@@ -21,7 +21,7 @@ func NewRootCmd() *cobra.Command {
 		Long: `Peggo is a companion executable for orchestrating a Gravity validator.
 
 Inputs in the CLI commands can be provided via flags or environment variables. If
-using the later, prefix the environment variable with PEGGO_ and the named of the
+using the latter, prefix the environment variable with PEGGO_ and the named of the
 flag (e.g. PEGGO_COSMOS_PK).`,
 	}
 
@@ -81,7 +81,7 @@ func parseServerConfig(cmd *cobra.Command) (*koanf.Koanf, error) {
 	konfig := koanf.New(".")
 
 	// load from file first (if provided)
-	// TODO: Support config files if/when needed.
+	// TODO: Support config files if/when needed. Koanf also supports watch the config file for changes.
 	// if configPath := ctx.String(config.ConfigPath); len(configPath) != 0 {
 	// 	if err := konfig.Load(file.Provider(configPath), toml.Parser()); err != nil {
 	// 		return nil, err

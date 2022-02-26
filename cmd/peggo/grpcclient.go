@@ -77,7 +77,7 @@ func (em *EthRPCManager) DialNext() error {
 		}
 	}
 
-	return errors.New(fmt.Sprintf("could not dial any of the %d Ethereum RPC endpoints configured", len(rpcs)))
+	return errors.New(fmt.Sprintf("failed to dial any of the %d Ethereum RPC endpoints configured", len(rpcs)))
 }
 
 // returns the current eth RPC client, dialing one first if nonexistent
