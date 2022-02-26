@@ -40,8 +40,6 @@ func getOrchestratorCmd() *cobra.Command {
 				return err
 			}
 
-			InitEthRPCManager(konfig)
-
 			logger, err := getLogger(cmd)
 			if err != nil {
 				return err
@@ -124,7 +122,8 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Ethereum account: %w", err)
 			}
 
-			ethRPC, err := ethManager.GetClient()
+			em := NewEthRPCManager(konfig)
+			ethRPC, err := em.GetClient()
 			if err != nil {
 				return err
 			}

@@ -15,8 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/knadh/koanf"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
@@ -64,7 +62,7 @@ func deployGravityCmd() *cobra.Command {
 				return err
 			}
 
-			InitEthRPCManager(konfig)
+			em := NewEthRPCManager(konfig)
 
 			// COSMOS RPC
 
@@ -121,12 +119,12 @@ func deployGravityCmd() *cobra.Command {
 			}
 
 			// ETH RPC
-			ethRPC, err := ethManager.GetEthClient()
+			ethRPC, err := em.GetEthClient()
 			if err != nil {
 				return err
 			}
 
-			auth, err := buildTransactOpts(konfig, ethRPC)
+			auth, err := buildTransactOpts(em)
 			if err != nil {
 				return err
 			}
@@ -201,14 +199,9 @@ func deployERC20Cmd() *cobra.Command {
 				return err
 			}
 
-			InitEthRPCManager(konfig)
+			em := NewEthRPCManager(konfig)
 
-			ethRPC, err := ethManager.GetEthClient()
-			if err != nil {
-				return err
-			}
-
-			auth, err := buildTransactOpts(konfig, ethRPC)
+			auth, err := buildTransactOpts(em)
 			if err != nil {
 				return err
 			}
@@ -263,7 +256,7 @@ func deployERC20Cmd() *cobra.Command {
 
 			gravityAddr := args[0]
 
-			gravityContract, err := getGravityContract(ethRPC, gravityAddr)
+			gravityContract, err := getGravityContract(em, gravityAddr)
 			if err != nil {
 				return err
 			}
@@ -343,21 +336,16 @@ network starting.`,
 				return err
 			}
 
-			InitEthRPCManager(konfig)
+			em := NewEthRPCManager(konfig)
 
-			ethRPC, err := ethManager.GetEthClient()
-			if err != nil {
-				return err
-			}
-
-			auth, err := buildTransactOpts(konfig, ethRPC)
+			auth, err := buildTransactOpts(em)
 			if err != nil {
 				return err
 			}
 
 			gravityAddr := args[0]
 
-			gravityContract, err := getGravityContract(ethRPC, gravityAddr)
+			gravityContract, err := getGravityContract(em, gravityAddr)
 			if err != nil {
 				return err
 			}
@@ -406,16 +394,11 @@ func sendToCosmosCmd() *cobra.Command {
 				return err
 			}
 
-			InitEthRPCManager(konfig)
-
-			ethRPC, err := ethManager.GetEthClient()
-			if err != nil {
-				return err
-			}
+			em := NewEthRPCManager(konfig)
 
 			gravityAddr := args[0]
 
-			gravityContract, err := getGravityContract(ethRPC, gravityAddr)
+			gravityContract, err := getGravityContract(em, gravityAddr)
 			if err != nil {
 				return err
 			}
@@ -424,12 +407,12 @@ func sendToCosmosCmd() *cobra.Command {
 			tokenAddr := ethcmn.HexToAddress(tokenAddrStr)
 
 			if konfig.Bool(flagAutoApprove) {
-				if err := approveERC20(konfig, ethRPC, tokenAddrStr, gravityAddr); err != nil {
+				if err := approveERC20(em, tokenAddrStr, gravityAddr); err != nil {
 					return err
 				}
 			}
 
-			auth, err := buildTransactOpts(konfig, ethRPC)
+			auth, err := buildTransactOpts(em)
 			if err != nil {
 				return err
 			}
@@ -472,7 +455,8 @@ Transaction: %s
 	return cmd
 }
 
-func buildTransactOpts(konfig *koanf.Koanf, ethClient *ethclient.Client) (*bind.TransactOpts, error) {
+func buildTransactOpts(em *EthRPCManager) (*bind.TransactOpts, error) {
+	konfig := em.konfig
 	ethPrivKeyHexStr := konfig.String(flagEthPK)
 
 	privKey, err := ethcrypto.ToECDSA(ethcmn.FromHex(ethPrivKeyHexStr))
@@ -491,7 +475,7 @@ func buildTransactOpts(konfig *koanf.Koanf, ethClient *ethclient.Client) (*bind.
 
 	fromAddress := ethcrypto.PubkeyToAddress(*publicKeyECDSA)
 
-	nonce, err := ethClient.PendingNonceAt(goCtx, fromAddress)
+	nonce, err := em.PendingNonceAt(goCtx, fromAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -499,7 +483,7 @@ func buildTransactOpts(konfig *koanf.Koanf, ethClient *ethclient.Client) (*bind.
 	goCtx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	ethChainID, err := ethClient.ChainID(goCtx)
+	ethChainID, err := em.ChainID(goCtx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Ethereum chain ID: %w", err)
 	}
@@ -520,7 +504,7 @@ func buildTransactOpts(konfig *koanf.Koanf, ethClient *ethclient.Client) (*bind.
 		gasPrice = big.NewInt(gasPriceInt)
 
 	default:
-		gasPrice, err = ethClient.SuggestGasPrice(context.Background())
+		gasPrice, err = em.SuggestGasPrice(context.Background())
 		if err != nil {
 			return nil, fmt.Errorf("failed to get Ethereum gas estimate: %w", err)
 		}
@@ -553,7 +537,12 @@ func getGravityParams(gRPCConn *grpc.ClientConn) (*gravitytypes.Params, error) {
 	return &gravityParamsResp.Params, nil
 }
 
-func getGravityContract(ethRPC *ethclient.Client, gravityAddr string) (*wrappers.Gravity, error) {
+func getGravityContract(em *EthRPCManager, gravityAddr string) (*wrappers.Gravity, error) {
+	ethRPC, err := em.GetEthClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Gravity contract instance: %w", err)
+	}
+
 	contract, err := wrappers.NewGravity(ethcmn.HexToAddress(gravityAddr), ethRPC)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Gravity contract instance: %w", err)
@@ -562,13 +551,18 @@ func getGravityContract(ethRPC *ethclient.Client, gravityAddr string) (*wrappers
 	return contract, nil
 }
 
-func approveERC20(konfig *koanf.Koanf, ethRPC *ethclient.Client, erc20AddrStr, gravityAddrStr string) error {
+func approveERC20(em *EthRPCManager, erc20AddrStr, gravityAddrStr string) error {
+	ethRPC, err := em.GetEthClient()
+	if err != nil {
+		return fmt.Errorf("failed to create ERC20 contract instance: %w", err)
+	}
+
 	contract, err := wrappers.NewERC20(ethcmn.HexToAddress(erc20AddrStr), ethRPC)
 	if err != nil {
 		return fmt.Errorf("failed to create ERC20 contract instance: %w", err)
 	}
 
-	auth, err := buildTransactOpts(konfig, ethRPC)
+	auth, err := buildTransactOpts(em)
 	if err != nil {
 		return err
 	}

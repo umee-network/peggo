@@ -14,22 +14,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-var ethManager *EthRPCManager
-
 type EthRPCManager struct {
 	currentEndpoint int // the slice index of the endpoint currently used
 	client          *rpc.Client
 	konfig          *koanf.Koanf
 }
 
-// initializes the single instance of EthRPCManager with a given config (uses flagEthRPCs).
-// no-op if already initialized, even if konfig would be different.
-func InitEthRPCManager(konfig *koanf.Koanf) {
-	if ethManager == nil {
-		ethManager = &EthRPCManager{
-			konfig: konfig,
-		}
+// creates an instance of EthRPCManager with a given konfig.
+func NewEthRPCManager(konfig *koanf.Koanf) *EthRPCManager {
+	ethManager := &EthRPCManager{
+		konfig: konfig,
 	}
+	return ethManager
 }
 
 // closes and sets to nil the stored eth RPC client
