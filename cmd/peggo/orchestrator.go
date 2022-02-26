@@ -40,6 +40,8 @@ func getOrchestratorCmd() *cobra.Command {
 				return err
 			}
 
+			InitEthRPCManager(konfig)
+
 			logger, err := getLogger(cmd)
 			if err != nil {
 				return err
