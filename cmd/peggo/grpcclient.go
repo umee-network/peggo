@@ -15,7 +15,7 @@ import (
 )
 
 type EthRPCManager struct {
-	currentEndpoint int // the slice index of the endpoint currently used
+	currentEndpoint int // index (in the slice of configured RPC endpoints) of most recent endpoint used
 	client          *rpc.Client
 	konfig          *koanf.Koanf
 }
