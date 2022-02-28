@@ -43,6 +43,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+[#216](https://github.com/umee-network/peggo/pull/216) Add profitability check on the batch requester loop.
+
 ### Bug Fixes
 
 - [#209](https://github.com/umee-network/peggo/pull/209) Fix the `version` command to display correctly.
