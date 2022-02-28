@@ -309,7 +309,6 @@ func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error
 			var unbatchedTokensWithFees []types.BatchFees
 
 			if err := retry.Do(func() (err error) {
-
 				batchFeesResp, err := p.cosmosQueryClient.BatchFees(ctx, &types.QueryBatchFeeRequest{})
 
 				if err != nil {
@@ -318,7 +317,7 @@ func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error
 
 				unbatchedTokensWithFees = batchFeesResp.GetBatchFees()
 
-				if p.relayer.GetProfitMultiplier() != 0.0 {
+				if p.relayer.GetProfitMultiplier() > 0.0 {
 					gasPrice, err = p.ethProvider.SuggestGasPrice(context.Background())
 					if err != nil {
 						return fmt.Errorf("failed to get Ethereum gas estimate: %w", err)
@@ -373,7 +372,7 @@ func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error
 
 				shouldRequestBatch := true
 
-				if p.relayer.GetProfitMultiplier() != 0.0 {
+				if p.relayer.GetProfitMultiplier() > 0.0 {
 					// First we get the cost of the transaction in USD
 					totalETHcost := big.NewInt(0).Mul(gasPrice, big.NewInt(estimatedGasCosts[unbatchedToken.TxCount]))
 					// Ethereum decimals are 18 and that's a constant.
