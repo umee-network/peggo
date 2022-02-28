@@ -37,8 +37,20 @@ const (
 // to add a dynamic registry in which gas costs are updated and divided by
 // type of token (not all ERC20 are created equal, some may do some extra checks
 // in transfers).
-// nolint: lll
-var estimatedGasCosts = []int64{575563, 582863, 591565, 600967, 611968, 621532, 630328, 642386, 653063, 661581, 668183, 678635, 685289, 696851, 704866, 708887, 712721, 721445, 727461, 734690, 742043, 752750, 760223, 767272, 769101, 773423, 784019, 798268, 802351, 806362, 807763, 814683, 828969, 831213, 843207, 847569, 870002, 873950, 875285, 877254, 882126, 887008, 911510, 911901, 918882, 919109, 920685, 927237, 933757, 935638, 936261, 947621, 948716, 965708, 970508, 976337, 995011, 998407, 999148, 1016724, 1024643, 1035313, 1044177, 1046768, 1053295, 1053903, 1059293, 1073982, 1078022, 1078123, 1082061, 1084901, 1094332, 1103762, 1108249, 1114666, 1126675, 1136556, 1146072, 1154187, 1157889, 1159855, 1171010, 1172318, 1173955, 1181863, 1188274, 1191781, 1194480, 1209858, 1226168, 1227017, 1228247, 1234944, 1238819, 1244511, 1256137, 1258859, 1261745, 1261934}
+var estimatedGasCosts = []int64{
+	575563, 582863, 591565, 600967, 611968, 621532, 630328, 642386, 653063,
+	661581, 668183, 678635, 685289, 696851, 704866, 708887, 712721, 721445,
+	727461, 734690, 742043, 752750, 760223, 767272, 769101, 773423, 784019,
+	798268, 802351, 806362, 807763, 814683, 828969, 831213, 843207, 847569,
+	870002, 873950, 875285, 877254, 882126, 887008, 911510, 911901, 918882,
+	919109, 920685, 927237, 933757, 935638, 936261, 947621, 948716, 965708,
+	970508, 976337, 995011, 998407, 999148, 1016724, 1024643, 1035313,
+	1044177, 1046768, 1053295, 1053903, 1059293, 1073982, 1078022, 1078123,
+	1082061, 1084901, 1094332, 1103762, 1108249, 1114666, 1126675, 1136556,
+	1146072, 1154187, 1157889, 1159855, 1171010, 1172318, 1173955, 1181863,
+	1188274, 1191781, 1194480, 1209858, 1226168, 1227017, 1228247, 1234944,
+	1238819, 1244511, 1256137, 1258859, 1261745, 1261934,
+}
 
 // Start combines the all major roles required to make
 // up the Orchestrator, all of these are async loops.
@@ -305,7 +317,6 @@ func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error
 			var unbatchedTokensWithFees []types.BatchFees
 
 			if err := retry.Do(func() (err error) {
-
 				batchFeesResp, err := p.cosmosQueryClient.BatchFees(ctx, &types.QueryBatchFeeRequest{})
 
 				if err != nil {
@@ -314,7 +325,7 @@ func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error
 
 				unbatchedTokensWithFees = batchFeesResp.GetBatchFees()
 
-				if p.relayer.GetProfitMultiplier() != 0.0 {
+				if p.relayer.GetProfitMultiplier() > 0.0 {
 					gasPrice, err = p.ethProvider.SuggestGasPrice(context.Background())
 					if err != nil {
 						return fmt.Errorf("failed to get Ethereum gas estimate: %w", err)
@@ -369,7 +380,7 @@ func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error
 
 				shouldRequestBatch := true
 
-				if p.relayer.GetProfitMultiplier() != 0.0 {
+				if p.relayer.GetProfitMultiplier() > 0.0 {
 					// First we get the cost of the transaction in USD
 					totalETHcost := big.NewInt(0).Mul(gasPrice, big.NewInt(estimatedGasCosts[unbatchedToken.TxCount-1]))
 					// Ethereum decimals are 18 and that's a constant.
