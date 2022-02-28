@@ -106,8 +106,12 @@ func bridgeFlagSet() *pflag.FlagSet {
 	fs := pflag.NewFlagSet("", pflag.ContinueOnError)
 
 	fs.String(flagEthRPC, "http://localhost:8545", "Specify the RPC address of an Ethereum node")
+<<<<<<< HEAD
 	fs.String(flagEthPK, "", "Provide the Ethereum private key of the orchestrator in hex")
 	fs.Int64(flagEthGasPrice, 0, "The Ethereum gas price to include in the transaction; If zero, gas price will be estimated")
+=======
+	fs.Int64(flagEthGasPrice, 0, "The Ethereum gas price (in wei) to include in the transaction; If zero, gas price will be estimated")
+>>>>>>> a345acb (chore: Clarify Ethereum gas price unit (#218))
 	fs.Int64(flagEthGasLimit, 6000000, "The Ethereum gas limit to include in the transaction")
 	_ = fs.MarkDeprecated(flagEthPK, "use the env var $PEGGO_ETH_PK instead")
 
