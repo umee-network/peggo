@@ -17,7 +17,7 @@ ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev
 RUN apk add --no-cache $PACKAGES
 WORKDIR /downloads/
 RUN git clone https://github.com/umee-network/umee.git
-RUN cd umee && git checkout ${UMEE_VERSION} && make build && cp ./build/umeed /usr/local/bin/
+RUN cd umee && git checkout ${UMEE_VERSION} && CGO_ENABLED=0 make build && cp ./build/umeed /usr/local/bin/
 
 # Add to a distroless container
 FROM gcr.io/distroless/cc:$IMG_TAG
