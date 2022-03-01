@@ -1,22 +1,17 @@
 # Release Notes
 
-This release introduces the deprecation of the `--relay-valsets` flag in favor
-of `--valset-relay-mode` which allows a finer control over how valsets will be
-relayed.
-The ERC20 to Coingecko IDs mapping was also updated to accomodate the new ERC20s
-deployed this week.
+This release includes several bug fixes and the ability to check for profit
+before requesting a new batch.
+It also includes updates to vulnerable dependencies.
 
 ## Changelog
 
 ### Features
 
-- [#189] Add the flag `--valset-relay-mode` which allows a finer control over
-  how valsets will be relayed.
+[#216](https://github.com/umee-network/peggo/pull/216) Add profitability check on the batch requester loop.
 
-### Improvements
+### Bug Fixes
 
-- [#201] Add ERC20 mappings for Umee's new tokens.
-
-### Deprecated
-
-- [#189] Deprecate the `--relay-valsets` flag.
+- [#217](https://github.com/umee-network/peggo/pull/217) Add validation to user input Ethereum addresses.
+- [#209](https://github.com/umee-network/peggo/pull/209) Fix the `version` command to display correctly.
+- [#205](https://github.com/umee-network/peggo/pull/205) Make sure users are warned when using unencrypted non-local urls in flags.
