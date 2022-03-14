@@ -44,7 +44,7 @@ type GravityRelayer interface {
 
 	// SetPriceFeeder sets the (optional) price feeder used when performing profitable
 	// batch calculations.
-	SetPriceFeeder(*coingecko.PriceFeed)
+	SetPriceFeeder(*coingecko.CoinGecko)
 
 	GetProfitMultiplier() float64
 }
@@ -57,7 +57,7 @@ type gravityRelayer struct {
 	valsetRelayMode   ValsetRelayMode
 	batchRelayEnabled bool
 	loopDuration      time.Duration
-	priceFeeder       *coingecko.PriceFeed
+	priceFeeder       *coingecko.CoinGecko
 	pendingTxWait     time.Duration
 	profitMultiplier  float64
 

@@ -70,7 +70,7 @@ func TestIsBatchProfitable(t *testing.T) {
 		fmt.Fprint(w, `{"ethereum": {"usd": 4271.57}}`)
 	}))
 	defer svr.Close()
-	coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, &coingecko.Config{BaseURL: svr.URL})
+	coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, &coingecko.Config{BaseURL: svr.URL})
 
 	relayer := gravityRelayer{
 		gravityContract:  gravityContract,

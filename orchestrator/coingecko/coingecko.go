@@ -22,35 +22,117 @@ const (
 
 var zeroPrice = float64(0)
 
-type PriceFeed struct {
+type CoinGecko struct {
 	client *http.Client
 	config *Config
 
-	interval time.Duration
+	coinsSymbol map[ethcmn.Address]string // contract addr => token symbol
 
 	logger zerolog.Logger
 }
 
+// Config wraps config variable to get information at CoinGecko
 type Config struct {
 	BaseURL string
 }
 
-func urlJoin(baseURL string, segments ...string) string {
-	u, err := url.Parse(baseURL)
-	if err != nil {
-		panic(err)
-	}
-	u.Path = path.Join(append([]string{u.Path}, segments...)...)
-	return u.String()
-
+// CoinInfo wraps the coin information receveid from an contract address.
+// https://api.coingecko.com/api/v3/coins/ethereum/contract/${CONTRACT_ADDR}
+type CoinInfo struct {
+	Symbol string `json:"symbol"`
+	Error  string `json:"error"`
 }
 
 type priceResponse map[string]struct {
 	USD float64 `json:"usd"`
 }
 
-func (cp *PriceFeed) QueryUSDPriceByCoinID(coinID string) (float64, error) {
-	u, err := url.ParseRequestURI(urlJoin(cp.config.BaseURL, "simple", "price"))
+// NewCoingeckoPriceFeed returns price puller for given symbol. The price will be pulled
+// from endpoint and divided by scaleFactor. Symbol name (if reported by endpoint) must match.
+func NewCoingeckoPriceFeed(logger zerolog.Logger, endpointConfig *Config) *CoinGecko {
+	return &CoinGecko{
+		client: &http.Client{
+			Transport: &http.Transport{
+				ResponseHeaderTimeout: maxRespHeadersTime,
+			},
+			Timeout: maxRespTime,
+		},
+		config:      checkCoingeckoConfig(endpointConfig),
+		coinsSymbol: make(map[ethcmn.Address]string),
+		logger:      logger.With().Str("oracle", "coingecko").Logger(),
+	}
+}
+
+func urlJoin(baseURL string, segments ...string) (*url.URL, error) {
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = path.Join(append([]string{u.Path}, segments...)...)
+	return u, nil
+}
+
+// GetTokenSymbol returns the token symbol checked by CoinGecko API.
+func (cp *CoinGecko) GetTokenSymbol(erc20Contract ethcmn.Address) (string, error) {
+	symbol, ok := cp.coinsSymbol[erc20Contract]
+	if !ok {
+		symbol, err := cp.requestCoinSymbol(erc20Contract)
+		if err != nil {
+			return "", err
+		}
+		cp.setCoinSymbol(erc20Contract, symbol)
+
+		return symbol, nil
+	}
+
+	return symbol, nil
+}
+
+func (cp *CoinGecko) setCoinSymbol(erc20Contract ethcmn.Address, symbol string) {
+	cp.coinsSymbol[erc20Contract] = symbol
+}
+
+func (cp *CoinGecko) getRequestCoinSymbolURL(erc20Contract ethcmn.Address) (*url.URL, error) {
+	return urlJoin(cp.config.BaseURL, "coins", EthereumCoinID, "contract", erc20Contract.Hex())
+}
+
+func (cp *CoinGecko) requestCoinSymbol(erc20Contract ethcmn.Address) (string, error) {
+	u, err := cp.getRequestCoinSymbolURL(erc20Contract)
+	if err != nil {
+		cp.logger.Fatal().Err(err).Msg("failed to parse coin info URL")
+	}
+
+	reqURL := u.String()
+	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
+	if err != nil {
+		cp.logger.Fatal().Err(err).Msg("failed to create HTTP request of coin info")
+	}
+
+	resp, err := cp.client.Do(req)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to fetch coin info from %s", reqURL)
+	}
+	defer resp.Body.Close()
+
+	var coinInfo CoinInfo
+	if err := json.NewDecoder(resp.Body).Decode(&coinInfo); err != nil {
+		return "", errors.Wrapf(err, "failed to parse response body from %s", reqURL)
+	}
+
+	if len(coinInfo.Error) > 0 {
+		return "", errors.New(coinInfo.Error)
+	}
+
+	if len(coinInfo.Symbol) == 0 {
+		return "", errors.New("Fail to get coin info for contract: " + erc20Contract.Hex())
+	}
+
+	return coinInfo.Symbol, nil
+}
+
+func (cp *CoinGecko) QueryUSDPriceByCoinID(coinID string) (float64, error) {
+	u, err := urlJoin(cp.config.BaseURL, "simple", "price")
 	if err != nil {
 		cp.logger.Fatal().Err(err).Msg("failed to parse URL")
 	}
@@ -92,14 +174,14 @@ func (cp *PriceFeed) QueryUSDPriceByCoinID(coinID string) (float64, error) {
 	return price, nil
 }
 
-func (cp *PriceFeed) QueryTokenUSDPrice(erc20Contract ethcmn.Address) (float64, error) {
+func (cp *CoinGecko) QueryTokenUSDPrice(erc20Contract ethcmn.Address) (float64, error) {
 	// If the token is one of the deployed by the Gravity contract, use the
 	// stored coin ID to look up the price.
 	if coinID, ok := bridgeTokensCoinIDs[erc20Contract.Hex()]; ok {
 		return cp.QueryUSDPriceByCoinID(coinID)
 	}
 
-	u, err := url.ParseRequestURI(urlJoin(cp.config.BaseURL, "simple", "token_price", EthereumCoinID))
+	u, err := urlJoin(cp.config.BaseURL, "simple", "token_price", EthereumCoinID)
 	if err != nil {
 		cp.logger.Fatal().Err(err).Msg("failed to parse URL")
 	}
@@ -127,7 +209,6 @@ func (cp *PriceFeed) QueryTokenUSDPrice(erc20Contract ethcmn.Address) (float64, 
 	var respBody priceResponse
 
 	err = json.NewDecoder(resp.Body).Decode(&respBody)
-
 	if err != nil {
 		return zeroPrice, errors.Wrapf(err, "failed to parse response body from %s", reqURL)
 	}
@@ -139,22 +220,6 @@ func (cp *PriceFeed) QueryTokenUSDPrice(erc20Contract ethcmn.Address) (float64, 
 	}
 
 	return price, nil
-}
-
-// NewCoingeckoPriceFeed returns price puller for given symbol. The price will be pulled
-// from endpoint and divided by scaleFactor. Symbol name (if reported by endpoint) must match.
-func NewCoingeckoPriceFeed(logger zerolog.Logger, interval time.Duration, endpointConfig *Config) *PriceFeed {
-	return &PriceFeed{
-		client: &http.Client{
-			Transport: &http.Transport{
-				ResponseHeaderTimeout: maxRespHeadersTime,
-			},
-			Timeout: maxRespTime,
-		},
-		config:   checkCoingeckoConfig(endpointConfig),
-		interval: interval,
-		logger:   logger.With().Str("module", "coingecko_pricefeed").Logger(),
-	}
 }
 
 func checkCoingeckoConfig(cfg *Config) *Config {

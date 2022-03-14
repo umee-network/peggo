@@ -171,7 +171,7 @@ func getOrchestratorCmd() *cobra.Command {
 			}
 
 			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
-			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, 100, &coingecko.Config{
+			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, &coingecko.Config{
 				BaseURL: coingeckoAPI,
 			})
 

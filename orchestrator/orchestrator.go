@@ -42,7 +42,7 @@ type gravityOrchestrator struct {
 	batchRequesterLoopDuration time.Duration
 	ethBlocksPerLoop           uint64
 	bridgeStartHeight          uint64
-	priceFeeder                *coingecko.PriceFeed
+	priceFeeder                *coingecko.CoinGecko
 
 	mtx             sync.Mutex
 	erc20DenomCache map[string]string
@@ -62,7 +62,7 @@ func NewGravityOrchestrator(
 	batchRequesterLoopDuration time.Duration,
 	ethBlocksPerLoop int64,
 	bridgeStartHeight int64,
-	priceFeeder *coingecko.PriceFeed,
+	priceFeeder *coingecko.CoinGecko,
 	options ...func(GravityOrchestrator),
 ) GravityOrchestrator {
 
