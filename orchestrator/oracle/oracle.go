@@ -3,6 +3,7 @@ package oracle
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -31,8 +32,10 @@ var (
 // Oracle implements the core component responsible for fetching exchange rates
 // for a given set of currency pairs and determining the correct exchange rates.
 type Oracle struct {
-	logger    zerolog.Logger
-	closer    *ummedpfsync.Closer
+	logger zerolog.Logger
+	closer *ummedpfsync.Closer
+
+	mtx       sync.RWMutex
 	providers map[string]*Provider // providerName => Provider
 	prices    map[string]sdk.Dec   // symbol => price
 }
@@ -70,6 +73,73 @@ func New(ctx context.Context, logger zerolog.Logger, providersName []string) (*O
 	return oracle, nil
 }
 
+// GetPrices returns a copy of the current prices fetched from the oracle's
+// set of exchange rate providers.
+func (o *Oracle) GetPrices(symbols ...string) map[string]sdk.Dec {
+	o.mtx.RLock()
+	defer o.mtx.RUnlock()
+
+	// Creates a new array for the prices in the oracle
+	prices := make(map[string]sdk.Dec, len(o.prices))
+	for k, v := range o.prices {
+		// Fills in the prices with each value in the oracle
+		prices[k] = v
+	}
+
+	return prices
+}
+
+// SubscribeSymbols attempts to subscribe the symbols in all the providers.
+// baseSymbols is the base to be subscribed ex.: ["UMEE", "ATOM"].
+func (o *Oracle) SubscribeSymbols(baseSymbols ...string) error {
+	for _, baseSymbol := range baseSymbols {
+		currencyPairs := GetStablecoinsCurrencyPair(baseSymbol)
+		if err := o.subscribeProviders(currencyPairs); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *Oracle) subscribeProviders(currencyPairs []umeedpftypes.CurrencyPair) error {
+	o.mtx.Lock()
+	defer o.mtx.Unlock()
+
+	for providerName, provider := range o.providers {
+		var pairsToSubscribe []umeedpftypes.CurrencyPair
+
+		for _, currencyPair := range currencyPairs {
+			symbol := currencyPair.String()
+
+			_, ok := provider.subscribedPairs[symbol]
+			if ok {
+				// currency pair already subscribed
+				continue
+			}
+
+			_, ok = provider.availablePairs[symbol]
+			if !ok {
+				o.logger.Debug().Str("provider name", providerName).Str("symbol", symbol).Msg("symbol is not available")
+				continue
+			}
+
+			pairsToSubscribe = append(pairsToSubscribe, currencyPair)
+		}
+
+		if err := provider.SubscribeCurrencyPairs(pairsToSubscribe...); err != nil {
+			o.logger.Err(err).Str("provider name", providerName).Msg("subscribing to new currency pairs")
+			return err
+		}
+
+		for _, pair := range pairsToSubscribe {
+			provider.subscribedPairs[pair.String()] = pair
+		}
+	}
+
+	return nil
+}
+
 // Stop stops the oracle process and waits for it to gracefully exit.
 func (o *Oracle) Stop() {
 	o.closer.Close()
@@ -90,7 +160,7 @@ func (o *Oracle) Start(ctx context.Context) error {
 				o.logger.Err(err).Msg("oracle tick failed")
 			}
 
-		case <-time.After(tickerTimeout):
+		case <-time.After(availablePairsReload):
 			o.LoadAvailablePairs()
 		}
 	}
@@ -358,6 +428,22 @@ func MapPairsToSlice(mapPairs map[string]umeedpftypes.CurrencyPair) []umeedpftyp
 	for _, cp := range mapPairs {
 		currencyPairs[iterator] = cp
 		iterator++
+	}
+
+	return currencyPairs
+}
+
+// GetStablecoinsCurrencyPair return the currency pair of that symbol quoted by some
+// stablecoins.
+func GetStablecoinsCurrencyPair(baseSymbol string) []umeedpftypes.CurrencyPair {
+	quotes := []string{"USD", "USDT", "UST"}
+	currencyPairs := make([]umeedpftypes.CurrencyPair, len(quotes))
+
+	for i, quote := range quotes {
+		currencyPairs[i] = umeedpftypes.CurrencyPair{
+			Base:  strings.ToUpper(baseSymbol),
+			Quote: quote,
+		}
 	}
 
 	return currencyPairs
