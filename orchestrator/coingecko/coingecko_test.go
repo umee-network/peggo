@@ -96,7 +96,7 @@ func TestQueryTokenUSDPrice(t *testing.T) {
 
 func TestGetTokenSymbol(t *testing.T) {
 	coinGecko := NewCoingeckoPriceFeed(logger, nil)
-	symbol := "umee"
+	symbol := "UMEE"
 	umeeContractAddr := ethcmn.HexToAddress("0xc0a4Df35568F116C370E6a6A6022Ceb908eedDaC")
 	coinGecko.setCoinSymbol(umeeContractAddr, symbol)
 
@@ -116,7 +116,7 @@ func TestRequestCoinSymbol(t *testing.T) {
 		coinGecko := NewCoingeckoPriceFeed(logger, &Config{BaseURL: svr.URL})
 		symbol, err := coinGecko.requestCoinSymbol(ethcmn.HexToAddress("0xc0a4Df35568F116C370E6a6A6022Ceb908eedDaC"))
 		assert.Nil(t, err)
-		assert.Equal(t, symbol, "umee")
+		assert.Equal(t, symbol, "UMEE")
 	})
 
 	t.Run("symbol not found", func(t *testing.T) {

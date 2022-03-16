@@ -128,7 +128,7 @@ func (cp *CoinGecko) requestCoinSymbol(erc20Contract ethcmn.Address) (string, er
 		return "", errors.New("Fail to get coin info for contract: " + erc20Contract.Hex())
 	}
 
-	return coinInfo.Symbol, nil
+	return strings.ToUpper(coinInfo.Symbol), nil
 }
 
 func (cp *CoinGecko) QueryUSDPriceByCoinID(coinID string) (float64, error) {
