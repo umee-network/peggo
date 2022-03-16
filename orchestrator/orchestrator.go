@@ -14,6 +14,7 @@ import (
 	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/keystore"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
+	"github.com/umee-network/peggo/orchestrator/oracle"
 	"github.com/umee-network/peggo/orchestrator/relayer"
 )
 
@@ -42,7 +43,8 @@ type gravityOrchestrator struct {
 	batchRequesterLoopDuration time.Duration
 	ethBlocksPerLoop           uint64
 	bridgeStartHeight          uint64
-	priceFeeder                *coingecko.CoinGecko
+	coinGecko                  *coingecko.CoinGecko
+	oracle                     oracle.PriceFeeder
 
 	mtx             sync.Mutex
 	erc20DenomCache map[string]string
@@ -63,6 +65,7 @@ func NewGravityOrchestrator(
 	ethBlocksPerLoop int64,
 	bridgeStartHeight int64,
 	priceFeeder *coingecko.CoinGecko,
+	oracle oracle.PriceFeeder,
 	options ...func(GravityOrchestrator),
 ) GravityOrchestrator {
 
@@ -81,7 +84,8 @@ func NewGravityOrchestrator(
 		batchRequesterLoopDuration: batchRequesterLoopDuration,
 		ethBlocksPerLoop:           uint64(ethBlocksPerLoop),
 		bridgeStartHeight:          uint64(bridgeStartHeight),
-		priceFeeder:                priceFeeder,
+		coinGecko:                  priceFeeder,
+		oracle:                     oracle,
 	}
 
 	for _, option := range options {

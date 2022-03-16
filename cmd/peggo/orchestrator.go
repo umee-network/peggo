@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -19,6 +20,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
+	umeedpfconfig "github.com/umee-network/umee/price-feeder/config"
+
 	"github.com/umee-network/peggo/cmd/peggo/client"
 	"github.com/umee-network/peggo/orchestrator"
 	"github.com/umee-network/peggo/orchestrator/coingecko"
@@ -26,6 +29,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
+	"github.com/umee-network/peggo/orchestrator/oracle"
 	"github.com/umee-network/peggo/orchestrator/relayer"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
@@ -192,6 +196,16 @@ func getOrchestratorCmd() *cobra.Command {
 				return err
 			}
 
+			providers := konfig.Strings(flagOracleProviders)
+			newOracle, err := oracle.New(context.Background(), logger, providers)
+			if err != nil {
+				return err
+			}
+
+			if err := newOracle.SubscribeSymbols(oracle.BaseSymbolETH); err != nil {
+				return err
+			}
+
 			relayer := relayer.NewGravityRelayer(
 				logger,
 				gravityQuerier,
@@ -202,6 +216,7 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Duration(flagEthPendingTXWait),
 				konfig.Float64(flagProfitMultiplier),
 				relayer.SetPriceFeeder(coingeckoFeed),
+				relayer.SetOracle(newOracle),
 			)
 
 			logger = logger.With().
@@ -235,6 +250,7 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Int64(flagEthBlocksPerLoop),
 				konfig.Int64(flagBridgeStartHeight),
 				coingeckoFeed,
+				newOracle,
 			)
 
 			ctx, cancel = context.WithCancel(context.Background())
@@ -263,6 +279,9 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 2000, "Number of Ethereum blocks to process per orchestrator loop")
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
+	cmd.Flags().StringSlice(flagOracleProviders, []string{umeedpfconfig.ProviderBinance, umeedpfconfig.ProviderHuobi},
+		fmt.Sprintf("Specify the providers to use in the oracle, options \"%s\"", strings.Join([]string{umeedpfconfig.ProviderBinance, umeedpfconfig.ProviderHuobi,
+			umeedpfconfig.ProviderKraken, umeedpfconfig.ProviderGate, umeedpfconfig.ProviderOkx, umeedpfconfig.ProviderOsmosis}, ",")))
 	cmd.Flags().Duration(flagEthPendingTXWait, 20*time.Minute, "Time for a pending tx to be considered stale")
 	cmd.Flags().String(flagEthAlchemyWS, "", "Specify the Alchemy websocket endpoint")
 	cmd.Flags().Float64(flagProfitMultiplier, 1.0, "Multiplier to apply to relayer profit")
