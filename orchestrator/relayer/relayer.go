@@ -10,6 +10,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/coingecko"
 	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
+	"github.com/umee-network/peggo/orchestrator/oracle"
 
 	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 )
@@ -45,6 +46,7 @@ type GravityRelayer interface {
 	// SetPriceFeeder sets the (optional) price feeder used when performing profitable
 	// batch calculations.
 	SetPriceFeeder(*coingecko.CoinGecko)
+	SetOracle(oracle.PriceFeeder)
 
 	GetProfitMultiplier() float64
 }
@@ -57,9 +59,10 @@ type gravityRelayer struct {
 	valsetRelayMode   ValsetRelayMode
 	batchRelayEnabled bool
 	loopDuration      time.Duration
-	priceFeeder       *coingecko.CoinGecko
+	coinGecko         *coingecko.CoinGecko
 	pendingTxWait     time.Duration
 	profitMultiplier  float64
+	oracle            oracle.PriceFeeder
 
 	// Store locally the last tx this validator made to avoid sending duplicates
 	// or invalid txs.
