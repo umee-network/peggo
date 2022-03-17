@@ -23,31 +23,34 @@ const (
 
 var zeroPrice = float64(0)
 
-type CoinGecko struct {
-	client *http.Client
-	config *Config
+type (
+	// CoinGecko wraps the client to retrieve information from their API.
+	CoinGecko struct {
+		client *http.Client
+		config *Config
 
-	coinsSymbol map[ethcmn.Address]string // contract addr => token symbol
+		coinsSymbol map[ethcmn.Address]string // contract addr => token symbol
 
-	logger zerolog.Logger
-}
+		logger zerolog.Logger
+	}
 
-// Config wraps the config variable to get CoinGecko information.
-type Config struct {
-	BaseURL string
-}
+	// Config wraps the config variable to get CoinGecko information.
+	Config struct {
+		BaseURL string
+	}
 
-// CoinInfo wraps the coin information received from a contract address.
-//
-// Ref : https://api.coingecko.com/api/v3/coins/ethereum/contract/${CONTRACT_ADDR}
-type CoinInfo struct {
-	Symbol string `json:"symbol"`
-	Error  string `json:"error"`
-}
+	// CoinInfo wraps the coin information received from a contract address.
+	//
+	// Ref : https://api.coingecko.com/api/v3/coins/ethereum/contract/${CONTRACT_ADDR}
+	CoinInfo struct {
+		Symbol string `json:"symbol"`
+		Error  string `json:"error"`
+	}
 
-type priceResponse map[string]struct {
-	USD float64 `json:"usd"`
-}
+	priceResponse map[string]struct {
+		USD float64 `json:"usd"`
+	}
+)
 
 // NewCoingeckoPriceFeed returns price puller for given symbol. The price will be pulled
 // from endpoint and divided by scaleFactor. Symbol name (if reported by endpoint) must match.
