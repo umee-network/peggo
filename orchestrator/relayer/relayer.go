@@ -43,9 +43,11 @@ type GravityRelayer interface {
 
 	RelayValsets(ctx context.Context, currentValset gravitytypes.Valset) error
 
-	// SetPriceFeeder sets the (optional) price feeder used when performing profitable
+	// SetCoinGecko sets CoinGecko to get the symbol from contract address.
+	SetCoinGecko(*coingecko.CoinGecko)
+
+	// SetOracle sets the oracle for price feeder used when performing profitable
 	// batch calculations.
-	SetPriceFeeder(*coingecko.CoinGecko)
 	SetOracle(oracle.PriceFeeder)
 
 	GetProfitMultiplier() float64

@@ -103,7 +103,7 @@ func TestIsBatchProfitable(t *testing.T) {
 
 	}))
 	defer svr.Close()
-	coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, &coingecko.Config{BaseURL: svr.URL})
+	coingeckoFeed := coingecko.NewCoingecko(logger, &coingecko.Config{BaseURL: svr.URL})
 	mockOracle := NewMockOracle()
 
 	relayer := gravityRelayer{

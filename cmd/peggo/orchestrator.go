@@ -175,7 +175,7 @@ func getOrchestratorCmd() *cobra.Command {
 			}
 
 			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
-			coingeckoFeed := coingecko.NewCoingeckoPriceFeed(logger, &coingecko.Config{
+			coingeckoFeed := coingecko.NewCoingecko(logger, &coingecko.Config{
 				BaseURL: coingeckoAPI,
 			})
 
@@ -215,7 +215,7 @@ func getOrchestratorCmd() *cobra.Command {
 				relayerLoopDuration,
 				konfig.Duration(flagEthPendingTXWait),
 				konfig.Float64(flagProfitMultiplier),
-				relayer.SetPriceFeeder(coingeckoFeed),
+				relayer.SetCoinGecko(coingeckoFeed),
 				relayer.SetOracle(o),
 			)
 

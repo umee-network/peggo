@@ -5,11 +5,11 @@ import (
 	"github.com/umee-network/peggo/orchestrator/oracle"
 )
 
-func SetPriceFeeder(coinGecko *coingecko.CoinGecko) func(GravityRelayer) {
-	return func(s GravityRelayer) { s.SetPriceFeeder(coinGecko) }
+func SetCoinGecko(coinGecko *coingecko.CoinGecko) func(GravityRelayer) {
+	return func(s GravityRelayer) { s.SetCoinGecko(coinGecko) }
 }
 
-func (s *gravityRelayer) SetPriceFeeder(coinGecko *coingecko.CoinGecko) {
+func (s *gravityRelayer) SetCoinGecko(coinGecko *coingecko.CoinGecko) {
 	s.coinGecko = coinGecko
 }
 
