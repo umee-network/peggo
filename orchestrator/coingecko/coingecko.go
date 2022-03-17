@@ -117,11 +117,11 @@ func (cp *CoinGecko) requestCoinSymbol(erc20Contract ethcmn.Address) (string, er
 
 	var coinInfo CoinInfo
 	if err := json.NewDecoder(resp.Body).Decode(&coinInfo); err != nil {
-		return "", errors.Wrapf(err, "failed to parse response body from %s", reqURL)
+		return "", fmt.Errorf("failed to parse response body from %s: %w", reqURL, err)
 	}
 
 	if len(coinInfo.Error) > 0 {
-		return "", errors.New(coinInfo.Error)
+		return "", fmt.Errorf("coin info request failed: %s", coinInfo.Error)
 	}
 
 	if len(coinInfo.Symbol) == 0 {
