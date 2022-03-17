@@ -32,13 +32,14 @@ type CoinGecko struct {
 	logger zerolog.Logger
 }
 
-// Config wraps config variable to get information at CoinGecko
+// Config wraps the config variable to get CoinGecko information.
 type Config struct {
 	BaseURL string
 }
 
-// CoinInfo wraps the coin information receveid from an contract address.
-// https://api.coingecko.com/api/v3/coins/ethereum/contract/${CONTRACT_ADDR}
+// CoinInfo wraps the coin information received from a contract address.
+//
+// Ref : https://api.coingecko.com/api/v3/coins/ethereum/contract/${CONTRACT_ADDR}
 type CoinInfo struct {
 	Symbol string `json:"symbol"`
 	Error  string `json:"error"`
