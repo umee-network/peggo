@@ -2,6 +2,7 @@ package coingecko
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"net/http"
