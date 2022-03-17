@@ -101,18 +101,18 @@ func (cp *CoinGecko) getRequestCoinSymbolURL(erc20Contract ethcmn.Address) (*url
 func (cp *CoinGecko) requestCoinSymbol(erc20Contract ethcmn.Address) (string, error) {
 	u, err := cp.getRequestCoinSymbolURL(erc20Contract)
 	if err != nil {
-		cp.logger.Fatal().Err(err).Msg("failed to parse coin info URL")
+		cp.logger.Err(err).Msg("failed to parse coin info URL")
 	}
 
 	reqURL := u.String()
 	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
-		cp.logger.Fatal().Err(err).Msg("failed to create HTTP request of coin info")
+		cp.logger.Err(err).Msg("failed to create HTTP request of coin info")
 	}
 
 	resp, err := cp.client.Do(req)
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to fetch coin info from %s", reqURL)
+		return "", fmt.Errorf("failed to fetch coin info from %s: %w", reqURL, err)
 	}
 	defer resp.Body.Close()
 
@@ -126,7 +126,7 @@ func (cp *CoinGecko) requestCoinSymbol(erc20Contract ethcmn.Address) (string, er
 	}
 
 	if len(coinInfo.Symbol) == 0 {
-		return "", errors.New("Fail to get coin info for contract: " + erc20Contract.Hex())
+		return "", fmt.Errorf("fail to get coin info for contract: %s", erc20Contract.Hex())
 	}
 
 	return strings.ToUpper(coinInfo.Symbol), nil
@@ -208,7 +208,6 @@ func (cp *CoinGecko) QueryTokenUSDPrice(erc20Contract ethcmn.Address) (float64, 
 	defer resp.Body.Close()
 
 	var respBody priceResponse
-
 	err = json.NewDecoder(resp.Body).Decode(&respBody)
 	if err != nil {
 		return zeroPrice, errors.Wrapf(err, "failed to parse response body from %s", reqURL)
