@@ -197,12 +197,12 @@ func getOrchestratorCmd() *cobra.Command {
 			}
 
 			providers := konfig.Strings(flagOracleProviders)
-			newOracle, err := oracle.New(context.Background(), logger, providers)
+			o, err := oracle.New(context.Background(), logger, providers)
 			if err != nil {
 				return err
 			}
 
-			if err := newOracle.SubscribeSymbols(oracle.BaseSymbolETH); err != nil {
+			if err := o.SubscribeSymbols(oracle.BaseSymbolETH); err != nil {
 				return err
 			}
 
@@ -216,7 +216,7 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Duration(flagEthPendingTXWait),
 				konfig.Float64(flagProfitMultiplier),
 				relayer.SetPriceFeeder(coingeckoFeed),
-				relayer.SetOracle(newOracle),
+				relayer.SetOracle(o),
 			)
 
 			logger = logger.With().
@@ -250,7 +250,7 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Int64(flagEthBlocksPerLoop),
 				konfig.Int64(flagBridgeStartHeight),
 				coingeckoFeed,
-				newOracle,
+				o,
 			)
 
 			ctx, cancel = context.WithCancel(context.Background())
