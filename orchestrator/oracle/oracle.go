@@ -230,7 +230,7 @@ func (o *Oracle) setPrices() error {
 	for providerName, provider := range o.providers {
 		providerName := providerName
 		provider := provider
-		subscribedPrices := MapPairsToSlice(provider.subscribedPairs)
+		subscribedPrices := umeedpfprovider.MapPairsToSlice(provider.subscribedPairs)
 
 		g.Go(func() error {
 			prices, err := provider.GetTickerPrices(subscribedPrices...)
@@ -445,19 +445,6 @@ func (o *Oracle) tick() error {
 	}
 
 	return nil
-}
-
-// MapPairsToSlice returns the map of currency pairs as slice.
-func MapPairsToSlice(mapPairs map[string]umeedpftypes.CurrencyPair) []umeedpftypes.CurrencyPair {
-	currencyPairs := make([]umeedpftypes.CurrencyPair, len(mapPairs))
-
-	iterator := 0
-	for _, cp := range mapPairs {
-		currencyPairs[iterator] = cp
-		iterator++
-	}
-
-	return currencyPairs
 }
 
 // GetStablecoinsCurrencyPair return the currency pair of that symbol quoted by some
