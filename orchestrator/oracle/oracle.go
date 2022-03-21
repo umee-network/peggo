@@ -230,7 +230,7 @@ func (o *Oracle) setPrices() error {
 	for providerName, provider := range o.providers {
 		providerName := providerName
 		provider := provider
-		subscribedPrices := umeedpfprovider.MapPairsToSlice(provider.subscribedPairs)
+		subscribedPrices := umeedpftypes.MapPairsToSlice(provider.subscribedPairs)
 
 		g.Go(func() error {
 			prices, err := provider.GetTickerPrices(subscribedPrices...)
