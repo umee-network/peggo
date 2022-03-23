@@ -162,12 +162,17 @@ func (o *Oracle) subscribeProviders(currencyPairs []umeedpftypes.CurrencyPair) e
 			pairsToSubscribe = append(pairsToSubscribe, currencyPair)
 		}
 
+		if len(pairsToSubscribe) == 0 {
+			o.logger.Debug().Str("provider_name", providerName).Msgf("No pairs to subscribe, received pairs to try: %+v", currencyPairs)
+			continue
+		}
+
 		if err := provider.SubscribeCurrencyPairs(pairsToSubscribe...); err != nil {
 			o.logger.Err(err).Str("provider_name", providerName).Msg("subscribing to new currency pairs")
 			return err
 		}
 
-		o.logger.Info().Msgf("Subscribed pairs %+v in provider: %s", pairsToSubscribe, providerName)
+		o.logger.Info().Str("provider_name", providerName).Msgf("Subscribed pairs %+v - len %d", pairsToSubscribe, len(pairsToSubscribe))
 
 		for _, pair := range pairsToSubscribe {
 			provider.subscribedPairs[pair.String()] = pair
@@ -203,6 +208,9 @@ func (o *Oracle) start(ctx context.Context) {
 
 // loadAvailablePairs load all the available pairs from providers.
 func (o *Oracle) loadAvailablePairs() {
+	o.mtx.Lock()
+	defer o.mtx.Unlock()
+
 	for providerName, provider := range o.providers {
 		availablePairs, err := provider.GetAvailablePairs()
 		if err != nil {
