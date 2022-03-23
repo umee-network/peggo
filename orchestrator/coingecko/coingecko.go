@@ -95,7 +95,7 @@ func (cp *CoinGecko) getRequestCoinSymbolURL(erc20Contract ethcmn.Address) (*url
 }
 
 func (cp *CoinGecko) requestCoinSymbol(erc20Contract ethcmn.Address) (string, error) {
-	u, err := cp.getRequestCoinSymbolURL(ethcmn.HexToAddress("0xc0a4Df35568F116C370E6a6A6022Ceb908eedDaC"))
+	u, err := cp.getRequestCoinSymbolURL(erc20Contract)
 	if err != nil {
 		cp.logger.Err(err).Msg("failed to parse coin info URL")
 	}
