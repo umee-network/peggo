@@ -163,7 +163,8 @@ func (o *Oracle) subscribeProviders(currencyPairs []umeedpftypes.CurrencyPair) e
 		}
 
 		if len(pairsToSubscribe) == 0 {
-			o.logger.Debug().Str("provider_name", providerName).Msgf("No pairs to subscribe, received pairs to try: %+v", currencyPairs)
+			o.logger.Debug().Str("provider_name", providerName).
+				Msgf("No pairs to subscribe, received pairs to try: %+v", currencyPairs)
 			continue
 		}
 
@@ -172,11 +173,13 @@ func (o *Oracle) subscribeProviders(currencyPairs []umeedpftypes.CurrencyPair) e
 			return err
 		}
 
-		o.logger.Info().Str("provider_name", providerName).Msgf("Subscribed pairs %+v - len %d", pairsToSubscribe, len(pairsToSubscribe))
-
 		for _, pair := range pairsToSubscribe {
 			provider.subscribedPairs[pair.String()] = pair
 		}
+
+		o.logger.Info().Str("provider_name", providerName).
+			Int("currency_pairs_length", len(pairsToSubscribe)).
+			Msgf("Subscribed pairs %+v", pairsToSubscribe)
 	}
 
 	return nil
