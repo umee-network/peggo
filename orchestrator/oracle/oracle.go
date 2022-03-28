@@ -126,6 +126,11 @@ func (o *Oracle) SubscribeSymbols(baseSymbols ...string) error {
 		if err := o.subscribeProviders(currencyPairs); err != nil {
 			return err
 		}
+
+		o.logger.Debug().
+			Str("token_symbol", baseSymbol).
+			Msg("New symbol subscribed")
+
 		o.subscribedBaseSymbols[baseSymbol] = struct{}{}
 	}
 
@@ -167,6 +172,10 @@ func (o *Oracle) subscribeProviders(currencyPairs []umeedpftypes.CurrencyPair) e
 
 		for _, pair := range pairsToSubscribe {
 			provider.subscribedPairs[pair.String()] = pair
+
+			o.logger.Debug().Str("provider_name", providerName).
+				Str("pair_symbol", pair.String()).
+				Msg("Subscribed new pair")
 		}
 
 		o.logger.Info().Str("provider_name", providerName).
