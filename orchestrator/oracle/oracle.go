@@ -82,7 +82,7 @@ func (o *Oracle) GetPrices(baseSymbols ...string) (map[string]sdk.Dec, error) {
 	o.mtx.RLock()
 	defer o.mtx.RUnlock()
 
-	// Creates a new array for the prices in the oracle
+	// Creates a new array for the prices in the oracle.
 	prices := make(map[string]sdk.Dec, len(baseSymbols))
 
 	for _, baseSymbol := range baseSymbols {
@@ -96,7 +96,7 @@ func (o *Oracle) GetPrices(baseSymbols ...string) (map[string]sdk.Dec, error) {
 	return prices, nil
 }
 
-// GetPrice returns the price based on the base symbol ex.: UMEE, ETH.
+// GetPrice returns the price based on the symbol ex.: UMEE, ETH.
 func (o *Oracle) GetPrice(baseSymbol string) (sdk.Dec, error) {
 	o.mtx.RLock()
 	defer o.mtx.RUnlock()
@@ -201,7 +201,7 @@ func (o *Oracle) start(ctx context.Context) {
 	}
 }
 
-// loadAvailablePairs load all the available pairs from providers.
+// loadAvailablePairs loads all the available pairs from providers.
 func (o *Oracle) loadAvailablePairs() {
 	o.mtx.Lock()
 	defer o.mtx.Unlock()
