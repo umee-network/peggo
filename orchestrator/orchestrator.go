@@ -13,7 +13,6 @@ import (
 	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/keystore"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
-	"github.com/umee-network/peggo/orchestrator/oracle"
 	"github.com/umee-network/peggo/orchestrator/relayer"
 )
 
@@ -43,7 +42,7 @@ type gravityOrchestrator struct {
 	ethBlocksPerLoop           uint64
 	bridgeStartHeight          uint64
 	symbolRetriever            SymbolRetriever
-	oracle                     oracle.PriceFeeder
+	oracle                     Oracle
 
 	mtx             sync.Mutex
 	erc20DenomCache map[string]string
@@ -64,7 +63,7 @@ func NewGravityOrchestrator(
 	ethBlocksPerLoop int64,
 	bridgeStartHeight int64,
 	symbolRetriever SymbolRetriever,
-	oracle oracle.PriceFeeder,
+	oracle Oracle,
 	options ...func(GravityOrchestrator),
 ) GravityOrchestrator {
 

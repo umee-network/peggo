@@ -9,7 +9,6 @@ import (
 
 	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
-	"github.com/umee-network/peggo/orchestrator/oracle"
 
 	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 )
@@ -47,7 +46,7 @@ type GravityRelayer interface {
 
 	// SetOracle sets the oracle for price feeder used when performing profitable
 	// batch calculations.
-	SetOracle(oracle.PriceFeeder)
+	SetOracle(Oracle)
 
 	GetProfitMultiplier() float64
 }
@@ -60,10 +59,10 @@ type gravityRelayer struct {
 	valsetRelayMode   ValsetRelayMode
 	batchRelayEnabled bool
 	loopDuration      time.Duration
-	symbolRetriever   SymbolRetriever
 	pendingTxWait     time.Duration
 	profitMultiplier  float64
-	oracle            oracle.PriceFeeder
+	symbolRetriever   SymbolRetriever
+	oracle            Oracle
 
 	// Store locally the last tx this validator made to avoid sending duplicates
 	// or invalid txs.

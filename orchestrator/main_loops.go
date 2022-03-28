@@ -318,7 +318,6 @@ func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error
 
 			if err := retry.Do(func() (err error) {
 				batchFeesResp, err := p.cosmosQueryClient.BatchFees(ctx, &types.QueryBatchFeeRequest{})
-
 				if err != nil {
 					return err
 				}

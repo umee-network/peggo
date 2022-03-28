@@ -30,14 +30,6 @@ var (
 	deviationThreshold = sdk.MustNewDecFromStr("2")
 )
 
-// PriceFeeder defines an interface an oracle with N exchange price
-// provider must implement.
-type PriceFeeder interface {
-	GetPrices(baseSymbols ...string) (map[string]sdk.Dec, error)
-	GetPrice(baseSymbol string) (sdk.Dec, error)
-	SubscribeSymbols(baseSymbols ...string) error
-}
-
 // Oracle implements the core component responsible for fetching exchange rates
 // for a given set of currency pairs and determining the correct exchange rates.
 type Oracle struct {
