@@ -252,12 +252,16 @@ func (s *gravityRelayer) IsBatchProfitable(
 		Str("token_contract", batch.TokenContract).
 		Msg("got token decimals")
 
-	baseSymbol, err := s.symbolRetriever.GetTokenSymbol(ethcmn.HexToAddress(batch.TokenContract))
+	tokenSymbol, err := s.symbolRetriever.GetTokenSymbol(ethcmn.HexToAddress(batch.TokenContract))
 	if err != nil {
 		return false
 	}
 
-	usdTokenPrice, err := s.oracle.GetPrice(baseSymbol)
+	if err := s.oracle.SubscribeSymbols(tokenSymbol); err != nil {
+		return false
+	}
+
+	usdTokenPrice, err := s.oracle.GetPrice(tokenSymbol)
 	if err != nil {
 		return false
 	}
