@@ -139,7 +139,7 @@ $~ ERC20_UMEE_TX_HASH="0xd1940e0501545e2d0935b36719ace1df28f88f333a60026ee43c56f
 
 ```shell
 $~ curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt",
-"params":["'$ERC20_UMEE_TX_HASH'"],"id":1}' $ETHRPC | jq '.result.logs[0].address'
+"params":["'$ERC20_UMEE_TX_HASH'"],"id":1}' $ETHRPC | jq -r '.result.logs[0].address'
 ```
 
 - Or even directly set the `TOKEN_ADDRESS` env variable with the contract
@@ -147,12 +147,12 @@ address of the deployed umee contract
 
 ```shell
 $~ TOKEN_ADDRESS=`curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt",
-"params":["'$ERC20_UMEE_TX_HASH'"],"id":1}' $ETHRPC | jq '.result.logs[0].address'`
+"params":["'$ERC20_UMEE_TX_HASH'"],"id":1}' $ETHRPC | jq -r '.result.logs[0].address'`
 ```
 
 <!--
 ```fish
-$~ set TOKEN_ADDRESS (curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt", "params":["'$ERC20_UMEE_TX_HASH'"],"id":1}' $ETHRPC | jq '.result.logs[0].address')
+$~ set TOKEN_ADDRESS (curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt", "params":["'$ERC20_UMEE_TX_HASH'"],"id":1}' $ETHRPC | jq -r '.result.logs[0].address')
 ```
  -->
 
@@ -170,7 +170,7 @@ $~ umeed tx gravity send-to-eth $MYETH 10000uumee 1uumee \
 
 ### Send transaction from eth to umee
 
-```shell $~ PEGGO_ETH_PK=$MYETHPK peggo bridge send-to-cosmos
+```shell $~ PEGGO_ETH_PK=$MYETHPK peggo bridge send-to-cosmos \
   $BRIDGEADDR $TOKEN_ADDRESS umee1y6xz2ggfc0pcsmyjlekh0j9pxh6hk87ymc9due 1 \
   --eth-rpc $ETHRPC
 ```
