@@ -41,8 +41,8 @@ type gravityOrchestrator struct {
 	batchRequesterLoopDuration time.Duration
 	ethBlocksPerLoop           uint64
 	bridgeStartHeight          uint64
-	symbolRetriever            SymbolRetriever
-	oracle                     Oracle
+	symbolRetriever            relayer.SymbolRetriever
+	oracle                     relayer.Oracle
 
 	mtx             sync.Mutex
 	erc20DenomCache map[string]string
@@ -62,8 +62,8 @@ func NewGravityOrchestrator(
 	batchRequesterLoopDuration time.Duration,
 	ethBlocksPerLoop int64,
 	bridgeStartHeight int64,
-	symbolRetriever SymbolRetriever,
-	oracle Oracle,
+	symbolRetriever relayer.SymbolRetriever,
+	oracle relayer.Oracle,
 	options ...func(GravityOrchestrator),
 ) GravityOrchestrator {
 
