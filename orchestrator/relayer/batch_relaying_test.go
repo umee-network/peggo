@@ -26,7 +26,6 @@ import (
 	"github.com/umee-network/peggo/orchestrator/coingecko"
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	"github.com/umee-network/peggo/orchestrator/ethereum/gravity"
-	"github.com/umee-network/peggo/orchestrator/oracle"
 )
 
 type mockOracle struct {
@@ -45,7 +44,7 @@ func (m mockOracle) SubscribeSymbols(baseSymbols ...string) error {
 	return nil
 }
 
-func NewMockOracle() oracle.PriceFeeder {
+func NewMockOracle() Oracle {
 	return mockOracle{
 		prices: map[string]sdk.Dec{
 			"ETH":  sdk.MustNewDecFromStr("4271.57"),
