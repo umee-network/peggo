@@ -45,7 +45,7 @@ type (
 	}
 )
 
-// NewCoingecko grabs the symbol from an contract address.
+// NewCoingecko grabs the symbol, given a contract address.
 func NewCoingecko(logger zerolog.Logger, endpointConfig *Config) *CoinGecko {
 	return &CoinGecko{
 		client: &http.Client{
@@ -103,7 +103,7 @@ func (cp *CoinGecko) requestCoinSymbol(erc20Contract ethcmn.Address) (string, er
 	reqURL := u.String()
 	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
 	if err != nil {
-		cp.logger.Err(err).Msg("failed to create HTTP request of coin info")
+		cp.logger.Err(err).Msg("failed to create HTTP request for coin info")
 	}
 
 	resp, err := cp.client.Do(req)

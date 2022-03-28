@@ -2,8 +2,8 @@ package coingecko
 
 import ethcmn "github.com/ethereum/go-ethereum/common"
 
-// Everytime a new ERC20 is deployed in the Gravity Bridge contract, to avoid
-// getting the symbol from CoinGecko we shoult add it here and make a new
+// Every time a new ERC20 is deployed in the Gravity Bridge contract, to avoid
+// getting the symbol from CoinGecko, we should add it here and make a new
 // release of Peggo.
 var bridgeTokensCoinSymbols = map[ethcmn.Address]string{
 	ethcmn.HexToAddress("0xc0a4Df35568F116C370E6a6A6022Ceb908eedDaC"): "UMEE",

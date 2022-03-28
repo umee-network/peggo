@@ -350,7 +350,7 @@ func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error
 
 							price, err := p.oracle.GetPrice(baseSymbol)
 							if err != nil {
-								// maybe the token was not subscribed yet
+								// Our providers may not yet be subscribed to their websockets.
 								if err := p.oracle.SubscribeSymbols(baseSymbol); err != nil {
 									return err
 								}
