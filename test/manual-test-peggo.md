@@ -53,7 +53,7 @@ __Expected Result__
 - Set the `BRIDGEADDR` variable
 
 ```shell
-$~ BRIDGEADDR=0x32FDBf26a106d57f99d7B2caBa67eD1a115D8d0c
+$~ BRIDGEADDR=0x61be4C0D3631f684CFfeD7FCf7087FFD4b4b127C
 ```
 
 - Wait until the gravity bridge is confirmed in ethereum (14 blocks)
@@ -68,7 +68,7 @@ $~ PEGGO_ETH_PK=$MYETHPK peggo orchestrator $BRIDGEADDR \
   --eth-rpc=$ETHRPC \
   --relay-batches=true \
   --valset-relay-mode="all" \
-  --cosmos-chain-id=testing \
+  --cosmos-chain-id=$CHAIN_ID \
   --cosmos-grpc="tcp://0.0.0.0:9090" \
   --tendermint-rpc="http://0.0.0.0:26657" \
   --cosmos-keyring=test \
@@ -81,7 +81,7 @@ $~ PEGGO_ETH_PK=$MYETH2PK peggo orchestrator $BRIDGEADDR \
   --eth-rpc=$ETHRPC \
   --relay-batches=true \
   --valset-relay-mode="all" \
-  --cosmos-chain-id=testing \
+  --cosmos-chain-id=$CHAIN_ID \
   --cosmos-grpc="tcp://0.0.0.0:9091" \
   --tendermint-rpc="http://0.0.0.0:26667" \
   --cosmos-keyring=test \
@@ -94,7 +94,7 @@ $~ PEGGO_ETH_PK=$MYETH3PK peggo orchestrator $BRIDGEADDR \
   --eth-rpc=$ETHRPC \
   --relay-batches=true \
   --valset-relay-mode="all" \
-  --cosmos-chain-id=testing \
+  --cosmos-chain-id=$CHAIN_ID \
   --cosmos-grpc="tcp://0.0.0.0:9092" \
   --tendermint-rpc="http://0.0.0.0:26677" \
   --cosmos-keyring=test \
