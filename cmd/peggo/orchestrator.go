@@ -174,9 +174,8 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to create Ethereum committer: %w", err)
 			}
 
-			coingeckoAPI := konfig.String(flagCoinGeckoAPI)
-			coingeckoFeed := coingecko.NewCoingecko(logger, &coingecko.Config{
-				BaseURL: coingeckoAPI,
+			symbolRetriever := coingecko.NewCoingecko(logger, &coingecko.Config{
+				BaseURL: konfig.String(flagCoinGeckoAPI),
 			})
 
 			// gravityParams.AverageBlockTime and gravityParams.AverageEthereumBlockTime are in milliseconds.
@@ -215,7 +214,7 @@ func getOrchestratorCmd() *cobra.Command {
 				relayerLoopDuration,
 				konfig.Duration(flagEthPendingTXWait),
 				konfig.Float64(flagProfitMultiplier),
-				relayer.SetCoinGecko(coingeckoFeed),
+				relayer.SetSymbolRetriever(symbolRetriever),
 				relayer.SetOracle(o),
 			)
 
@@ -249,7 +248,7 @@ func getOrchestratorCmd() *cobra.Command {
 				batchRequesterLoopDuration,
 				konfig.Int64(flagEthBlocksPerLoop),
 				konfig.Int64(flagBridgeStartHeight),
-				coingeckoFeed,
+				symbolRetriever,
 				o,
 			)
 

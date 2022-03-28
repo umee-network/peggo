@@ -1,16 +1,15 @@
 package relayer
 
 import (
-	"github.com/umee-network/peggo/orchestrator/coingecko"
 	"github.com/umee-network/peggo/orchestrator/oracle"
 )
 
-func SetCoinGecko(coinGecko *coingecko.CoinGecko) func(GravityRelayer) {
-	return func(s GravityRelayer) { s.SetCoinGecko(coinGecko) }
+func SetSymbolRetriever(coinGecko SymbolRetriever) func(GravityRelayer) {
+	return func(s GravityRelayer) { s.SetSymbolRetriever(coinGecko) }
 }
 
-func (s *gravityRelayer) SetCoinGecko(coinGecko *coingecko.CoinGecko) {
-	s.coinGecko = coinGecko
+func (s *gravityRelayer) SetSymbolRetriever(symbolRetriever SymbolRetriever) {
+	s.symbolRetriever = symbolRetriever
 }
 
 // SetOracle sets a new oracle to the Gravity Relayer.

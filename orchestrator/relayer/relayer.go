@@ -7,7 +7,6 @@ import (
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog"
 
-	"github.com/umee-network/peggo/orchestrator/coingecko"
 	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 	"github.com/umee-network/peggo/orchestrator/oracle"
@@ -43,8 +42,8 @@ type GravityRelayer interface {
 
 	RelayValsets(ctx context.Context, currentValset gravitytypes.Valset) error
 
-	// SetCoinGecko sets CoinGecko to get the symbol from contract address.
-	SetCoinGecko(*coingecko.CoinGecko)
+	// SetSymbolRetriever sets the Symbol Retriever api to get the symbol from contract address.
+	SetSymbolRetriever(SymbolRetriever)
 
 	// SetOracle sets the oracle for price feeder used when performing profitable
 	// batch calculations.
@@ -61,7 +60,7 @@ type gravityRelayer struct {
 	valsetRelayMode   ValsetRelayMode
 	batchRelayEnabled bool
 	loopDuration      time.Duration
-	coinGecko         *coingecko.CoinGecko
+	symbolRetriever   SymbolRetriever
 	pendingTxWait     time.Duration
 	profitMultiplier  float64
 	oracle            oracle.PriceFeeder

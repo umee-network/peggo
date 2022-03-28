@@ -216,7 +216,7 @@ func (s *gravityRelayer) IsBatchProfitable(
 	gasPrice *big.Int,
 	profitMultiplier float64,
 ) bool {
-	if s.coinGecko == nil || s.oracle == nil || profitMultiplier == 0 {
+	if s.symbolRetriever == nil || s.oracle == nil || profitMultiplier == 0 {
 		return true
 	}
 
@@ -252,7 +252,7 @@ func (s *gravityRelayer) IsBatchProfitable(
 		Str("token_contract", batch.TokenContract).
 		Msg("got token decimals")
 
-	baseSymbol, err := s.coinGecko.GetTokenSymbol(ethcmn.HexToAddress(batch.TokenContract))
+	baseSymbol, err := s.symbolRetriever.GetTokenSymbol(ethcmn.HexToAddress(batch.TokenContract))
 	if err != nil {
 		return false
 	}

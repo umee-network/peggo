@@ -30,7 +30,7 @@ func TestNewGravityRelayer(t *testing.T) {
 		time.Minute,
 		time.Minute,
 		1.0,
-		SetCoinGecko(nil),
+		SetSymbolRetriever(nil),
 	)
 
 	assert.NotNil(t, relayer)

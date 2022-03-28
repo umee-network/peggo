@@ -108,7 +108,7 @@ func TestIsBatchProfitable(t *testing.T) {
 
 	relayer := gravityRelayer{
 		gravityContract:  gravityContract,
-		coinGecko:        coingeckoFeed,
+		symbolRetriever:  coingeckoFeed,
 		profitMultiplier: 1.1,
 		oracle:           mockOracle,
 	}

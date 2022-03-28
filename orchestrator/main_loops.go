@@ -343,7 +343,7 @@ func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error
 
 					for _, token := range unbatchedTokensWithFees {
 						if _, ok := tokensPrices[token.Token]; !ok {
-							baseSymbol, err := p.coinGecko.GetTokenSymbol(ethcmn.HexToAddress(token.Token))
+							baseSymbol, err := p.symbolRetriever.GetTokenSymbol(ethcmn.HexToAddress(token.Token))
 							if err != nil {
 								return err
 							}
