@@ -196,7 +196,7 @@ func getOrchestratorCmd() *cobra.Command {
 			}
 
 			providers := konfig.Strings(flagOracleProviders)
-			o, err := oracle.New(context.Background(), logger, providers)
+			o, err := oracle.New(ctx, logger, providers)
 			if err != nil {
 				return err
 			}
