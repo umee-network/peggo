@@ -233,6 +233,7 @@ func (o *Oracle) loadAvailablePairs() {
 // to determine prices. If candles are not available, uses the most recent prices
 // with VWAP. Warns the the user of any missing prices, and filters out any faulty
 // providers which do not report prices or candles within 2𝜎 of the others.
+// code originally from https://github.com/umee-network/umee/blob/2a69b56ae1c6098cb2d23ef8384f5acf28f76d35/price-feeder/oracle/oracle.go#L166-L167
 func (o *Oracle) setPrices() error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
@@ -341,6 +342,7 @@ func (o *Oracle) setPrices() error {
 
 // filterCandleDeviations finds the standard deviations of the tvwaps of
 // all assets, and filters out any providers that are not within 2𝜎 of the mean.
+// code originally from https://github.com/umee-network/umee/blob/2a69b56ae1c6098cb2d23ef8384f5acf28f76d35/price-feeder/oracle/oracle.go#L458-L459
 func (o *Oracle) filterCandleDeviations(
 	candles umeedpfprovider.AggregatedProviderCandles,
 ) (umeedpfprovider.AggregatedProviderCandles, error) {
@@ -405,6 +407,7 @@ func (o *Oracle) filterCandleDeviations(
 
 // filterTickerDeviations finds the standard deviations of the prices of
 // all assets, and filters out any providers that are not within 2𝜎 of the mean.
+// code originally from https://github.com/umee-network/umee/blob/2a69b56ae1c6098cb2d23ef8384f5acf28f76d35/price-feeder/oracle/oracle.go#L409-L410
 func (o *Oracle) filterTickerDeviations(
 	prices umeedpfprovider.AggregatedProviderPrices,
 ) (umeedpfprovider.AggregatedProviderPrices, error) {
