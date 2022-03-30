@@ -246,14 +246,17 @@ func (o *Oracle) setPrices() error {
 		subscribedPrices := umeedpftypes.MapPairsToSlice(provider.subscribedPairs)
 
 		g.Go(func() error {
-			prices, err := provider.GetTickerPrices(subscribedPrices...)
-			if err != nil {
-				return err
-			}
+			var (
+				tickerErr error
+				candleErr error
+			)
 
-			candles, err := provider.GetCandlePrices(subscribedPrices...)
-			if err != nil {
-				return err
+			prices, tickerErr := provider.GetTickerPrices(subscribedPrices...)
+			candles, candleErr := provider.GetCandlePrices(subscribedPrices...)
+
+			if tickerErr != nil && candleErr != nil {
+				// only generates error if ticker and candle generate errors
+				return fmt.Errorf("ticker error: %+v\ncandle error: %+v", tickerErr, candleErr)
 			}
 
 			// flatten and collect prices based on the base currency per provider
