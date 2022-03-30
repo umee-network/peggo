@@ -196,6 +196,8 @@ func getOrchestratorCmd() *cobra.Command {
 			}
 
 			ctx, cancel = context.WithCancel(context.Background())
+			// listen for and trap any OS signal to gracefully shutdown and exit
+			trapSignal(cancel)
 
 			providers := konfig.Strings(flagOracleProviders)
 			o, err := oracle.New(ctx, logger, providers)
@@ -267,9 +269,6 @@ func getOrchestratorCmd() *cobra.Command {
 					return gravityContract.SubscribeToPendingTxs(errCtx, alchemyWS)
 				})
 			}
-
-			// listen for and trap any OS signal to gracefully shutdown and exit
-			trapSignal(cancel)
 
 			return g.Wait()
 		},
