@@ -195,8 +195,10 @@ func getOrchestratorCmd() *cobra.Command {
 				return err
 			}
 
+			ctx, cancel = context.WithCancel(context.Background())
+
 			providers := konfig.Strings(flagOracleProviders)
-			o, err := oracle.New(context.Background(), logger, providers)
+			o, err := oracle.New(ctx, logger, providers)
 			if err != nil {
 				return err
 			}
@@ -252,7 +254,6 @@ func getOrchestratorCmd() *cobra.Command {
 				o,
 			)
 
-			ctx, cancel = context.WithCancel(context.Background())
 			g, errCtx := errgroup.WithContext(ctx)
 
 			g.Go(func() error {
