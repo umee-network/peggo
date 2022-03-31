@@ -44,6 +44,7 @@ const (
 	flagValsetRelayMode         = "valset-relay-mode"
 	flagRelayBatches            = "relay-batches"
 	flagCoinGeckoAPI            = "coingecko-api"
+	flagOracleProviders         = "oracle-providers"
 	flagEthGasPrice             = "eth-gas-price"
 	flagEthGasLimit             = "eth-gas-limit"
 	flagAutoApprove             = "auto-approve"
