@@ -1,17 +1,11 @@
 # Release Notes
 
-This release includes several bug fixes and the ability to check for profit
-before requesting a new batch.
-It also includes updates to vulnerable dependencies.
+This release fixes one of the main issues from the Trail of Bits audit, the need
+for multiple price oracles instead of one. Now we can have multiple, thanks to
+the implementation of the price feeder as a module.
 
 ## Changelog
 
 ### Features
 
-[#216](https://github.com/umee-network/peggo/pull/216) Add profitability check on the batch requester loop.
-
-### Bug Fixes
-
-- [#217](https://github.com/umee-network/peggo/pull/217) Add validation to user input Ethereum addresses.
-- [#209](https://github.com/umee-network/peggo/pull/209) Fix the `version` command to display correctly.
-- [#205](https://github.com/umee-network/peggo/pull/205) Make sure users are warned when using unencrypted non-local urls in flags.
+[#231](https://github.com/umee-network/peggo/pull/231) Add multiple providers for token prices.
