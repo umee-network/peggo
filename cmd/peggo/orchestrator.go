@@ -196,12 +196,12 @@ func getOrchestratorCmd() *cobra.Command {
 				return err
 			}
 
-<<<<<<< HEAD
 			// If relayValsets is true then the user didn't specify a value for 'valset-relay-mode',
 			// so we'll default to "minimum".
 			if relayValsets && valsetRelayMode == relayer.ValsetRelayModeNone {
 				valsetRelayMode = relayer.ValsetRelayModeMinimum
-=======
+			}
+
 			ctx, cancel = context.WithCancel(context.Background())
 			// listen for and trap any OS signal to gracefully shutdown and exit
 			trapSignal(cancel)
@@ -214,7 +214,6 @@ func getOrchestratorCmd() *cobra.Command {
 
 			if err := o.SubscribeSymbols(oracle.BaseSymbolETH); err != nil {
 				return err
->>>>>>> cbb7f56 (feat: add umee price feeder (#231))
 			}
 
 			relayer := relayer.NewGravityRelayer(
