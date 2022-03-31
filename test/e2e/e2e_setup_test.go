@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -28,7 +29,6 @@ import (
 	tmconfig "github.com/tendermint/tendermint/config"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
 	"github.com/umee-network/umee/app"
 )
@@ -213,6 +213,27 @@ func (s *IntegrationTestSuite) initGenesis() {
 	bz, err := cdc.MarshalJSON(&gravityGenState)
 	s.Require().NoError(err)
 	appGenState[gravitytypes.ModuleName] = bz
+
+	// var leverageGenState leveragetypes.GenesisState
+	// s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
+
+	// leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
+	// 	BaseDenom:        app.BondDenom,
+	// 	SymbolDenom:      app.DisplayDenom,
+	// 	Exponent:         6,
+	// 	ReserveFactor:    sdk.MustNewDecFromStr("0.100000000000000000"),
+	// 	CollateralWeight: sdk.MustNewDecFromStr("0.050000000000000000"),
+	// 	// LiquidationThreshold: sdk.MustNewDecFromStr("0.050000000000000000"),
+	// 	BaseBorrowRate:       sdk.MustNewDecFromStr("0.020000000000000000"),
+	// 	KinkBorrowRate:       sdk.MustNewDecFromStr("0.200000000000000000"),
+	// 	MaxBorrowRate:        sdk.MustNewDecFromStr("1.50000000000000000"),
+	// 	KinkUtilizationRate:  sdk.MustNewDecFromStr("0.200000000000000000"),
+	// 	LiquidationIncentive: sdk.MustNewDecFromStr("0.180000000000000000"),
+	// })
+
+	// bz, err = cdc.MarshalJSON(&leverageGenState)
+	// s.Require().NoError(err)
+	// appGenState[leveragetypes.ModuleName] = bz
 
 	var bankGenState banktypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
