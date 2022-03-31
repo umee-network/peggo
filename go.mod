@@ -22,6 +22,10 @@ require (
 	github.com/tendermint/tendermint v0.34.14
 	github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220217130213-b3cdbcaa3b93
 	github.com/umee-network/umee v1.0.3
+<<<<<<< HEAD
+=======
+	github.com/umee-network/umee/price-feeder v0.1.4
+>>>>>>> e38dde3 (chore: bump github.com/umee-network/umee/price-feeder (#248))
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d
 	google.golang.org/grpc v1.43.0
@@ -215,7 +219,11 @@ require (
 	github.com/regen-network/cosmos-proto v0.3.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rjeczalik/notify v0.9.1 // indirect
+<<<<<<< HEAD
 	github.com/rs/cors v1.7.0 // indirect
+=======
+	github.com/rs/cors v1.8.2 // indirect
+>>>>>>> e38dde3 (chore: bump github.com/umee-network/umee/price-feeder (#248))
 	github.com/ryancurrah/gomodguard v1.2.3 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.3.0 // indirect
 	github.com/sanposhiho/wastedassign/v2 v2.0.6 // indirect
