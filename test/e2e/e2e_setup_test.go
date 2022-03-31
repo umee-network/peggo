@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -28,7 +29,6 @@ import (
 	tmconfig "github.com/tendermint/tendermint/config"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 
 	"github.com/umee-network/umee/app"
 )
