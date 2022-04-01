@@ -43,6 +43,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+[#252](https://github.com/umee-network/peggo/pull/252) Point to new version of Umee + GB
+
+## [v0.2.7](https://github.com/umee-network/peggo/releases/tag/v0.2.7) - 2022-03-31
+
 ### Features
 
 [#231](https://github.com/umee-network/peggo/pull/231) Add multiple providers for token prices.
