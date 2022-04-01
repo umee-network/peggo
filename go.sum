@@ -1536,6 +1536,8 @@ github.com/ultraware/whitespace v0.0.5 h1:hh+/cpIcopyMYbZNVov9iSxvJU3OYQg78Sfaqz
 github.com/ultraware/whitespace v0.0.5/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
 github.com/umee-network/umee v0.8.1-0.20220331213306-5169ac0bf7f4 h1:jlyUB/KyVnQesmky1PYSdaDKRUGmJ7chfnSjjOJsqVg=
 github.com/umee-network/umee v0.8.1-0.20220331213306-5169ac0bf7f4/go.mod h1:vBUVu0e0XDQSG/Xu3vtSGfR55U0IIAuX5lMpru/cC1Q=
+github.com/umee-network/umee v0.8.1-0.20220401203142-d8942c2af8c9 h1:kuzxu8DhNcJg2EvcaNBdmoRWxpb02jnRNdLQOwawZSE=
+github.com/umee-network/umee v0.8.1-0.20220401203142-d8942c2af8c9/go.mod h1:H/V8xhDwqyGqu3wZ9wzdicUuqqO9zJYVOlgbdOI/UmU=
 github.com/umee-network/umee/price-feeder v0.0.0-20220331213306-5169ac0bf7f4 h1:VuIhCoV6UH5BAOU9EDSRrePCMZ4ee6NPsUoxA985XJA=
 github.com/umee-network/umee/price-feeder v0.0.0-20220331213306-5169ac0bf7f4/go.mod h1:kYew+FzSs2g8eu8yWgoiW//DndVjiA7WedIgXZRv88k=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
