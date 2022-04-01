@@ -10,14 +10,14 @@
 
 ```shell
 $~ UMEE_PEGGO_PATH=${peggo_root_path_in_your_local_enviroment}
-$~ ETHRPC=https://goerli-infura.brave.com/f7106c838853428280fa0c585acc9485
-$~ MYETH=0xfac5EC50BdfbB803f5cFc9BF0A0C2f52aDE5b6dd
-$~ MYETHPK=06e48d48a55cc6843acb2c3c23431480ec42fca02683f4d8d3d471372e5317ee
-$~ MYETH2=0x02fa1b44e2EF8436e6f35D5F56607769c658c225
-$~ MYETH2PK=4faf826f3d3a5fa60103392446a72dea01145c6158c6dd29f6faab9ec9917a1b
-$~ MYETH3=0xd8f468c1B719cc2d50eB1E3A55cFcb60e23758CD
-$~ MYETH3PK=11f746395f0dd459eff05d1bc557b81c3f7ebb1338a8cc9d36966d0bb2dcea21
-$~ CHAIN_ID=888
+ETHRPC=https://goerli-infura.brave.com/f7106c838853428280fa0c585acc9485
+MYETH=0xfac5EC50BdfbB803f5cFc9BF0A0C2f52aDE5b6dd
+MYETHPK=06e48d48a55cc6843acb2c3c23431480ec42fca02683f4d8d3d471372e5317ee
+MYETH2=0x02fa1b44e2EF8436e6f35D5F56607769c658c225
+MYETH2PK=4faf826f3d3a5fa60103392446a72dea01145c6158c6dd29f6faab9ec9917a1b
+MYETH3=0xd8f468c1B719cc2d50eB1E3A55cFcb60e23758CD
+MYETH3PK=11f746395f0dd459eff05d1bc557b81c3f7ebb1338a8cc9d36966d0bb2dcea21
+CHAIN_ID=888
 ```
 
 <!--
@@ -30,8 +30,9 @@ set MYETH2PK 4faf826f3d3a5fa60103392446a72dea01145c6158c6dd29f6faab9ec9917a1b
 set MYETH3 0xd8f468c1B719cc2d50eB1E3A55cFcb60e23758CD
 set MYETH3PK 11f746395f0dd459eff05d1bc557b81c3f7ebb1338a8cc9d36966d0bb2dcea21
 set CHAIN_ID 888
-set BRIDGEADDR 0x61be4C0D3631f684CFfeD7FCf7087FFD4b4b127C
+set BRIDGEADDR 0x60eF97f2F2e86a7Ac46D5476fA3Ab7120b081fc6
 set ERC20_UMEE_TX_HASH 0x412e6f389d5b59dba62951d7f162bb7328d712aa1f49515a0e2e9a29162c3e26
+set TOKEN_ADDRESS 0xaffc72358f7ea95ccac548ef4e53d5497f3ac808
 ```
 -->
 
@@ -68,7 +69,7 @@ __Expected Result__
 - Set the `BRIDGEADDR` variable
 
 ```shell
-$~ BRIDGEADDR=0x61be4C0D3631f684CFfeD7FCf7087FFD4b4b127C
+$~ BRIDGEADDR=0x60eF97f2F2e86a7Ac46D5476fA3Ab7120b081fc6
 ```
 
 - Wait until the gravity bridge is confirmed in ethereum (14 blocks)
@@ -119,8 +120,16 @@ $~ PEGGO_ETH_PK=$MYETH3PK peggo orchestrator $BRIDGEADDR \
 
 ### Deploy Umee ERC20
 
-- Deploy a [ERC20](https://eips.ethereum.org/EIPS/eip-20) representation of uumee
-token in eth
+- You can also use a old deployed ERC20 umee representation already created if the
+contract didn't change, you can just set the `TOKEN_ADDRESS` env variable with the
+contract address of the already deployed umee ERC20 smartcontract
+
+```shell
+$~ TOKEN_ADDRESS=0xaffc72358f7ea95ccac548ef4e53d5497f3ac808
+```
+
+- Or you can deploy a [ERC20](https://eips.ethereum.org/EIPS/eip-20)
+representation of uumee token in eth
 
 ```shell
 $~ PEGGO_ETH_PK=$MYETHPK peggo bridge deploy-erc20 $BRIDGEADDR uumee --eth-rpc $ETHRPC
@@ -165,7 +174,9 @@ $~ umeed tx gravity send-to-eth $MYETH 10000uumee 1uumee \
   --from val \
   --chain-id $CHAIN_ID \
   --keyring-backend=test \
+  --log_level trace \
   --home=$UMEE_PEGGO_PATH/test/cosmos/data/$CHAIN_ID/n0/
+
 ```
 
 ### Send transaction from eth to umee
