@@ -24,12 +24,6 @@ const (
 	BaseSymbolETH        = "ETH"
 )
 
-var (
-	// deviationThreshold defines how many 𝜎 a provider can be away from the mean
-	// without being considered faulty.
-	deviationThreshold = sdk.MustNewDecFromStr("2")
-)
-
 // Oracle implements the core component responsible for fetching exchange rates
 // for a given set of currency pairs and determining the correct exchange rates.
 type Oracle struct {
@@ -264,7 +258,14 @@ func (o *Oracle) setPrices() error {
 			// e.g.: {ProviderKraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
 			for _, pair := range subscribedPrices {
-				ummedpforacle.SetProviderTickerPricesAndCandles(providerName, providerPrices, providerCandles, prices, candles, pair)
+				ummedpforacle.SetProviderTickerPricesAndCandles(
+					providerName,
+					providerPrices,
+					providerCandles,
+					prices,
+					candles,
+					pair,
+				)
 			}
 
 			mtx.Unlock()
