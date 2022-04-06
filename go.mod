@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.4.2-0.20220317234142-1c674cbc83ff
 	github.com/avast/retry-go v3.0.0+incompatible
-	github.com/cosmos/cosmos-sdk v0.45.1
+	github.com/cosmos/cosmos-sdk v0.45.2
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/golang/mock v1.6.0
@@ -13,6 +13,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/knadh/koanf v1.4.0
 	github.com/ory/dockertest/v3 v3.8.1
+	github.com/osmosis-labs/bech32-ibc v0.2.0-rc2
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.26.1
 	github.com/shopspring/decimal v1.3.1
@@ -20,12 +21,12 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.1
-	github.com/tendermint/tendermint v0.34.14
-	github.com/umee-network/umee v1.0.3
-	github.com/umee-network/umee/price-feeder v0.0.0-20220404205651-c42bd222c349
+	github.com/tendermint/tendermint v0.34.16
+	github.com/umee-network/umee/price-feeder v0.2.0
+	github.com/umee-network/umee/v2 v2.0.0
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
-	google.golang.org/grpc v1.44.0
+	google.golang.org/grpc v1.45.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -45,7 +46,7 @@ require (
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/OpenPeeDeeP/depguard v1.1.0 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
-	github.com/Workiva/go-datastructures v1.0.52 // indirect
+	github.com/Workiva/go-datastructures v1.0.53 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
 	github.com/armon/go-metrics v0.3.10 // indirect
 	github.com/ashanbrown/forbidigo v1.3.0 // indirect
@@ -67,7 +68,7 @@ require (
 	github.com/chavacava/garif v0.0.0-20210405164556-e8a0a408d6af // indirect
 	github.com/coinbase/rosetta-sdk-go v0.7.0 // indirect
 	github.com/confio/ics23/go v0.7.0 // indirect
-	github.com/containerd/continuity v0.1.0 // indirect
+	github.com/containerd/continuity v0.2.1 // indirect
 	github.com/cosmos/btcutil v1.0.4 // indirect
 	github.com/cosmos/gorocksdb v1.2.0 // indirect
 	github.com/cosmos/iavl v0.17.3 // indirect
@@ -98,7 +99,8 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/fzipp/gocyclo v0.4.0 // indirect
 	github.com/go-critic/go-critic v0.6.2 // indirect
-	github.com/go-kit/kit v0.10.0 // indirect
+	github.com/go-kit/kit v0.12.0 // indirect
+	github.com/go-kit/log v0.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
@@ -162,12 +164,11 @@ require (
 	github.com/jirfag/go-printf-func-name v0.0.0-20200119135958-7558a9eaa5af // indirect
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/julz/importas v0.1.0 // indirect
-	github.com/justinas/alice v1.2.0 // indirect
 	github.com/karalabe/usb v0.0.2 // indirect
 	github.com/keybase/go-keychain v0.0.0-20190712205309-48d3d31d256d // indirect
 	github.com/kisielk/errcheck v1.6.0 // indirect
 	github.com/kisielk/gotool v1.0.0 // indirect
-	github.com/klauspost/compress v1.13.5 // indirect
+	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/kulti/thelper v0.5.1 // indirect
 	github.com/kunwardeep/paralleltest v1.0.3 // indirect
 	github.com/kyoh86/exportloopref v0.1.8 // indirect
@@ -187,7 +188,7 @@ require (
 	github.com/mbilski/exhaustivestruct v1.2.0 // indirect
 	github.com/mgechev/revive v1.1.4 // indirect
 	github.com/mimoo/StrobeGo v0.0.0-20181016162300-f8f6d4d2b643 // indirect
-	github.com/minio/highwayhash v1.0.1 // indirect
+	github.com/minio/highwayhash v1.0.2 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
@@ -203,8 +204,7 @@ require (
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
-	github.com/opencontainers/runc v1.0.2 // indirect
-	github.com/osmosis-labs/bech32-ibc v0.2.0-rc2 // indirect
+	github.com/opencontainers/runc v1.0.3 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
 	github.com/phayes/checkstyle v0.0.0-20170904204023-bfd46e6a821d // indirect
@@ -223,7 +223,6 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rjeczalik/notify v0.9.1 // indirect
 	github.com/rs/cors v1.8.2 // indirect
-	github.com/rs/xid v1.3.0 // indirect
 	github.com/ryancurrah/gomodguard v1.2.3 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.3.0 // indirect
 	github.com/sanposhiho/wastedassign/v2 v2.0.6 // indirect
@@ -231,7 +230,6 @@ require (
 	github.com/securego/gosec/v2 v2.10.0 // indirect
 	github.com/shazow/go-diff v0.0.0-20160112020656-b6b7b6733b8c // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
-	github.com/sirkon/goproxy v1.4.8 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/sivchari/containedctx v1.0.2 // indirect
 	github.com/sivchari/tenv v1.4.7 // indirect
@@ -259,6 +257,7 @@ require (
 	github.com/ultraware/funlen v0.0.3 // indirect
 	github.com/ultraware/whitespace v0.0.5 // indirect
 	github.com/umee-network/Gravity-Bridge/module v1.4.2-0.20220217130213-b3cdbcaa3b93 // indirect
+	github.com/umee-network/umee v0.8.1-0.20220330155329-d9903f72d511 // indirect
 	github.com/uudashr/gocognit v1.0.5 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
@@ -275,7 +274,7 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
+	google.golang.org/genproto v0.0.0-20220317150908-0efb43f6373e // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
