@@ -44,6 +44,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ## [Unreleased]
 
 [#252](https://github.com/umee-network/peggo/pull/252) Point to new version of Umee + GB
+[#270](https://github.com/umee-network/peggo/pull/270) Remove Cosmos PK flag
 
 ## [v0.2.7](https://github.com/umee-network/peggo/releases/tag/v0.2.7) - 2022-03-31
 
