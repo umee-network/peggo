@@ -1,4 +1,6 @@
 sequenceDiagram
+    title: BatchRequesterLoop
+
     Peggo->>+Cosmos: BatchFees queries the batch fees
     Cosmos-->>-Peggo: return the batches from unbatched pool
     Peggo->>+Oracle: GetPrice of all unbatched tokens

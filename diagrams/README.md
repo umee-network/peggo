@@ -7,7 +7,17 @@ with it
 
 ## Loops
 
+### EthOracleMainLoop
+
+- The `EthOracleMainLoop` responsible for making sure that Ethereum events are
+retrieved from the Ethereum blockchain and ferried over to Cosmos where they
+will be used to issue tokens or process batches
+
 ### BatchRequesterLoop
+
+- This loop really means that peggo checks with umee if there is any batch of tokens
+ that needs to be batched to ethereum (It doesn't actually sends that batch) it just
+ request to cosmos that this batch is built to be bridged in another loop
 
 - This loop is where peggo looks at the BatchFees and uses the query endpoint `BatchFees`
  to iterate over the send to Eth tx pool for each token type, the relayer can then
@@ -20,7 +30,7 @@ with it
 - `MsgRequestBatch` is a message anyone can send that requests a batch of transactions
  to send across the bridge be created for whatever block height this message is
  included in. This acts as a coordination point, the handler for this message
- looks at the AddToOutgoingPool tx's in the store and generates a batch, also
+ looks at the `AddToOutgoingPool` tx's in the store and generates a batch, also
  available in the store tied to this message. The validators then grab this batch,
  sign it, submit the signatures with a MsgConfirmBatch before a relayer
  can finally submit the batch
