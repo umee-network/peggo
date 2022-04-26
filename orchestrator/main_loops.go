@@ -58,9 +58,16 @@ func (p *gravityOrchestrator) Start(ctx context.Context) error {
 	var pg loops.ParanoidGroup
 
 	pg.Go(func() error {
+		// scan all the events emmited by ethereum gravity contract
+		// from the last block (we get the last block from cosmos)
+		// broadcast all the eth events to cosmos as "claims"
 		return p.EthOracleMainLoop(ctx)
 	})
+
 	pg.Go(func() error {
+		// looks at the BatchFees on Cosmos and uses the query endpoint BatchFees
+		// to iterate over each token to see if it is profitable, if it is
+		// it will send an request batch for that denom
 		return p.BatchRequesterLoop(ctx)
 	})
 	pg.Go(func() error {
@@ -298,6 +305,7 @@ func (p *gravityOrchestrator) EthSignerMainLoop(ctx context.Context) (err error)
 	})
 }
 
+// BatchRequesterLoop sends a batch request to Cosmos (Umee).
 func (p *gravityOrchestrator) BatchRequesterLoop(ctx context.Context) (err error) {
 	logger := p.logger.With().Str("loop", "BatchRequesterLoop").Logger()
 
