@@ -13,6 +13,10 @@ with it
 retrieved from the Ethereum blockchain and ferried over to Cosmos where they
 will be used to issue tokens or process batches
 
+![diagram](./mermaid-diagram-eth_oracle_main_loop-2022_04_26.png)
+
+- Code for this diagram is in `diagrams/loop_EthOracleMainLoop.mermaid`
+
 ### BatchRequesterLoop
 
 - This loop really means that peggo checks with umee if there is any batch of tokens
