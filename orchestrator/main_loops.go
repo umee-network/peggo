@@ -75,7 +75,7 @@ func (p *gravityOrchestrator) Start(ctx context.Context) error {
 		// Gets the last pending valset to send an MsgValsetConfirm that sends
 		// signatures over to the cosmos validator if 66%+ a new validator set
 		// can be send to ethereum smartcontract. Also get the last pending
-		// batch request that signs that batch with an MsgConfirmBatch embeded
+		// batch request that signs that batch with an MsgConfirmBatch embedded
 		// with the txs and also the eth signature, then the cosmos validators
 		// are able to put the transactions in the queue ordered by tx fee
 		return p.EthSignerMainLoop(ctx)
