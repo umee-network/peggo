@@ -58,7 +58,7 @@ func (p *gravityOrchestrator) Start(ctx context.Context) error {
 	var pg loops.ParanoidGroup
 
 	pg.Go(func() error {
-		// scan all the events emmited by ethereum gravity contract
+		// scan all the events emitted by ethereum gravity contract
 		// from the last block (we get the last block from cosmos)
 		// broadcast all the eth events to cosmos as "claims"
 		return p.EthOracleMainLoop(ctx)
@@ -70,9 +70,17 @@ func (p *gravityOrchestrator) Start(ctx context.Context) error {
 		// it will send an request batch for that denom
 		return p.BatchRequesterLoop(ctx)
 	})
+
 	pg.Go(func() error {
+		// Gets the last pending valset to send an MsgValsetConfirm that sends
+		// signatures over to the cosmos validator if 66%+ a new validator set
+		// can be send to ethereum smartcontract. Also get the last pending
+		// batch request that signs that batch with an MsgConfirmBatch embeded
+		// with the txs and also the eth signature, then the cosmos validators
+		// are able to put the transactions in the queue ordered by tx fee
 		return p.EthSignerMainLoop(ctx)
 	})
+
 	pg.Go(func() error {
 		return p.RelayerMainLoop(ctx)
 	})

@@ -39,6 +39,16 @@ will be used to issue tokens or process batches
  sign it, submit the signatures with a MsgConfirmBatch before a relayer
  can finally submit the batch
 
-![diagram](./mermaid-diagram-batch_requester_loop-20220425104218.png)
+![diagram](./mermaid-diagram-batch_requester_loop-2022_04_25.png)
 
 - Code for this diagram is in `diagrams/loop_BatchRequesterLoop.mermaid`
+
+### EthSignerMainLoop
+
+- The `EthSignerMainLoop` responsible for making sure that transaciton batches
+and validator set are signed and confirmed and sent to the cosmos so that
+afterwards they can be relayed and sent to the ethereum smartcontract
+
+![diagram](./mermaid-diagram-eth_signer_main_loop-2022_05_24.png)
+
+- Code for this diagram is in `diagrams/loop_EthSignerMainLoop.mermaid`
