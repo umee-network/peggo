@@ -82,6 +82,12 @@ func (p *gravityOrchestrator) Start(ctx context.Context) error {
 	})
 
 	pg.Go(func() error {
+		// Gets the latest valset available and updating it on the ethereum
+		// smartcontract if needed. Also gets all the pending transaction
+		// batches and it's signatures from cosmos and send it to the
+		// ethereum if that batch of token is profitable, wasn't sent yet
+		// by another node (checking the nonce) and it is not currently
+		// in the eth node node mempool.
 		return p.RelayerMainLoop(ctx)
 	})
 

@@ -52,3 +52,15 @@ afterwards they can be relayed and sent to the ethereum smartcontract
 ![diagram](./mermaid-diagram-eth_signer_main_loop-2022_05_24.png)
 
 - Code for this diagram is in `diagrams/loop_EthSignerMainLoop.mermaid`
+
+### RelayerMainLoop
+
+- The `RelayerMainLoop` responsible for getting the latest valset available
+and updating it on the ethereum smartcontract if needed. Also gets all the pending
+transaction batches and it's signatures from cosmos and send it to the ethereum if
+that batch of token is profitable, wasn't sent yet by another node (checking the
+nonce) and it is not currently in the eth node node mempool.
+
+![diagram](./mermaid-diagram-relayer_main_loop-2022_05_24.png)
+
+- Code for this diagram is in `diagrams/loop_RelayerMainLoop.mermaid`
