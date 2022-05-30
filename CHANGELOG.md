@@ -43,6 +43,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+[#275](https://github.com/umee-network/peggo/pull/275) Add diagrams of main loops.
+
 ### Bug Fixes
 
 [#270](https://github.com/umee-network/peggo/pull/270) Remove Cosmos PK flag
