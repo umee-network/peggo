@@ -21,7 +21,7 @@ linters:
     - gocritic
     - gofmt
     - goimports
-    - golint
+    - revive
     - gosec
     - gosimple
     - govet
@@ -57,8 +57,11 @@ issues:
 linters-settings:
   dogsled:
     max-blank-identifiers: 3
-  golint:
-    min-confidence: 0
+  revive:
+    # Sets the default failure confidence.
+    # This means that linting errors with less than 0.8 confidence will be ignored.
+    # Default: 0.8
+    confidence: 0
   misspell:
     locale: US
   nolintlint:
