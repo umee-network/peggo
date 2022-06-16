@@ -7,7 +7,7 @@
 
 set -e
 
-CWD=$(pwd)
+CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # These options can be overridden by env
 CHAIN_ID="${CHAIN_ID:-888}"
