@@ -1,5 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
 import { HardhatNetworkAccountUserConfig, HardhatNetworkUserConfig, NetworkUserConfig } from "hardhat/src/types/config"
+import "@nomiclabs/hardhat-etherscan";
 import { env } from "process";
 
 // You need to export an object to set up your config
@@ -55,6 +56,9 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: peggoTestNetwork
+  },
+  etherscan: {
+    apiKey: "QCT9NFXK6QMK7H1UX9WU3RXJ972RR2H2G1",
   },
   paths: {
     sources: "./contracts",
