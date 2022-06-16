@@ -61,6 +61,7 @@ defaultFlags="$rpc --relay-batches=true --valset-relay-mode=all \
 "
 
 peggoLogPath=$hdir/peggo
+mkdir -p $peggoLogPath
 
 PEGGO_ETH_PK=$val0PrivateKey peggo orchestrator $bridgeAddr \
   $defaultFlags \
