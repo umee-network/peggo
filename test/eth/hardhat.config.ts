@@ -39,16 +39,27 @@ const peggoAccounts: HardhatNetworkAccountUserConfig[] = [
 
 const peggoTestNetwork: HardhatNetworkUserConfig = {
   chainId: GetChainId(),
-  loggingEnabled: true,
+  // loggingEnabled: true,
   accounts: peggoAccounts,
   // url: "http://127.0.0.1:8545/",
 }
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.10",
+  solidity: {
+    version: "0.8.10",
+    settings: {
+      optimizer: {
+        enabled: true
+      }
+    }
+  },
   networks: {
     hardhat: peggoTestNetwork
   },
+  paths: {
+    sources: "./contracts",
+    artifacts: "./artifacts"
+  }
 };
 
 export default config;
