@@ -40,8 +40,15 @@ const peggoAccounts: HardhatNetworkAccountUserConfig[] = [
 
 const peggoTestNetwork: HardhatNetworkUserConfig = {
   chainId: GetChainId(),
-  // loggingEnabled: true,
   accounts: peggoAccounts,
+  mining: {
+    mempool: {
+      order: "fifo"
+    },
+    auto: true,
+    interval: [1000, 3000],
+  }
+  // loggingEnabled: true,
   // url: "http://127.0.0.1:8545/",
 }
 
