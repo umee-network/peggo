@@ -45,8 +45,8 @@ userPrivateKey="0x6c212553111b370a8ffdc682954495b7b90a73cedab7106323646a4f2c4e66
 
 $CWD/../eth/run_ganache.sh
 
-echo Wait for ganache to start
-sleep 10
+echo Wait for ganache to start and produce some blocks
+sleep 15
 
 bridgeDeployed=$hdir/bridge_deployed.txt
 
@@ -56,7 +56,7 @@ bridgeAddr=$(cat $bridgeDeployed | grep Address | awk '{print $2}')
 
 defaultFlags="$rpc --relay-batches=true --valset-relay-mode=all \
   --cosmos-chain-id=$CHAIN_ID --cosmos-keyring=test \
-  --cosmos-from=val --log-level debug --log-format json \
+  --cosmos-from=val --log-level debug \
   --profit-multiplier=0
 "
 
