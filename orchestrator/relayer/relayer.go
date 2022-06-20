@@ -117,9 +117,9 @@ func (s *gravityRelayer) UpdateLatestValsetEthBlockNumber(lastestValsetEthBlockN
 	s.latestValsetEthBlockNumber = lastestValsetEthBlockNumber
 }
 
-// IsLastValsetUpdateOutdated checks if the latest valset update was sent
+// IsLastestValsetUpdateOutdated checks if the latest valset update was sent
 // more than 2000 blocks than the current height
-func (s *gravityRelayer) IsLastValsetUpdateOutdated(ctx context.Context) bool {
+func (s *gravityRelayer) IsLastestValsetUpdateOutdated(ctx context.Context) bool {
 	if s.latestValsetEthBlockNumber == 0 {
 		// means that it wasn't update or didn't passed to `FindLatestValset`
 		return false

@@ -66,8 +66,10 @@ func (s *gravityRelayer) RelayValsets(ctx context.Context, currentValset types.V
 
 	// We might not need to relay this valset update unless the user explicitly specified it.
 	if s.valsetRelayMode == ValsetRelayModeMinimum && latestValidValset.Nonce == latestValsets.Valsets[0].Nonce {
-		s.logger.Debug().Msg("not relaying because nonces match")
-		return nil
+		if !s.IsLastestValsetUpdateOutdated(ctx) {
+			s.logger.Debug().Msg("not relaying because nonces match and valset is not outdated")
+			return nil
+		}
 	}
 
 	s.logger.Info().
