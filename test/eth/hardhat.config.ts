@@ -3,7 +3,7 @@ import { HardhatNetworkAccountUserConfig, HardhatNetworkUserConfig, NetworkUserC
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-ethers";
 import { env } from "process";
-import "./tasks/get_current_valset";
+import "./tasks/getCurrentValset";
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
