@@ -20,6 +20,10 @@ n2dir="$hdir/n2"
 umeeBasename=$(basename $UMEED_BIN)
 ganache="ganache-cli"
 
+# Common flags
+kbt="--keyring-backend test"
+cid="--chain-id $CHAIN_ID"
+
 if pgrep -x $umeeBasename >/dev/null
 then
   echo "$umeeBasename is running, going to kill all"
@@ -80,4 +84,9 @@ PEGGO_ETH_PK=$val2PrivateKey peggo orchestrator $bridgeAddr \
   --cosmos-grpc="tcp://0.0.0.0:9092" \
   --tendermint-rpc="http://0.0.0.0:26677" \
   --cosmos-keyring-dir=$n2dir > $peggoLogPath/n2.peggo.log 2>&1 &
+
+echo Wait for a few seconds to get the current valset
+sleep 15
+
+$CWD/valset_update.sh
 
