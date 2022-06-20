@@ -72,6 +72,7 @@ func (s *gravityRelayer) FindLatestValset(ctx context.Context) (*types.Valset, e
 
 		for iter.Next() {
 			valsetUpdatedEvents = append(valsetUpdatedEvents, iter.Event)
+			s.UpdateLatestValsetEthBlockNumber(iter.Event.Raw.BlockNumber)
 		}
 
 		iter.Close()
@@ -91,7 +92,7 @@ func (s *gravityRelayer) FindLatestValset(ctx context.Context) (*types.Valset, e
 			event := valsetUpdatedEvents[0]
 			valset := &types.Valset{
 				Nonce:        event.NewValsetNonce.Uint64(),
-				Members:      make([]types.BridgeValidator, 0, len(event.Powers)),
+				Members:      make([]types.BridgeValidator, len(event.Powers)),
 				RewardAmount: sdk.NewIntFromBigInt(event.RewardAmount),
 				RewardToken:  event.RewardToken.Hex(),
 			}
