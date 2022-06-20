@@ -92,7 +92,7 @@ func (s *gravityRelayer) RelayValsets(ctx context.Context, currentValset types.V
 
 	estimatedGasCost, gasPrice, err := s.gravityContract.EstimateGas(ctx, s.gravityContract.Address(), txData)
 	if err != nil {
-		s.logger.Err(err).Msg("failed to estimate gas cost")
+		s.logger.Err(err).Msg("failed to estimate gas cost of ValsetUpdate")
 		return nil
 	}
 
