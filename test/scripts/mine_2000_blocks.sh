@@ -29,7 +29,8 @@ cd $CWD/../eth && npx hardhat $hardhatNetwork run $CWD/../eth/scripts/mine_block
 $CWD/print_block_number.sh
 
 cd $CWD/../eth && npx hardhat $hardhatNetwork getCurrentValset $bridgeAddr --show-stack-traces
-echo Wait for the orchestrator to read and update the valset
-sleep 20
+
+echo Wait for the orchestrator to read and check if the valset need to be updated
+sleep 35
 
 cd $CWD/../eth && npx hardhat $hardhatNetwork getCurrentValset $bridgeAddr --show-stack-traces

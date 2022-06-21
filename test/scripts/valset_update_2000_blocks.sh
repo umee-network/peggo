@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 ETH_RPC=${ETH_RPC:-"http://127.0.0.1:8545"}
@@ -50,7 +50,7 @@ userPrivateKey="0x6c212553111b370a8ffdc682954495b7b90a73cedab7106323646a4f2c4e66
 $CWD/../eth/run_ganache.sh
 
 echo Wait for ganache to start and produce some blocks
-sleep 15
+sleep 20
 
 bridgeDeployed=$hdir/bridge_deployed.txt
 
@@ -58,7 +58,7 @@ PEGGO_ETH_PK=$val0PrivateKey $PEGGO_BIN bridge deploy-gravity $rpc 2> $bridgeDep
 
 bridgeAddr=$(cat $bridgeDeployed | grep Address | awk '{print $2}')
 
-defaultFlags="$rpc --relay-batches=true --valset-relay-mode=all \
+defaultFlags="$rpc --relay-batches=true --valset-relay-mode=minimum \
   --cosmos-chain-id=$CHAIN_ID --cosmos-keyring=test \
   --cosmos-from=val --log-level debug \
   --profit-multiplier=0
@@ -67,19 +67,19 @@ defaultFlags="$rpc --relay-batches=true --valset-relay-mode=all \
 peggoLogPath=$hdir/peggo
 mkdir -p $peggoLogPath
 
-PEGGO_ETH_PK=$val0PrivateKey peggo orchestrator $bridgeAddr \
+PEGGO_ETH_PK=$val0PrivateKey $PEGGO_BIN orchestrator $bridgeAddr \
   $defaultFlags \
   --cosmos-grpc="tcp://0.0.0.0:9090" \
   --tendermint-rpc="http://0.0.0.0:26657" \
   --cosmos-keyring-dir=$n0dir > $peggoLogPath/n0.peggo.log 2>&1 &
 
-PEGGO_ETH_PK=$val1PrivateKey peggo orchestrator $bridgeAddr \
+PEGGO_ETH_PK=$val1PrivateKey $PEGGO_BIN orchestrator $bridgeAddr \
   $defaultFlags \
   --cosmos-grpc="tcp://0.0.0.0:9091" \
   --tendermint-rpc="http://0.0.0.0:26667" \
   --cosmos-keyring-dir=$n1dir > $peggoLogPath/n1.peggo.log 2>&1 &
 
-PEGGO_ETH_PK=$val2PrivateKey peggo orchestrator $bridgeAddr \
+PEGGO_ETH_PK=$val2PrivateKey $PEGGO_BIN orchestrator $bridgeAddr \
   $defaultFlags \
   --cosmos-grpc="tcp://0.0.0.0:9092" \
   --tendermint-rpc="http://0.0.0.0:26677" \
@@ -88,5 +88,20 @@ PEGGO_ETH_PK=$val2PrivateKey peggo orchestrator $bridgeAddr \
 echo Wait for a few seconds to get the current valset
 sleep 15
 
-$CWD/valset_update.sh
+$CWD/print_block_number.sh
 
+echo .
+echo Incresing the stake of one validator, it should not update the valset
+echo Because the members did not changed and 2000 blocks did not pass
+echo Since the last updated valset and valset-relay-mode=minimum
+echo .
+sleep 1
+
+$CWD/increasce_stake_to_update_valset.sh
+
+echo Stake increasced
+sleep 2
+
+$CWD/mine_2000_blocks.sh
+
+echo after mining 2000 blocks, it should update

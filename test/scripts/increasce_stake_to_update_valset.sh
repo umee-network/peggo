@@ -27,14 +27,20 @@ cd $CWD/../eth && npx hardhat $hardhatNetwork getCurrentValset $bridgeAddr --sho
 
 n0ValAddr=$($UMEED_BIN keys --home $n0dir $kbt show val --bech val -a)
 
-$UMEED_BIN tx staking delegate $n0ValAddr 1000000000uumee \
+amount=1000000000uumee
+
+$UMEED_BIN tx staking delegate $n0ValAddr $amount \
   --home $n0dir $kbt --from val $cid -y --broadcast-mode block
+
+echo .
+echo Delegated $amount to $n0ValAddr
+echo .
 
 $CWD/print_block_number.sh
 
 cd $CWD/../eth && npx hardhat $hardhatNetwork getCurrentValset $bridgeAddr --show-stack-traces
 
-echo Wait for the orchestrator to read and update the valset
+echo Wait for the orchestrator to read and check if the valset need to be updated
 sleep 20
 
 $CWD/print_block_number.sh
