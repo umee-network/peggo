@@ -36,6 +36,11 @@ func (m *MockQueryClient) EXPECT() *MockQueryClientMockRecorder {
 	return m.recorder
 }
 
+// GetPendingIbcAutoForwards unimplemented method.
+func (m *MockQueryClient) GetPendingIbcAutoForwards(ctx context.Context, in *types.QueryPendingIbcAutoForwards, opts ...grpc.CallOption) (*types.QueryPendingIbcAutoForwardsResponse, error) {
+	return nil, nil
+}
+
 // BatchConfirms mocks base method.
 func (m *MockQueryClient) BatchConfirms(arg0 context.Context, arg1 *types.QueryBatchConfirmsRequest, arg2 ...grpc.CallOption) (*types.QueryBatchConfirmsResponse, error) {
 	m.ctrl.T.Helper()
