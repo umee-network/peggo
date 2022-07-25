@@ -62,17 +62,23 @@ func New(ctx context.Context, logger zerolog.Logger, providersName []string) (*O
 		}
 	}
 
-	oracle := &Oracle{
+	o := &Oracle{
 		logger:                  logger.With().Str("module", "oracle").Logger(),
 		closer:                  ummedpfsync.NewCloser(),
 		providers:               providers,
 		subscribedBaseSymbols:   map[string]struct{}{},
 		providerSubscribedPairs: map[string][]umeedpftypes.CurrencyPair{},
 	}
-	oracle.loadAvailablePairs()
-	go oracle.start(ctx)
+	o.loadAvailablePairs()
+	if err := o.subscribeProviders([]umeedpftypes.CurrencyPair{
+		{Base: "USDT", Quote: "USD"},
+		{Base: "DAI", Quote: "USD"},
+	}); err != nil {
+		return nil, err
+	}
+	go o.start(ctx)
 
-	return oracle, nil
+	return o, nil
 }
 
 // GetPrices returns the price for the provided base symbols.
