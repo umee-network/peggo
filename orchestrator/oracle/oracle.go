@@ -3,7 +3,6 @@ package oracle
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -17,11 +16,13 @@ import (
 	ummedpfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
 )
 
-// We define tickerTimeout as the minimum timeout between each oracle loop.
 const (
-	tickerTimeout        = 1000 * time.Millisecond
+	// tickerTimeout is the minimum timeout between each oracle loop.
+	tickerTimeout = 1000 * time.Millisecond
+	// availablePairsReload is the amount of time to reload the providers available pairs.
 	availablePairsReload = 24 * time.Hour
-	BaseSymbolETH        = "ETH"
+	// SymbolETH refers to the ethereum symbol.
+	SymbolETH = "ETH"
 )
 
 // Oracle implements the core component responsible for fetching exchange rates
@@ -71,8 +72,8 @@ func New(ctx context.Context, logger zerolog.Logger, providersName []string) (*O
 	}
 	o.loadAvailablePairs()
 	if err := o.subscribeProviders([]umeedpftypes.CurrencyPair{
-		{Base: "USDT", Quote: "USD"},
-		{Base: "DAI", Quote: "USD"},
+		{Base: symbolUSDT, Quote: symbolUSD},
+		{Base: symbolDAI, Quote: symbolUSD},
 	}); err != nil {
 		return nil, err
 	}
@@ -309,20 +310,4 @@ func (o *Oracle) tick() error {
 	}
 
 	return nil
-}
-
-// GetStablecoinsCurrencyPair return the currency pair of that symbol quoted by some
-// stablecoins.
-func GetStablecoinsCurrencyPair(baseSymbol string) []umeedpftypes.CurrencyPair {
-	quotes := []string{"USD", "USDT", "DAI"}
-	currencyPairs := make([]umeedpftypes.CurrencyPair, len(quotes))
-
-	for i, quote := range quotes {
-		currencyPairs[i] = umeedpftypes.CurrencyPair{
-			Base:  strings.ToUpper(baseSymbol),
-			Quote: quote,
-		}
-	}
-
-	return currencyPairs
 }
