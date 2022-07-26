@@ -91,7 +91,7 @@ sleep 15
 $CWD/print_block_number.sh
 
 echo .
-echo Incresing the stake of one validator, it should not update the valset
+echo Increasing the stake of one validator, it should not update the valset
 echo Because the members did not changed and 2000 blocks did not pass
 echo Since the last updated valset and valset-relay-mode=minimum
 echo .
