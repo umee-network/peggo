@@ -3,7 +3,7 @@ run:
   skip-dirs:
     - test
     - diagrams
-  go: '1.17'
+  go: '1.19'
 
   govet:
     # Enable analyzers by name (in addition to default).
