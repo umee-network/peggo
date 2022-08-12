@@ -7,7 +7,7 @@ require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/cosmos/cosmos-sdk v0.45.5
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/ethereum/go-ethereum v1.10.20
+	github.com/ethereum/go-ethereum v1.10.21
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.48.0
 	github.com/hashicorp/go-multierror v1.1.1
