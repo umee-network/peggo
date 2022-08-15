@@ -15,7 +15,7 @@ import (
 // corresponds to Cosmos chain ID, fromSpec is either name of the key, or bech32-address
 // of the Cosmos account. Keyring is required to contain the specified key.
 func NewClientContext(chainID, fromSpec string, kb keyring.Keyring) (client.Context, error) {
-	var keyInfo keyring.Info
+	var keyInfo *keyring.Record
 
 	if kb != nil {
 		addr, err := cosmostypes.AccAddressFromBech32(fromSpec)
@@ -38,7 +38,7 @@ func NewClientContext(chainID, fromSpec string, kb keyring.Keyring) (client.Cont
 	encodingConfig := umeeapp.MakeEncodingConfig()
 	clientCtx := client.Context{
 		ChainID:           chainID,
-		JSONCodec:         encodingConfig.Marshaler,
+		Codec:             encodingConfig.Codec,
 		InterfaceRegistry: encodingConfig.InterfaceRegistry,
 		Output:            os.Stderr,
 		OutputFormat:      "json",
@@ -54,9 +54,9 @@ func NewClientContext(chainID, fromSpec string, kb keyring.Keyring) (client.Cont
 
 	if keyInfo != nil {
 		clientCtx = clientCtx.WithKeyring(kb)
-		clientCtx = clientCtx.WithFromAddress(keyInfo.GetAddress())
-		clientCtx = clientCtx.WithFromName(keyInfo.GetName())
-		clientCtx = clientCtx.WithFrom(keyInfo.GetName())
+		clientCtx = clientCtx.WithFromAddress(keyInfo.PubKey.GetValue())
+		clientCtx = clientCtx.WithFromName(keyInfo.Name)
+		clientCtx = clientCtx.WithFrom(keyInfo.Name)
 	}
 
 	return clientCtx, nil

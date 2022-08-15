@@ -252,7 +252,7 @@ func (c *cosmosClient) broadcastTx(
 		txf = txf.WithGas(adjusted)
 	}
 
-	txn, err := tx.BuildUnsignedTx(txf, msgs...)
+	txn, err := c.txFactory.BuildUnsignedTx(msgs...)
 	if err != nil {
 		err = errors.Wrap(err, "failed to BuildUnsignedTx")
 		return nil, err

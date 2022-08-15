@@ -25,7 +25,7 @@ import (
 	"github.com/tendermint/tendermint/p2p"
 	"github.com/tendermint/tendermint/privval"
 
-	"github.com/umee-network/umee/v2/app"
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 type validator struct {
@@ -33,7 +33,7 @@ type validator struct {
 	index            int
 	moniker          string
 	mnemonic         string
-	keyInfo          keyring.Info
+	keyInfo          *keyring.Record
 	privateKey       cryptotypes.PrivKey
 	consensusKey     privval.FilePVKey
 	consensusPrivKey cryptotypes.PrivKey
@@ -69,7 +69,7 @@ func (v *validator) init() error {
 		return err
 	}
 
-	appState, err := json.MarshalIndent(app.ModuleBasics.DefaultGenesis(cdc), "", " ")
+	appState, err := json.MarshalIndent(umeeapp.ModuleBasics.DefaultGenesis(cdc), "", " ")
 	if err != nil {
 		return fmt.Errorf("failed to JSON encode app genesis state: %w", err)
 	}
@@ -126,7 +126,8 @@ func (v *validator) createConsensusKey() error {
 }
 
 func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
-	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil)
+	encodingConfig := umeeapp.MakeEncodingConfig()
+	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil, encodingConfig.Codec)
 	if err != nil {
 		return err
 	}
@@ -185,7 +186,7 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	}
 
 	return stakingtypes.NewMsgCreateValidator(
-		sdk.ValAddress(v.keyInfo.GetAddress()),
+		sdk.ValAddress(v.keyInfo.PubKey.GetValue()),
 		valPubKey,
 		amount,
 		description,
@@ -202,7 +203,7 @@ func (v *validator) buildDelegateKeysMsg(orchAddr sdk.AccAddress, ethAddr string
 	}
 
 	return gravitytypes.NewMsgSetOrchestratorAddress(
-		sdk.ValAddress(v.keyInfo.GetAddress()),
+		sdk.ValAddress(v.keyInfo.PubKey.GetValue()),
 		orchAddr,
 		*eth,
 	), nil
@@ -225,6 +226,11 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 		Sequence:      0,
 	}
 
+	pubkey, err := v.keyInfo.GetPubKey()
+	if err != nil {
+		return nil, err
+	}
+
 	// For SIGN_MODE_DIRECT, calling SetSignatures calls setSignerInfos on
 	// TxBuilder under the hood, and SignerInfos is needed to generate the sign
 	// bytes. This is the reason for setting SetSignatures here, with a nil
@@ -234,7 +240,7 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	// also doesn't affect its generated sign bytes, so for code's simplicity
 	// sake, we put it here.
 	sig := txsigning.SignatureV2{
-		PubKey: v.keyInfo.GetPubKey(),
+		PubKey: pubkey,
 		Data: &txsigning.SingleSignatureData{
 			SignMode:  txsigning.SignMode_SIGN_MODE_DIRECT,
 			Signature: nil,
@@ -261,7 +267,7 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	}
 
 	sig = txsigning.SignatureV2{
-		PubKey: v.keyInfo.GetPubKey(),
+		PubKey: pubkey,
 		Data: &txsigning.SingleSignatureData{
 			SignMode:  txsigning.SignMode_SIGN_MODE_DIRECT,
 			Signature: sigBytes,

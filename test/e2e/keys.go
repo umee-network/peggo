@@ -5,6 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/go-bip39"
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 func createMnemonic() (string, error) {
@@ -21,7 +22,7 @@ func createMnemonic() (string, error) {
 	return mnemonic, nil
 }
 
-func createMemoryKey() (mnemonic string, info *keyring.Info, err error) {
+func createMemoryKey() (mnemonic string, info *keyring.Record, err error) {
 	mnemonic, err = createMnemonic()
 	if err != nil {
 		return "", nil, err
@@ -35,8 +36,9 @@ func createMemoryKey() (mnemonic string, info *keyring.Info, err error) {
 	return mnemonic, account, nil
 }
 
-func createMemoryKeyFromMnemonic(mnemonic string) (*keyring.Info, error) {
-	kb, err := keyring.New("testnet", keyring.BackendMemory, "", nil)
+func createMemoryKeyFromMnemonic(mnemonic string) (*keyring.Record, error) {
+	encodingConfig := umeeapp.MakeEncodingConfig()
+	kb, err := keyring.New("testnet", keyring.BackendMemory, "", nil, encodingConfig.Codec)
 	if err != nil {
 		return nil, err
 	}
@@ -52,5 +54,5 @@ func createMemoryKeyFromMnemonic(mnemonic string) (*keyring.Info, error) {
 		return nil, err
 	}
 
-	return &account, nil
+	return account, nil
 }

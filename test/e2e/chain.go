@@ -39,7 +39,7 @@ func init() {
 		&ed25519.PubKey{},
 	)
 
-	cdc = encodingConfig.Marshaler
+	cdc = encodingConfig.Codec
 }
 
 type chain struct {
@@ -150,7 +150,7 @@ func (c *chain) createAndInitOrchestratorsWithMnemonics(count int, mnemonics []s
 			return err
 		}
 
-		orchestrator.keyInfo = *info
+		orchestrator.keyInfo = info
 		orchestrator.mnemonic = mnemonics[i]
 
 		c.orchestrators = append(c.orchestrators, orchestrator)

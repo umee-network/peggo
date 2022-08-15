@@ -19,10 +19,10 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		s.sendFromUmeeToEth(0, ethRecipient, "100photon", "10photon", "3photon")
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
-		fromAddr := s.chain.validators[0].keyInfo.GetAddress()
+		fromAddr := s.chain.validators[0].keyInfo.PubKey.GetValue()
 
 		// require the sender's (validator) balance decreased
-		balance, err := queryUmeeDenomBalance(umeeEndpoint, fromAddr.String(), "photon")
+		balance, err := queryUmeeDenomBalance(umeeEndpoint, string(fromAddr), "photon")
 		s.Require().NoError(err)
 		s.Require().GreaterOrEqual(balance.Amount.Int64(), int64(99999998237))
 
@@ -52,8 +52,8 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 
 	// send 100 photon tokens from Ethereum back to Umee
 	s.Run("send_photon_tokens_from_eth", func() {
-		toAddr := s.chain.validators[0].keyInfo.GetAddress()
-		s.sendFromEthToUmee(1, photonERC20Addr, toAddr.String(), "100")
+		toAddr := s.chain.validators[0].keyInfo.PubKey.GetValue()
+		s.sendFromEthToUmee(1, photonERC20Addr, string(toAddr), "100")
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		expBalance := int64(99999998334)
@@ -62,7 +62,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 		var latestBalance int64
 		s.Require().Eventuallyf(
 			func() bool {
-				b, err := queryUmeeDenomBalance(umeeEndpoint, toAddr.String(), "photon")
+				b, err := queryUmeeDenomBalance(umeeEndpoint, string(toAddr), "photon")
 				if err != nil {
 					return false
 				}
@@ -91,9 +91,9 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		s.sendFromUmeeToEth(0, ethRecipient, "300uumee", "10photon", "7uumee")
 
 		endpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
-		fromAddr := s.chain.validators[0].keyInfo.GetAddress()
+		fromAddr := s.chain.validators[0].keyInfo.PubKey.GetValue()
 
-		balance, err := queryUmeeDenomBalance(endpoint, fromAddr.String(), "uumee")
+		balance, err := queryUmeeDenomBalance(endpoint, string(fromAddr), "uumee")
 		s.Require().NoError(err)
 		s.Require().Equal(int64(9999999693), balance.Amount.Int64())
 
@@ -123,8 +123,8 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 
 	// send 300 umee tokens from Ethereum back to Umee
 	s.Run("send_uumee_tokens_from_eth", func() {
-		toAddr := s.chain.validators[0].keyInfo.GetAddress()
-		s.sendFromEthToUmee(1, umeeERC20Addr, toAddr.String(), "300")
+		toAddr := s.chain.validators[0].keyInfo.PubKey.GetValue()
+		s.sendFromEthToUmee(1, umeeERC20Addr, string(toAddr), "300")
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		expBalance := int64(9999999993)
@@ -133,7 +133,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 		var latestBalance int64
 		s.Require().Eventuallyf(
 			func() bool {
-				b, err := queryUmeeDenomBalance(umeeEndpoint, toAddr.String(), "uumee")
+				b, err := queryUmeeDenomBalance(umeeEndpoint, string(toAddr), "uumee")
 				if err != nil {
 					return false
 				}

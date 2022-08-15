@@ -26,6 +26,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/orchestrator/ethereum/keystore"
+	umeeapp "github.com/umee-network/umee/v2/app"
 	"golang.org/x/term"
 )
 
@@ -111,17 +112,19 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 			}
 		}
 
+		encodingConfig := umeeapp.MakeEncodingConfig()
 		kb, err := keyring.New(
 			konfig.String(flagCosmosKeyringApp),
 			konfig.String(flagCosmosKeyring),
 			absoluteKeyringDir,
 			passReader,
+			encodingConfig.Codec,
 		)
 		if err != nil {
 			return emptyCosmosAddress, nil, fmt.Errorf("failed to create keyring: %w", err)
 		}
 
-		var keyInfo keyring.Info
+		var keyInfo *keyring.Record
 		if fromIsAddress {
 			if keyInfo, err = kb.KeyByAddress(addressFrom); err != nil {
 				return emptyCosmosAddress, nil, fmt.Errorf(
@@ -141,26 +144,26 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 		switch keyType := keyInfo.GetType(); keyType {
 		case keyring.TypeLocal:
 			// kb has a key and it's totally usable
-			return keyInfo.GetAddress(), kb, nil
+			return keyInfo.PubKey.GetValue(), kb, nil
 
 		case keyring.TypeLedger:
 			// The keyring stores references to ledger keys, so we must explicitly
 			// check that. The keyring doesn't know how to scan HD keys - they must be
 			// added manually before.
 			if cosmosUseLedger {
-				return keyInfo.GetAddress(), kb, nil
+				return keyInfo.PubKey.GetValue(), kb, nil
 			}
 
-			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key is a ledger reference, enable ledger option", keyInfo.GetName())
+			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key is a ledger reference, enable ledger option", keyInfo.Name)
 
 		case keyring.TypeOffline:
-			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key is an offline key, not supported yet", keyInfo.GetName())
+			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key is an offline key, not supported yet", keyInfo.Name)
 
 		case keyring.TypeMulti:
-			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key is an multisig key, not supported yet", keyInfo.GetName())
+			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key is an multisig key, not supported yet", keyInfo.Name)
 
 		default:
-			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key  has unsupported type: %s", keyInfo.GetName(), keyType)
+			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key  has unsupported type: %s", keyInfo.Name, keyType)
 		}
 
 	default:
@@ -390,8 +393,9 @@ func keyringForPrivKey(name string, privKey sdkcryptotypes.PrivKey) (keyring.Key
 	}
 
 	armored := sdkcrypto.EncryptArmorPrivKey(privKey, tmpPhrase, privKey.Type())
+	encodingConfig := umeeapp.MakeEncodingConfig()
 
-	kb := keyring.NewInMemory()
+	kb := keyring.NewInMemory(encodingConfig.Codec)
 	if err := kb.ImportPrivKey(name, armored, tmpPhrase); err != nil {
 		err = errors.Wrap(err, "failed to import privkey")
 		return nil, err

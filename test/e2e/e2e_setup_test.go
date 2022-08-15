@@ -148,14 +148,14 @@ func (s *IntegrationTestSuite) initNodes() {
 	val0ConfigDir := s.chain.validators[0].configDir()
 	for _, val := range s.chain.validators {
 		s.Require().NoError(
-			addGenesisAccount(val0ConfigDir, "", initBalanceStr, val.keyInfo.GetAddress()),
+			addGenesisAccount(val0ConfigDir, "", initBalanceStr, val.keyInfo.PubKey.GetValue()),
 		)
 	}
 
 	// add orchestrator accounts to genesis file
 	for _, orch := range s.chain.orchestrators {
 		s.Require().NoError(
-			addGenesisAccount(val0ConfigDir, "", initBalanceStr, orch.keyInfo.GetAddress()),
+			addGenesisAccount(val0ConfigDir, "", initBalanceStr, orch.keyInfo.PubKey.GetValue()),
 		)
 	}
 
@@ -228,7 +228,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 		BaseBorrowRate:       sdk.MustNewDecFromStr("0.020000000000000000"),
 		KinkBorrowRate:       sdk.MustNewDecFromStr("0.200000000000000000"),
 		MaxBorrowRate:        sdk.MustNewDecFromStr("1.50000000000000000"),
-		KinkUtilizationRate:  sdk.MustNewDecFromStr("0.200000000000000000"),
+		KinkUtilization:      sdk.MustNewDecFromStr("0.200000000000000000"),
 		LiquidationIncentive: sdk.MustNewDecFromStr("0.180000000000000000"),
 	})
 	bz, err = cdc.MarshalJSON(&leverageGenState)
@@ -274,7 +274,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 		createValmsg, err := val.buildCreateValidatorMsg(stakeAmountCoin)
 		s.Require().NoError(err)
 
-		delKeysMsg, err := val.buildDelegateKeysMsg(s.chain.orchestrators[i].keyInfo.GetAddress(), s.chain.orchestrators[i].ethereumKey.address)
+		delKeysMsg, err := val.buildDelegateKeysMsg(s.chain.orchestrators[i].keyInfo.PubKey.GetValue(), s.chain.orchestrators[i].ethereumKey.address)
 		s.Require().NoError(err)
 
 		signedTx, err := val.signMsg(createValmsg, delKeysMsg)
@@ -690,7 +690,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--cosmos-gas-prices",
 					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
 					"--cosmos-from",
-					s.chain.orchestrators[i].keyInfo.GetName(),
+					s.chain.orchestrators[i].keyInfo.Name,
 					"--relay-batches=true",
 					"--valset-relay-mode=minimum",
 					"--profit-multiplier=0.0",

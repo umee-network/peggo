@@ -32,12 +32,12 @@ type Oracle struct {
 	closer *ummedpfsync.Closer
 
 	mtx                   sync.RWMutex
-	providers             map[string]*Provider // providerName => Provider
-	prices                map[string]sdk.Dec   // baseSymbol => price ex.: UMEE, ETH => sdk.Dec
-	subscribedBaseSymbols map[string]struct{}  // baseSymbol => nothing
+	providers             map[umeedpfprovider.Name]*Provider // providerName => Provider
+	prices                map[string]sdk.Dec                 // baseSymbol => price ex.: UMEE, ETH => sdk.Dec
+	subscribedBaseSymbols map[string]struct{}                // baseSymbol => nothing
 	// this field could be calculated each time by looping providers.subscribedPairs
 	// but the time to process is not worth the amount of memory
-	providerSubscribedPairs map[string][]umeedpftypes.CurrencyPair // providerName => []CurrencyPair
+	providerSubscribedPairs map[umeedpfprovider.Name][]umeedpftypes.CurrencyPair // providerName => []CurrencyPair
 }
 
 // Provider wraps the umee provider interface.
@@ -47,11 +47,11 @@ type Provider struct {
 	subscribedPairs map[string]umeedpftypes.CurrencyPair // Symbol => currencyPair
 }
 
-func New(ctx context.Context, logger zerolog.Logger, providersName []string) (*Oracle, error) {
-	providers := map[string]*Provider{}
+func New(ctx context.Context, logger zerolog.Logger, providersName []umeedpfprovider.Name) (*Oracle, error) {
+	providers := map[umeedpfprovider.Name]*Provider{}
 
 	for _, providerName := range providersName {
-		provider, err := ummedpforacle.NewProvider(ctx, providerName, logger, umeedpftypes.CurrencyPair{})
+		provider, err := ummedpforacle.NewProvider(ctx, providerName, logger, umeedpfprovider.Endpoint{}, umeedpftypes.CurrencyPair{})
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +68,7 @@ func New(ctx context.Context, logger zerolog.Logger, providersName []string) (*O
 		closer:                  ummedpfsync.NewCloser(),
 		providers:               providers,
 		subscribedBaseSymbols:   map[string]struct{}{},
-		providerSubscribedPairs: map[string][]umeedpftypes.CurrencyPair{},
+		providerSubscribedPairs: map[umeedpfprovider.Name][]umeedpftypes.CurrencyPair{},
 	}
 	o.loadAvailablePairs()
 	if err := o.subscribeProviders([]umeedpftypes.CurrencyPair{
@@ -157,7 +157,7 @@ func (o *Oracle) subscribeProviders(currencyPairs []umeedpftypes.CurrencyPair) e
 
 			_, availablePair := provider.availablePairs[symbol]
 			if !availablePair {
-				o.logger.Debug().Str("provider_name", providerName).Str("symbol", symbol).Msg("symbol is not available")
+				o.logger.Debug().Str("provider_name", string(providerName)).Str("symbol", symbol).Msg("symbol is not available")
 				continue
 			}
 
@@ -165,13 +165,13 @@ func (o *Oracle) subscribeProviders(currencyPairs []umeedpftypes.CurrencyPair) e
 		}
 
 		if len(pairsToSubscribe) == 0 {
-			o.logger.Debug().Str("provider_name", providerName).
+			o.logger.Debug().Str("provider_name", string(providerName)).
 				Msgf("No pairs to subscribe, received pairs to try: %+v", currencyPairs)
 			continue
 		}
 
 		if err := provider.SubscribeCurrencyPairs(pairsToSubscribe...); err != nil {
-			o.logger.Err(err).Str("provider_name", providerName).Msg("subscribing to new currency pairs")
+			o.logger.Err(err).Str("provider_name", string(providerName)).Msg("subscribing to new currency pairs")
 			return err
 		}
 
@@ -179,12 +179,12 @@ func (o *Oracle) subscribeProviders(currencyPairs []umeedpftypes.CurrencyPair) e
 			provider.subscribedPairs[pair.String()] = pair
 			o.providerSubscribedPairs[providerName] = append(o.providerSubscribedPairs[providerName], pair)
 
-			o.logger.Debug().Str("provider_name", providerName).
+			o.logger.Debug().Str("provider_name", string(providerName)).
 				Str("pair_symbol", pair.String()).
 				Msg("Subscribed new pair")
 		}
 
-		o.logger.Info().Str("provider_name", providerName).
+		o.logger.Info().Str("provider_name", string(providerName)).
 			Int("currency_pairs_length", len(pairsToSubscribe)).
 			Msgf("Subscribed pairs %+v", pairsToSubscribe)
 	}
@@ -224,7 +224,7 @@ func (o *Oracle) loadAvailablePairs() {
 	for providerName, provider := range o.providers {
 		availablePairs, err := provider.GetAvailablePairs()
 		if err != nil {
-			o.logger.Debug().Err(err).Str("provider_name", providerName).Msg("Error getting available pairs for provider")
+			o.logger.Debug().Err(err).Str("provider_name", string(providerName)).Msg("Error getting available pairs for provider")
 			continue
 		}
 		if len(availablePairs) == 0 {
