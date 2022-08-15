@@ -51,7 +51,13 @@ func New(ctx context.Context, logger zerolog.Logger, providersName []umeedpfprov
 	providers := map[umeedpfprovider.Name]*Provider{}
 
 	for _, providerName := range providersName {
-		provider, err := ummedpforacle.NewProvider(ctx, providerName, logger, umeedpfprovider.Endpoint{}, umeedpftypes.CurrencyPair{})
+		provider, err := ummedpforacle.NewProvider(
+			ctx,
+			providerName,
+			logger,
+			umeedpfprovider.Endpoint{},
+			umeedpftypes.CurrencyPair{},
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -224,7 +230,10 @@ func (o *Oracle) loadAvailablePairs() {
 	for providerName, provider := range o.providers {
 		availablePairs, err := provider.GetAvailablePairs()
 		if err != nil {
-			o.logger.Debug().Err(err).Str("provider_name", string(providerName)).Msg("Error getting available pairs for provider")
+			o.logger.Debug().Err(err).Str(
+				"provider_name",
+				string(providerName),
+			).Msg("Error getting available pairs for provider")
 			continue
 		}
 		if len(availablePairs) == 0 {
