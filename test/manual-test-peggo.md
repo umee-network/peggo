@@ -22,7 +22,7 @@ $~ CHAIN_ID=888
 
 <!--
 ```fish
-$~ set ETHRPC https://goerli-infura.brave.com/f7106c838853428280fa0c585acc9485
+set ETHRPC https://goerli-infura.brave.com/f7106c838853428280fa0c585acc9485
 set MYETH 0xfac5EC50BdfbB803f5cFc9BF0A0C2f52aDE5b6dd
 set MYETHPK 06e48d48a55cc6843acb2c3c23431480ec42fca02683f4d8d3d471372e5317ee
 set MYETH2 0x02fa1b44e2EF8436e6f35D5F56607769c658c225
@@ -30,7 +30,7 @@ set MYETH2PK 4faf826f3d3a5fa60103392446a72dea01145c6158c6dd29f6faab9ec9917a1b
 set MYETH3 0xd8f468c1B719cc2d50eB1E3A55cFcb60e23758CD
 set MYETH3PK 11f746395f0dd459eff05d1bc557b81c3f7ebb1338a8cc9d36966d0bb2dcea21
 set CHAIN_ID 888
-set BRIDGEADDR 0x61be4C0D3631f684CFfeD7FCf7087FFD4b4b127C
+set BRIDGEADDR 0xaB3BB333676fBF3c88554A455633aC9168cDD0Af
 set ERC20_UMEE_TX_HASH 0x412e6f389d5b59dba62951d7f162bb7328d712aa1f49515a0e2e9a29162c3e26
 ```
 -->
@@ -53,7 +53,7 @@ $~ bash $UMEE_PEGGO_PATH/test/cosmos/multinode.sh umeed
 set the `BRIDGEADDR` env variable with the contract address of the bridge smartcontract
 
 ```shell
-$~ BRIDGEADDR=0x32FDBf26a106d57f99d7B2caBa67eD1a115D8d0c
+$~ BRIDGEADDR=0xaB3BB333676fBF3c88554A455633aC9168cDD0Af
 ```
 
 - Or you can deploy a new bridge
@@ -68,7 +68,7 @@ __Expected Result__
 - Set the `BRIDGEADDR` variable
 
 ```shell
-$~ BRIDGEADDR=0x61be4C0D3631f684CFfeD7FCf7087FFD4b4b127C
+$~ BRIDGEADDR=0xaB3BB333676fBF3c88554A455633aC9168cDD0Af
 ```
 
 - Wait until the gravity bridge is confirmed in ethereum (14 blocks)
@@ -132,8 +132,14 @@ __Expected Result__
 - Set transaction hash in `ERC20_UMEE_TX_HASH`
 
 ```shell
-$~ ERC20_UMEE_TX_HASH="0xd1940e0501545e2d0935b36719ace1df28f88f333a60026ee43c56f97386cadc"
+$~ ERC20_UMEE_TX_HASH="0x3f662bdfdea16af474b9c83ba88ffb817fc4f57d5aff7153071afa3e7bc3d662"
 ```
+
+<!--
+```fish
+set ERC20_UMEE_TX_HASH 0x3f662bdfdea16af474b9c83ba88ffb817fc4f57d5aff7153071afa3e7bc3d662
+```
+-->
 
 - You can get the contract address of the deployed umee contract
 

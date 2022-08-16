@@ -519,6 +519,7 @@ func (s *IntegrationTestSuite) runValidators() {
 			Entrypoint: []string{
 				"umeed",
 				"start",
+				"--log_level=trace",
 			},
 		}
 
@@ -701,6 +702,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
 					"--cosmos-from",
 					s.chain.orchestrators[i].keyInfo.Name,
+					"--oracle-providers=mock",
 					"--relay-batches=true",
 					"--valset-relay-mode=minimum",
 					"--profit-multiplier=0.0",
