@@ -418,7 +418,8 @@ func (c *cosmosClient) runBatchBroadcast() {
 
 		if res.Code != 0 {
 			err = errors.Errorf("error %d (%s): %s", res.Code, res.Codespace, res.RawLog)
-			c.logger.Err(err).Str("tx_hash", res.TxHash).Msg("failed to (sync) broadcast batch tx")
+			c.logger.Err(err).Str("tx_hash", res.TxHash).
+				Msg("failed to (sync) broadcast tx batch error code != 0")
 		} else {
 			c.logger.Debug().Str("tx_hash", res.TxHash).Msg("batch tx committed successfully")
 		}
