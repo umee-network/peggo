@@ -192,12 +192,15 @@ if [[ ! -d "$hdir" ]]; then
 
 	echo "regex replacing config variables"
 
+	minimumGasPrice="0.0000001$STAKE_DENOM"
+
 	perl -i -pe 's|addr_book_strict = true|addr_book_strict = false|g' $n0cfg
 	perl -i -pe 's|external_address = ""|external_address = "tcp://127.0.0.1:26657"|g' $n0cfg
 	perl -i -pe 's|"tcp://127.0.0.1:26657"|"tcp://0.0.0.0:26657"|g' $n0cfg
 	perl -i -pe 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $n0cfg
 	perl -i -pe 's|log_level = "info"|log_level = "'$LOG_LEVEL'"|g' $n0cfg
 	perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "5s"|g' $n0cfg
+	perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "'$minimumGasPrice'"|g' $n0app
 
 	perl -i -pe 's|addr_book_strict = true|addr_book_strict = false|g' $n1cfg
 	perl -i -pe 's|external_address = ""|external_address = "tcp://127.0.0.1:26667"|g' $n1cfg
@@ -207,6 +210,7 @@ if [[ ! -d "$hdir" ]]; then
 	perl -i -pe 's|"tcp://0.0.0.0:10337"|"tcp://0.0.0.0:11337"|g' $n1app
 	perl -i -pe 's|"0.0.0.0:1317"|"0.0.0.0:1417"|g' $n1app
 	perl -i -pe 's|"0.0.0.0:9090"|"0.0.0.0:9091"|g' $n1app
+	perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "'$minimumGasPrice'"|g' $n1app
 	perl -i -pe 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $n1cfg
 	perl -i -pe 's|log_level = "info"|log_level = "'$LOG_LEVEL'"|g' $n1cfg
 	perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "5s"|g' $n1cfg
@@ -219,6 +223,7 @@ if [[ ! -d "$hdir" ]]; then
 	perl -i -pe 's|"tcp://0.0.0.0:10337"|"tcp://0.0.0.0:12337"|g' $n2app
 	perl -i -pe 's|"0.0.0.0:1317"|"0.0.0.0:1517"|g' $n2app
 	perl -i -pe 's|"0.0.0.0:9090"|"0.0.0.0:9092"|g' $n2app
+	perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "'$minimumGasPrice'"|g' $n2app
 	perl -i -pe 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $n2cfg
 	perl -i -pe 's|log_level = "info"|log_level = "'$LOG_LEVEL'"|g' $n2cfg
 	perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "5s"|g' $n2cfg
@@ -246,16 +251,16 @@ sleep 8
 
 echo
 echo "Logs:"
-echo "  * tail -f ./data/$CHAIN_ID.n0.log"
-echo "  * tail -f ./data/$CHAIN_ID.n1.log"
-echo "  * tail -f ./data/$CHAIN_ID.n2.log"
+echo "  * tail -f $hdir.n0.log"
+echo "  * tail -f $hdir.n1.log"
+echo "  * tail -f $hdir.n2.log"
 echo
 echo "Env for easy access:"
-echo "export H1='--home ./data/$CHAIN_ID/n0/'"
-echo "export H2='--home ./data/$CHAIN_ID/n1/'"
-echo "export H3='--home ./data/$CHAIN_ID/n2/'"
+echo "export H1='--home $n0dir'"
+echo "export H2='--home $n1dir'"
+echo "export H3='--home $n2dir'"
 echo
 echo "Command Line Access:"
-echo "  * $NODE_BIN --home ./data/$CHAIN_ID/n0 status"
-echo "  * $NODE_BIN --home ./data/$CHAIN_ID/n1 status"
-echo "  * $NODE_BIN --home ./data/$CHAIN_ID/n2 status"
+echo "  * $NODE_BIN --home $n0dir status"
+echo "  * $NODE_BIN --home $n1dir status"
+echo "  * $NODE_BIN --home $n2dir status"
