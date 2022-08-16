@@ -278,7 +278,7 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 2000, "Number of Ethereum blocks to process per orchestrator loop")
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
 	//nolint: lll
-	cmd.Flags().StringSlice(flagOracleProviders, []string{string(umeedpfprovider.ProviderBinance), string(umeedpfprovider.ProviderHuobi)},
+	cmd.Flags().StringSlice(flagOracleProviders, []string{string(umeedpfprovider.ProviderBinance), string(umeedpfprovider.ProviderKraken)},
 		fmt.Sprintf("Specify the providers to use in the oracle, options \"%s\"", strings.Join([]string{string(umeedpfprovider.ProviderBinance), string(umeedpfprovider.ProviderHuobi),
 			string(umeedpfprovider.ProviderKraken), string(umeedpfprovider.ProviderGate), string(umeedpfprovider.ProviderOkx), string(umeedpfprovider.ProviderOsmosis)}, ",")))
 	cmd.Flags().Duration(flagEthPendingTXWait, 20*time.Minute, "Time for a pending tx to be considered stale")
