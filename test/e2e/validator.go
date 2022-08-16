@@ -185,8 +185,13 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 		return nil, err
 	}
 
+	valAddr, err := v.keyInfo.GetAddress()
+	if err != nil {
+		return nil, err
+	}
+
 	return stakingtypes.NewMsgCreateValidator(
-		sdk.ValAddress(v.keyInfo.PubKey.GetValue()),
+		sdk.ValAddress(valAddr),
 		valPubKey,
 		amount,
 		description,
@@ -202,8 +207,13 @@ func (v *validator) buildDelegateKeysMsg(orchAddr sdk.AccAddress, ethAddr string
 		return nil, err
 	}
 
+	valAddr, err := v.keyInfo.GetAddress()
+	if err != nil {
+		return nil, err
+	}
+
 	return gravitytypes.NewMsgSetOrchestratorAddress(
-		sdk.ValAddress(v.keyInfo.PubKey.GetValue()),
+		sdk.ValAddress(valAddr),
 		orchAddr,
 		*eth,
 	), nil

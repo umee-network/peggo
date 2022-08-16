@@ -143,15 +143,23 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 
 		switch keyType := keyInfo.GetType(); keyType {
 		case keyring.TypeLocal:
+			addr, err := keyInfo.GetAddress()
+			if err != nil {
+				return nil, nil, err
+			}
 			// kb has a key and it's totally usable
-			return keyInfo.PubKey.GetValue(), kb, nil
+			return addr, kb, nil
 
 		case keyring.TypeLedger:
+			addr, err := keyInfo.GetAddress()
+			if err != nil {
+				return nil, nil, err
+			}
 			// The keyring stores references to ledger keys, so we must explicitly
 			// check that. The keyring doesn't know how to scan HD keys - they must be
 			// added manually before.
 			if cosmosUseLedger {
-				return keyInfo.PubKey.GetValue(), kb, nil
+				return addr, kb, nil
 			}
 
 			return emptyCosmosAddress, nil, fmt.Errorf("'%s' key is a ledger reference, enable ledger option", keyInfo.Name)

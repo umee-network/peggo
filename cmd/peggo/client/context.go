@@ -53,8 +53,13 @@ func NewClientContext(chainID, fromSpec string, kb keyring.Keyring) (client.Cont
 	}
 
 	if keyInfo != nil {
+		addr, err := keyInfo.GetAddress()
+		if err != nil {
+			return clientCtx, err
+		}
+
 		clientCtx = clientCtx.WithKeyring(kb)
-		clientCtx = clientCtx.WithFromAddress(keyInfo.PubKey.GetValue())
+		clientCtx = clientCtx.WithFromAddress(addr)
 		clientCtx = clientCtx.WithFromName(keyInfo.Name)
 		clientCtx = clientCtx.WithFrom(keyInfo.Name)
 	}

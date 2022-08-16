@@ -147,15 +147,19 @@ func (s *IntegrationTestSuite) initNodes() {
 	// initialize a genesis file for the first validator
 	val0ConfigDir := s.chain.validators[0].configDir()
 	for _, val := range s.chain.validators {
+		addr, err := val.keyInfo.GetAddress()
+		s.Require().NoError(err)
 		s.Require().NoError(
-			addGenesisAccount(val0ConfigDir, "", initBalanceStr, val.keyInfo.PubKey.GetValue()),
+			addGenesisAccount(val0ConfigDir, "", initBalanceStr, addr),
 		)
 	}
 
 	// add orchestrator accounts to genesis file
 	for _, orch := range s.chain.orchestrators {
+		addr, err := orch.keyInfo.GetAddress()
+		s.Require().NoError(err)
 		s.Require().NoError(
-			addGenesisAccount(val0ConfigDir, "", initBalanceStr, orch.keyInfo.PubKey.GetValue()),
+			addGenesisAccount(val0ConfigDir, "", initBalanceStr, addr),
 		)
 	}
 
@@ -274,7 +278,9 @@ func (s *IntegrationTestSuite) initGenesis() {
 		createValmsg, err := val.buildCreateValidatorMsg(stakeAmountCoin)
 		s.Require().NoError(err)
 
-		delKeysMsg, err := val.buildDelegateKeysMsg(s.chain.orchestrators[i].keyInfo.PubKey.GetValue(), s.chain.orchestrators[i].ethereumKey.address)
+		addr, err := s.chain.orchestrators[i].keyInfo.GetAddress()
+		s.Require().NoError(err)
+		delKeysMsg, err := val.buildDelegateKeysMsg(addr, s.chain.orchestrators[i].ethereumKey.address)
 		s.Require().NoError(err)
 
 		signedTx, err := val.signMsg(createValmsg, delKeysMsg)
@@ -358,7 +364,7 @@ func (s *IntegrationTestSuite) getMinGasPrice() string {
 func (s *IntegrationTestSuite) runGanacheContainer() {
 	s.T().Log("starting Ganache container...")
 
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-eth-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 

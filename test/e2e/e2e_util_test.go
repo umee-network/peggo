@@ -122,9 +122,12 @@ func (s *IntegrationTestSuite) registerOrchAddresses(valIdx int, umeeFee string)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	valAddr := s.chain.validators[valIdx].keyInfo.PubKey.GetValue()
-
+	valAddr, err := s.chain.validators[valIdx].keyInfo.GetAddress()
+	s.Require().NoError(err)
 	s.T().Logf("registering Ethereum Orchestrator addresses; validator: %s", sdk.ValAddress(valAddr))
+
+	orchAddr, err := s.chain.orchestrators[valIdx].keyInfo.GetAddress()
+	s.Require().NoError(err)
 
 	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
 		Context:      ctx,
@@ -137,8 +140,8 @@ func (s *IntegrationTestSuite) registerOrchAddresses(valIdx int, umeeFee string)
 			"tx",
 			"gravity",
 			"set-orchestrator-address",
-			string(valAddr),
-			string(s.chain.orchestrators[valIdx].keyInfo.PubKey.GetValue()),
+			valAddr.String(),
+			orchAddr.String(),
 			s.chain.orchestrators[valIdx].ethereumKey.address,
 			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
 			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
@@ -183,9 +186,12 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
+	addr, err := s.chain.validators[valIdx].keyInfo.GetAddress()
+	s.Require().NoError(err)
+
 	s.T().Logf(
 		"sending tokens from Umee to Ethereum; from: %s, to: %s, amount: %s, umeeFee: %s, gravityFee: %s",
-		s.chain.validators[valIdx].keyInfo.PubKey.GetValue(), ethDest, amount, umeeFee, gravityFee,
+		addr, ethDest, amount, umeeFee, gravityFee,
 	)
 
 	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
