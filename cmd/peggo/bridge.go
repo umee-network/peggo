@@ -174,11 +174,18 @@ func deployGravityCmd() *cobra.Command {
 				return fmt.Errorf("failed deploy Gravity Bridge contract: %w", err)
 			}
 
+			powerStr := ""
+			for _, power := range powers {
+				powerStr += power.String() + " ,"
+			}
+
 			_, _ = fmt.Fprintf(os.Stderr, `Gravity Bridge contract successfully deployed!
 Address: %s
+Input: %+v, %+v, [%s]
 Transaction: %s
 `,
 				address.Hex(),
+				gravityIDBytes32, validators, powerStr,
 				tx.Hash().Hex(),
 			)
 
