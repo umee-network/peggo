@@ -77,6 +77,8 @@ func New(ctx context.Context, logger zerolog.Logger, providersName []umeedpfprov
 		providerSubscribedPairs: map[umeedpfprovider.Name][]umeedpftypes.CurrencyPair{},
 	}
 	o.loadAvailablePairs()
+	o.mtx.Lock()
+	defer o.mtx.Unlock()
 	if err := o.subscribeProviders([]umeedpftypes.CurrencyPair{
 		{Base: symbolUSDT, Quote: symbolUSD},
 		{Base: symbolDAI, Quote: symbolUSD},

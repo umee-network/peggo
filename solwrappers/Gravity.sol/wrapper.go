@@ -2168,20 +2168,25 @@ var GravityFuncSigs = GravityMetaData.Sigs
 var GravityBin = GravityMetaData.Bin
 
 // DeployGravity deploys a new Ethereum contract, binding an instance of Gravity to it.
-func DeployGravity(auth *bind.TransactOpts, backend bind.ContractBackend, _gravityId [32]byte, _validators []common.Address, _powers []*big.Int) (common.Address, *types.Transaction, *Gravity, error) {
+func DeployGravity(auth *bind.TransactOpts, backend bind.ContractBackend, _gravityId [32]byte, _validators []common.Address, _powers []*big.Int) (common.Address, []byte,  *types.Transaction, *Gravity, error) {
 	parsed, err := GravityMetaData.GetAbi()
 	if err != nil {
-		return common.Address{}, nil, nil, err
+		return common.Address{}, nil, nil, nil, err
 	}
 	if parsed == nil {
-		return common.Address{}, nil, nil, errors.New("GetABI returned nil")
+		return common.Address{}, nil, nil, nil, errors.New("GetABI returned nil")
+	}
+
+	input, err := parsed.Pack("", _gravityId, _validators, _powers)
+	if err != nil {
+		return common.Address{}, nil, nil, nil, err
 	}
 
 	address, tx, contract, err := bind.DeployContract(auth, *parsed, common.FromHex(GravityBin), backend, _gravityId, _validators, _powers)
 	if err != nil {
-		return common.Address{}, nil, nil, err
+		return common.Address{}, nil, nil, nil, err
 	}
-	return address, tx, &Gravity{GravityCaller: GravityCaller{contract: contract}, GravityTransactor: GravityTransactor{contract: contract}, GravityFilterer: GravityFilterer{contract: contract}}, nil
+	return address, input, tx, &Gravity{GravityCaller: GravityCaller{contract: contract}, GravityTransactor: GravityTransactor{contract: contract}, GravityFilterer: GravityFilterer{contract: contract}}, nil
 }
 
 // Gravity is an auto generated Go binding around an Ethereum contract.
