@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -446,7 +445,7 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 func (s *IntegrationTestSuite) runEthContainer() {
 	s.T().Log("starting Ethereum container...")
 
-	tmpDir, err := ioutil.TempDir("", "umee-e2e-testnet-eth-")
+	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-eth-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
@@ -707,6 +706,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--valset-relay-mode=minimum",
 					"--profit-multiplier=0.0",
 					"--relayer-loop-multiplier=1.0",
+					"--log-level=debug",
 					"--requester-loop-multiplier=1.0",
 				},
 			},
