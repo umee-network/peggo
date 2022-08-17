@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type CosmosClient interface {
@@ -36,7 +37,11 @@ func NewCosmosClient(
 	protoAddr string,
 	options ...CosmosClientOption,
 ) (CosmosClient, error) {
-	conn, err := grpc.Dial(protoAddr, grpc.WithInsecure(), grpc.WithContextDialer(dialerFunc))
+	conn, err := grpc.Dial(
+		protoAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithContextDialer(dialerFunc),
+	)
 	if err != nil {
 		err := errors.Wrapf(err, "failed to connect to the gRPC: %s", protoAddr)
 		return nil, err
