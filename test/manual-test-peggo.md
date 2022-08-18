@@ -30,8 +30,9 @@ set MYETH2PK 4faf826f3d3a5fa60103392446a72dea01145c6158c6dd29f6faab9ec9917a1b
 set MYETH3 0xd8f468c1B719cc2d50eB1E3A55cFcb60e23758CD
 set MYETH3PK 11f746395f0dd459eff05d1bc557b81c3f7ebb1338a8cc9d36966d0bb2dcea21
 set CHAIN_ID 888
-set BRIDGEADDR 0xaB3BB333676fBF3c88554A455633aC9168cDD0Af
-set ERC20_UMEE_TX_HASH 0x412e6f389d5b59dba62951d7f162bb7328d712aa1f49515a0e2e9a29162c3e26
+set BRIDGEADDR 0x86C4B780936D59b475291EE69D10A0260cD46F11
+set ERC20_UMEE_TX_HASH 0xee1c5539df361e1fca437d6de9f8590efebbae156daa9769645626a36dba3b1c
+set TOKEN_ADDRESS 0xdcbb485f280284ec571e11eb09490677a5bdd569
 ```
 -->
 
@@ -68,7 +69,7 @@ __Expected Result__
 - Set the `BRIDGEADDR` variable
 
 ```shell
-$~ BRIDGEADDR=0xaB3BB333676fBF3c88554A455633aC9168cDD0Af
+$~ BRIDGEADDR=0x86C4B780936D59b475291EE69D10A0260cD46F11
 ```
 
 - Wait until the gravity bridge is confirmed in ethereum (14 blocks)
@@ -171,12 +172,13 @@ $~ umeed tx gravity send-to-eth $MYETH 10000uumee 1uumee \
   --from val \
   --chain-id $CHAIN_ID \
   --keyring-backend=test \
+  --fees 1uumee \
   --home=$UMEE_PEGGO_PATH/test/cosmos/data/$CHAIN_ID/n0/
 ```
 
 ### Send transaction from eth to umee
 
 ```shell $~ PEGGO_ETH_PK=$MYETHPK peggo bridge send-to-cosmos \
-  $BRIDGEADDR $TOKEN_ADDRESS umee1y6xz2ggfc0pcsmyjlekh0j9pxh6hk87ymc9due 1 \
+  $BRIDGEADDR $TOKEN_ADDRESS umee1pprgkthxc2yhr5gvuk2tcjjchfhq6n96xg427t 1 \
   --eth-rpc $ETHRPC
 ```
