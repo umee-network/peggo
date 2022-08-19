@@ -16,7 +16,7 @@ RUN make install
 
 # Fetch umeed binary
 FROM base-builder AS umeed-builder
-ARG UMEE_VERSION=robert/cosmos-046
+ARG UMEE_VERSION=cosmos-046-fee
 ENV PACKAGES curl eudev-dev
 RUN apk add --no-cache $PACKAGES
 WORKDIR /downloads/
