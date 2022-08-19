@@ -26,8 +26,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/peggo/orchestrator/ethereum/keystore"
-	umeeapp "github.com/umee-network/umee/v2/app"
 	"golang.org/x/term"
+
+	umeeapp "github.com/umee-network/umee/v2/app"
+	umeeparams "github.com/umee-network/umee/v2/app/params"
 )
 
 const defaultKeyringKeyName = "validator"
@@ -43,6 +45,7 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 	cosmosPassphrase := konfig.String(flagCosmosFromPassphrase)
 	cosmosKeyringDir := konfig.String(flagCosmosKeyringDir)
 	cosmosUseLedger := konfig.Bool(flagCosmosUseLedger)
+	encodingConfig := umeeapp.MakeEncodingConfig()
 
 	switch {
 	case len(cosmosPK) > 0:
@@ -85,7 +88,7 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 		}
 
 		// wrap a PK into a Keyring
-		kb, err := keyringForPrivKey(keyName, cosmosAccPk)
+		kb, err := keyringForPrivKey(keyName, cosmosAccPk, encodingConfig)
 		return addressFromPk, kb, err
 
 	case len(cosmosFrom) > 0:
@@ -112,7 +115,6 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 			}
 		}
 
-		encodingConfig := umeeapp.MakeEncodingConfig()
 		kb, err := keyring.New(
 			konfig.String(flagCosmosKeyringApp),
 			konfig.String(flagCosmosKeyring),
@@ -392,14 +394,17 @@ func (r *passReader) Read(p []byte) (n int, err error) {
 
 // keyringForPrivKey creates a temporary in-mem keyring for a PrivKey.
 // Allows to init Context when the key has been provided in plaintext and parsed.
-func keyringForPrivKey(name string, privKey sdkcryptotypes.PrivKey) (keyring.Keyring, error) {
+func keyringForPrivKey(
+	name string,
+	privKey sdkcryptotypes.PrivKey,
+	encodingConfig umeeparams.EncodingConfig,
+) (keyring.Keyring, error) {
 	tmpPhrase, err := randPhrase(64)
 	if err != nil {
 		return nil, err
 	}
 
 	armored := sdkcrypto.EncryptArmorPrivKey(privKey, tmpPhrase, privKey.Type())
-	encodingConfig := umeeapp.MakeEncodingConfig()
 
 	kb := keyring.NewInMemory(encodingConfig.Codec)
 	if err := kb.ImportPrivKey(name, armored, tmpPhrase); err != nil {

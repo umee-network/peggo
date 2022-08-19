@@ -26,6 +26,7 @@ import (
 	"github.com/umee-network/peggo/cmd/peggo/client"
 	"github.com/umee-network/peggo/orchestrator/relayer"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 var (
@@ -65,9 +66,9 @@ func deployGravityCmd() *cobra.Command {
 			}
 
 			// COSMOS RPC
-
+			encodingConfig := umeeapp.MakeEncodingConfig()
 			cosmosChainID := konfig.String(flagCosmosChainID)
-			clientCtx, err := client.NewClientContext(cosmosChainID, "", nil)
+			clientCtx, err := client.NewClientContext(cosmosChainID, "", nil, encodingConfig)
 			if err != nil {
 				return err
 			}
@@ -219,8 +220,9 @@ func deployERC20Cmd() *cobra.Command {
 			}
 
 			// query for the name and symbol on-chain via the token's metadata
+			encodingConfig := umeeapp.MakeEncodingConfig()
 			cosmosChainID := konfig.String(flagCosmosChainID)
-			clientCtx, err := client.NewClientContext(cosmosChainID, "", nil)
+			clientCtx, err := client.NewClientContext(cosmosChainID, "", nil, encodingConfig)
 			if err != nil {
 				return err
 			}

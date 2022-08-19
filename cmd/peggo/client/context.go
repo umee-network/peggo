@@ -8,13 +8,18 @@ import (
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/pkg/errors"
-	umeeapp "github.com/umee-network/umee/v2/app"
+	umeeparams "github.com/umee-network/umee/v2/app/params"
 )
 
 // NewClientContext creates a new Cosmos Client context, where chainID
 // corresponds to Cosmos chain ID, fromSpec is either name of the key, or bech32-address
 // of the Cosmos account. Keyring is required to contain the specified key.
-func NewClientContext(chainID, fromSpec string, kb keyring.Keyring) (client.Context, error) {
+func NewClientContext(
+	chainID,
+	fromSpec string,
+	kb keyring.Keyring,
+	encodingConfig umeeparams.EncodingConfig,
+) (client.Context, error) {
 	var keyInfo *keyring.Record
 
 	if kb != nil {
@@ -35,7 +40,6 @@ func NewClientContext(chainID, fromSpec string, kb keyring.Keyring) (client.Cont
 		}
 	}
 
-	encodingConfig := umeeapp.MakeEncodingConfig()
 	clientCtx := client.Context{
 		ChainID:           chainID,
 		Codec:             encodingConfig.Codec,

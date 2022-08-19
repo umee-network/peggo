@@ -20,6 +20,7 @@ import (
 	"google.golang.org/grpc"
 
 	umeedpfprovider "github.com/umee-network/umee/price-feeder/oracle/provider"
+	umeeapp "github.com/umee-network/umee/v2/app"
 
 	"github.com/umee-network/peggo/cmd/peggo/client"
 	"github.com/umee-network/peggo/orchestrator"
@@ -60,8 +61,9 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Cosmos keyring: %w", err)
 			}
 
+			encodingConfig := umeeapp.MakeEncodingConfig()
 			cosmosChainID := konfig.String(flagCosmosChainID)
-			clientCtx, err := client.NewClientContext(cosmosChainID, orchAddress.String(), cosmosKeyring)
+			clientCtx, err := client.NewClientContext(cosmosChainID, orchAddress.String(), cosmosKeyring, encodingConfig)
 			if err != nil {
 				return err
 			}
