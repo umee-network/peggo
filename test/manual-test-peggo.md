@@ -87,6 +87,7 @@ $~ PEGGO_ETH_PK=$MYETHPK peggo orchestrator $BRIDGEADDR \
   --cosmos-chain-id=$CHAIN_ID \
   --cosmos-grpc="tcp://0.0.0.0:9090" \
   --tendermint-rpc="http://0.0.0.0:26657" \
+  --oracle-providers="mock" \
   --cosmos-keyring=test \
   --cosmos-keyring-dir=$UMEE_PEGGO_PATH/test/cosmos/data/$CHAIN_ID/n0/ \
   --cosmos-from=val  --log-level debug --log-format text --profit-multiplier=0
@@ -100,6 +101,7 @@ $~ PEGGO_ETH_PK=$MYETH2PK peggo orchestrator $BRIDGEADDR \
   --cosmos-chain-id=$CHAIN_ID \
   --cosmos-grpc="tcp://0.0.0.0:9091" \
   --tendermint-rpc="http://0.0.0.0:26667" \
+  --oracle-providers="mock" \
   --cosmos-keyring=test \
   --cosmos-keyring-dir=$UMEE_PEGGO_PATH/test/cosmos/data/$CHAIN_ID/n1/ \
   --cosmos-from=val  --log-level debug --log-format text --profit-multiplier=0
@@ -113,6 +115,7 @@ $~ PEGGO_ETH_PK=$MYETH3PK peggo orchestrator $BRIDGEADDR \
   --cosmos-chain-id=$CHAIN_ID \
   --cosmos-grpc="tcp://0.0.0.0:9092" \
   --tendermint-rpc="http://0.0.0.0:26677" \
+  --oracle-providers="mock" \
   --cosmos-keyring=test \
   --cosmos-keyring-dir=$UMEE_PEGGO_PATH/test/cosmos/data/$CHAIN_ID/n2/ \
   --cosmos-from=val  --log-level debug --log-format text --profit-multiplier=0
@@ -133,12 +136,12 @@ __Expected Result__
 - Set transaction hash in `ERC20_UMEE_TX_HASH`
 
 ```shell
-$~ ERC20_UMEE_TX_HASH="0x3f662bdfdea16af474b9c83ba88ffb817fc4f57d5aff7153071afa3e7bc3d662"
+$~ ERC20_UMEE_TX_HASH="0xf185d0f54f42ed0f303400db5e6d1d83637acce12971f7fc48b3e33b8e11ad0b"
 ```
 
 <!--
 ```fish
-set ERC20_UMEE_TX_HASH 0x3f662bdfdea16af474b9c83ba88ffb817fc4f57d5aff7153071afa3e7bc3d662
+set ERC20_UMEE_TX_HASH 0xf185d0f54f42ed0f303400db5e6d1d83637acce12971f7fc48b3e33b8e11ad0b
 ```
 -->
 
