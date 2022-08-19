@@ -34,13 +34,13 @@ import (
 )
 
 const (
-	photonDenom    string = "photon"
-	initBalanceStr string = "110000000000uumee,100000000000photon"
-	minGasPrice    string = "0.00001"
-	gaiaChainID    string = "test-gaia-chain"
+	photonDenom    = "photon"
+	initBalanceStr = "110000000000uumee,100000000000photon"
+	minGasPrice    = "0.00001"
+	gaiaChainID    = "test-gaia-chain"
 
-	ethChainID uint   = 15
-	ethMinerPK string = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"
+	ethChainID uint = 15
+	ethMinerPK      = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"
 )
 
 var (
