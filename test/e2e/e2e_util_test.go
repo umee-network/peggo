@@ -281,8 +281,6 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 			s.chain.id,
 			"--cosmos-grpc",
 			fmt.Sprintf("tcp://%s:9090", s.valResources[valIdx].Container.Name[1:]),
-			"--output=json",
-			"--note=neededNoteForJsonUnmarshal",
 			"--tendermint-rpc",
 			fmt.Sprintf("http://%s:26657", s.valResources[valIdx].Container.Name[1:]),
 		},
