@@ -257,7 +257,7 @@ func (c *cosmosClient) broadcastTx(
 		txf = txf.WithGas(adjusted)
 	}
 
-	txn, err := c.txFactory.BuildUnsignedTx(msgs...)
+	txn, err := txf.BuildUnsignedTx(msgs...)
 	if err != nil {
 		err = errors.Wrap(err, "failed to BuildUnsignedTx")
 		return nil, err
@@ -297,10 +297,11 @@ func (c *cosmosClient) broadcastTx(
 			resultTx, err := clientCtx.Client.Tx(awaitCtx, txHash, false)
 			if err != nil {
 				if errRes := client.CheckTendermintError(err, txBytes); errRes != nil {
+					c.logger.Error().Str("tendermint errRes", errRes.RawLog)
 					return errRes, err
 				}
 
-				// log.WithError(err).Warningln("Tx Error for Hash:", res.TxHash)
+				c.logger.Error().Err(err).Str("Tx Hash", res.TxHash).Msg("Tx error on broadcastTx")
 
 				t.Reset(defaultBroadcastStatusPoll)
 				continue
