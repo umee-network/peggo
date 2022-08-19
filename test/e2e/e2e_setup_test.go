@@ -662,14 +662,6 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 	s.gravityContractAddr = gravityContractAddr
 }
 
-func (s *IntegrationTestSuite) registerValidatorOrchAddresses() {
-	s.T().Log("registering Umee validator Ethereum keys...")
-
-	for i := range s.chain.validators {
-		s.registerOrchAddresses(i, "10photon")
-	}
-}
-
 func (s *IntegrationTestSuite) runOrchestrators() {
 	s.T().Log("starting orchestrator containers...")
 
