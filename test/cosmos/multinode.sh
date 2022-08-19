@@ -198,7 +198,7 @@ if [[ ! -d "$hdir" ]]; then
 	perl -i -pe 's|external_address = ""|external_address = "tcp://127.0.0.1:26657"|g' $n0cfg
 	perl -i -pe 's|"tcp://127.0.0.1:26657"|"tcp://0.0.0.0:26657"|g' $n0cfg
 	perl -i -pe 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $n0cfg
-	perl -i -pe 's|log_level = "debug"|log_level = "'$LOG_LEVEL'"|g' $n0cfg
+	perl -i -pe 's|log_level = "info"|log_level = "'$LOG_LEVEL'"|g' $n0cfg
 	perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "5s"|g' $n0cfg
 	perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "'$minimumGasPrice'"|g' $n0app
 
@@ -211,7 +211,7 @@ if [[ ! -d "$hdir" ]]; then
 	perl -i -pe 's|"0.0.0.0:1317"|"0.0.0.0:1417"|g' $n1app
 	perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "'$minimumGasPrice'"|g' $n1app
 	perl -i -pe 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $n1cfg
-	perl -i -pe 's|log_level = "debug"|log_level = "'$LOG_LEVEL'"|g' $n1cfg
+	perl -i -pe 's|log_level = "info"|log_level = "'$LOG_LEVEL'"|g' $n1cfg
 	perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "5s"|g' $n1cfg
 
 	perl -i -pe 's|addr_book_strict = true|addr_book_strict = false|g' $n2cfg
@@ -223,7 +223,7 @@ if [[ ! -d "$hdir" ]]; then
 	perl -i -pe 's|"0.0.0.0:1317"|"0.0.0.0:1517"|g' $n2app
 	perl -i -pe 's|minimum-gas-prices = ""|minimum-gas-prices = "'$minimumGasPrice'"|g' $n2app
 	perl -i -pe 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $n2cfg
-	perl -i -pe 's|log_level = "debug"|log_level = "'$LOG_LEVEL'"|g' $n2cfg
+	perl -i -pe 's|log_level = "info"|log_level = "'$LOG_LEVEL'"|g' $n2cfg
 	perl -i -pe 's|timeout_commit = ".*?"|timeout_commit = "5s"|g' $n2cfg
 
 	echo "Set peers for all three nodes"
@@ -239,9 +239,9 @@ fi # data dir check
 # Start the instances
 echo "Starting nodes..."
 
-$NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level trace --trace > $hdir.n0.log 2>&1 &
-$NODE_BIN $home1 start --grpc.address="0.0.0.0:9091" --grpc-web.enable=false --log_level trace > $hdir.n1.log 2>&1 &
-$NODE_BIN $home2 start --grpc.address="0.0.0.0:9092" --grpc-web.enable=false --log_level trace > $hdir.n2.log 2>&1 &
+$NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level $LOG_LEVEL > $hdir.n0.log 2>&1 &
+$NODE_BIN $home1 start --grpc.address="0.0.0.0:9091" --grpc-web.enable=false --log_level $LOG_LEVEL > $hdir.n1.log 2>&1 &
+$NODE_BIN $home2 start --grpc.address="0.0.0.0:9092" --grpc-web.enable=false --log_level $LOG_LEVEL > $hdir.n2.log 2>&1 &
 
 
 # Wait for chains to start
