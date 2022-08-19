@@ -212,6 +212,8 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 			fmt.Sprintf("--%s=%s", flags.FlagChainID, s.chain.id),
 			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
 			"--keyring-backend=test",
+			"--output=json",
+			"--note=neededNoteForJsonUnmarshal",
 			"--broadcast-mode=sync",
 			"-y",
 		},
@@ -229,6 +231,7 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 		OutputStream: &outBuf,
 		ErrorStream:  &errBuf,
 	})
+
 	s.Require().NoErrorf(err, "stdout: %s, stderr: %s", outBuf.String(), errBuf.String())
 
 	var broadcastResp map[string]interface{}
@@ -278,6 +281,8 @@ func (s *IntegrationTestSuite) sendFromEthToUmee(valIdx int, tokenAddr, toUmeeAd
 			s.chain.id,
 			"--cosmos-grpc",
 			fmt.Sprintf("tcp://%s:9090", s.valResources[valIdx].Container.Name[1:]),
+			"--output=json",
+			"--note=neededNoteForJsonUnmarshal",
 			"--tendermint-rpc",
 			fmt.Sprintf("http://%s:26657", s.valResources[valIdx].Container.Name[1:]),
 		},
