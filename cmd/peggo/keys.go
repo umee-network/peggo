@@ -144,9 +144,8 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 		switch keyType := keyInfo.GetType(); keyType {
 		case keyring.TypeLocal:
 			addr, err := keyInfo.GetAddress()
-			if err != nil {
-				return nil, nil, err
-			}
+			// kb has a key and it's totally usable
+			return addr, kb, err
 			// kb has a key and it's totally usable
 			return addr, kb, nil
 
