@@ -51,7 +51,7 @@ $~ bash $UMEE_PEGGO_PATH/test/cosmos/multinode.sh umeed
 ### Deploy a new Gravity bridge smartcontract
 
 - You can also use a old one already created if the contract didn't change so just
-set the `BRIDGEADDR` env variable with the contract address of the bridge smartcontract
+  set the `BRIDGEADDR` env variable with the contract address of the bridge smartcontract
 
 ```shell
 $~ BRIDGEADDR=0xaB3BB333676fBF3c88554A455633aC9168cDD0Af
@@ -63,7 +63,7 @@ $~ BRIDGEADDR=0xaB3BB333676fBF3c88554A455633aC9168cDD0Af
 $~ PEGGO_ETH_PK=$MYETHPK peggo bridge deploy-gravity --eth-rpc $ETHRPC
 ```
 
-__Expected Result__
+**Expected Result**
 ![image](https://user-images.githubusercontent.com/17556614/160243283-bad93a66-7b09-467c-b1a8-80e2a9336b68.png)
 
 - Set the `BRIDGEADDR` variable
@@ -77,7 +77,7 @@ $~ BRIDGEADDR=0x86C4B780936D59b475291EE69D10A0260cD46F11
 ### Start the orchestrators
 
 - Open 3 new shells with the env variables set and run
-the following commands one in each shell
+  the following commands one in each shell
 
 ```shell
 $~ PEGGO_ETH_PK=$MYETHPK peggo orchestrator $BRIDGEADDR \
@@ -124,13 +124,13 @@ $~ PEGGO_ETH_PK=$MYETH3PK peggo orchestrator $BRIDGEADDR \
 ### Deploy Umee ERC20
 
 - Deploy a [ERC20](https://eips.ethereum.org/EIPS/eip-20) representation of uumee
-token in eth
+  token in eth
 
 ```shell
 $~ PEGGO_ETH_PK=$MYETHPK peggo bridge deploy-erc20 $BRIDGEADDR uumee --eth-rpc $ETHRPC
 ```
 
-__Expected Result__
+**Expected Result**
 ![image](https://user-images.githubusercontent.com/17556614/160244050-4317c0c7-1328-4654-ae41-7b1069aa1624.png)
 
 - Set transaction hash in `ERC20_UMEE_TX_HASH`
@@ -153,7 +153,7 @@ $~ curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt",
 ```
 
 - Or even directly set the `TOKEN_ADDRESS` env variable with the contract
-address of the deployed umee contract
+  address of the deployed umee contract
 
 ```shell
 $~ TOKEN_ADDRESS=`curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt",
