@@ -3,6 +3,7 @@ package peggo
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -32,6 +33,8 @@ import (
 	"github.com/umee-network/peggo/orchestrator/relayer"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
+
+const defaultStatusAPI = "8080"
 
 func getOrchestratorCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -268,6 +271,17 @@ func getOrchestratorCmd() *cobra.Command {
 				})
 			}
 
+			// If we have enabled the status API, start listening
+			if statusAPI := konfig.String(flagStatusAPI); statusAPI != defaultStatusAPI {
+				if url, err := url.ParseRequestURI(statusAPI); err == nil {
+					// use provided endpoint
+					orchestrator.Listen(url.Port(), logger)
+				} else {
+					// or, use default
+					orchestrator.Listen(defaultStatusAPI, logger)
+				}
+			}
+
 			return g.Wait()
 		},
 	}
@@ -288,6 +302,7 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().String(flagCosmosFeeGranter, "", "Set an (optional) fee granter address that will pay for Cosmos fees (feegrant must exist)") //nolint: lll
 	cmd.Flags().Int64(flagBridgeStartHeight, 0, "Set an (optional) height to wait for the bridge to be available")
 	cmd.Flags().Int(flagCosmosMsgsPerTx, 10, "Set a maximum number of messages to send per transaction (used for claims)")
+	cmd.Flags().String(flagStatusAPI, defaultStatusAPI, fmt.Sprintf("Set an (optional) status API endpoint port (default: %s)", defaultStatusAPI))
 	cmd.Flags().AddFlagSet(cosmosFlagSet())
 	cmd.Flags().AddFlagSet(cosmosKeyringFlagSet())
 	cmd.Flags().AddFlagSet(ethereumKeyOptsFlagSet())
