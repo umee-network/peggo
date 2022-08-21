@@ -149,7 +149,6 @@ func (s *IntegrationTestSuite) sendFromUmeeToEth(valIdx int, ethDest, amount, um
 			fmt.Sprintf("--%s=%s", flags.FlagFees, umeeFee),
 			"--keyring-backend=test",
 			"--output=json",
-			"--note=neededNoteForJsonUnmarshal",
 			"--broadcast-mode=sync",
 			"-y",
 		},
