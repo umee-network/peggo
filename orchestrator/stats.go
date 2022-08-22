@@ -1,10 +1,45 @@
 package orchestrator
 
 import (
+	"encoding/json"
 	"net/http"
 
+	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/rs/zerolog"
 )
+
+type StatKind int
+
+const (
+	Waiting StatKind = iota
+	Unprocessed
+	Successful
+)
+
+type Stats struct {
+	Transactions map[StatKind][]types.BatchFees `json:"transactions"`
+}
+
+func (s StatKind) String() string {
+	kinds := [...]string{"waiting", "unprocessed", "successful"}
+	return kinds[s]
+}
+
+var s = Stats{Transactions: make(map[StatKind][]types.BatchFees)}
+
+func init() {
+	// testing stats
+	s.Add(Waiting, types.BatchFees{})
+	s.Add(Unprocessed, types.BatchFees{})
+	s.Add(Successful, types.BatchFees{})
+}
+
+func (s Stats) Add(kind StatKind, batchFees types.BatchFees) (stats Stats) {
+	// add kind of stat
+	s.Transactions[kind] = append(s.Transactions[kind], batchFees)
+	// TODO prune slice after N length (or MAX size-- better)
+	return s
+}
 
 func Listen(port string, logger zerolog.Logger) {
 	// Create http endpoint for peggo statistic requests
@@ -15,11 +50,19 @@ func Listen(port string, logger zerolog.Logger) {
 	}
 }
 
+// helper fns
+// ---------
 func writeStats(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	if !query.Has("test") {
-		httpError(w, "test is required")
-		return
+	// human-friendly, stringify keys
+	transactions := make(map[string][]types.BatchFees)
+	for kind, batchFees := range s.Transactions {
+		transactions[kind.String()] = batchFees
+	}
+	// output json
+	if data, err := json.Marshal(transactions); err == nil {
+		w.Write(data)
+	} else {
+		httpError(w, "failed to marshal stats")
 	}
 }
 
