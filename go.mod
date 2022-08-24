@@ -7,7 +7,7 @@ require (
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/cosmos/cosmos-sdk v0.46.0
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/ethereum/go-ethereum v1.10.21
+	github.com/ethereum/go-ethereum v1.10.22
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.48.0
 	github.com/hashicorp/go-multierror v1.1.1
@@ -22,11 +22,11 @@ require (
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.0
 	github.com/tendermint/tendermint v0.34.20
-	github.com/umee-network/umee/price-feeder v0.0.0-20220818052427-b823dd1a7e42
-	github.com/umee-network/umee/v2 v2.0.0-20220818052427-b823dd1a7e42
+	github.com/umee-network/umee/price-feeder v0.0.0-20220824025346-77e91eb5d82b
+	github.com/umee-network/umee/v2 v2.0.0-20220824025346-77e91eb5d82b
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467
-	google.golang.org/grpc v1.48.0
+	google.golang.org/grpc v1.49.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -37,7 +37,7 @@ require (
 	cloud.google.com/go/iam v0.3.0 // indirect
 	cloud.google.com/go/storage v1.14.0 // indirect
 	cosmossdk.io/errors v1.0.0-beta.7 // indirect
-	cosmossdk.io/math v1.0.0-beta.2 // indirect
+	cosmossdk.io/math v1.0.0-beta.3 // indirect
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
 	github.com/99designs/keyring v1.2.1 // indirect
 	github.com/Antonboom/errname v0.1.7 // indirect
