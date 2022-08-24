@@ -275,10 +275,10 @@ func getOrchestratorCmd() *cobra.Command {
 			if statusAPI := konfig.String(flagStatusAPI); statusAPI != defaultStatusAPI {
 				if url, err := url.ParseRequestURI(statusAPI); err == nil {
 					// use provided endpoint
-					orchestrator.Listen(url.Port(), logger)
+					orchestrator.Listen(url.Port(), ctx, logger)
 				} else {
 					// or, use default
-					orchestrator.Listen(defaultStatusAPI, logger)
+					orchestrator.Listen(defaultStatusAPI, ctx, logger)
 				}
 			}
 

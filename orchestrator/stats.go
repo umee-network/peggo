@@ -41,13 +41,24 @@ func (s Stats) Add(kind StatKind, batchFees types.BatchFees) (stats Stats) {
 	return s
 }
 
-func Listen(port string, logger zerolog.Logger) {
+func Listen(port string, ctx context.Context, logger zerolog.Logger) {
 	// Create http endpoint for peggo statistic requests
+	server := http.Server{Addr: ":" + port}
 	http.HandleFunc("/", writeStats)
 	logger.Info().Msgf("Starting status API on %s\n", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		logger.Fatal().Msgf("Failed to start status API on %s: %s\n", port, err)
-	}
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				server.Shutdown(ctx)
+				return
+			default:
+				if err := server.ListenAndServe(); err != nil {
+					logger.Fatal().Msgf("Failed to start status API on %s: %s\n", port, err)
+				}
+			}
+		}
+	}()
 }
 
 // helper fns
