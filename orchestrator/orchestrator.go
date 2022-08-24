@@ -43,6 +43,7 @@ type gravityOrchestrator struct {
 	bridgeStartHeight          uint64
 	symbolRetriever            relayer.SymbolRetriever
 	oracle                     relayer.Oracle
+	stats                      *Stats
 
 	mtx             sync.Mutex
 	erc20DenomCache map[string]string
@@ -64,6 +65,7 @@ func NewGravityOrchestrator(
 	bridgeStartHeight int64,
 	symbolRetriever relayer.SymbolRetriever,
 	oracle relayer.Oracle,
+	stats *Stats,
 	options ...func(GravityOrchestrator),
 ) GravityOrchestrator {
 
@@ -84,6 +86,7 @@ func NewGravityOrchestrator(
 		bridgeStartHeight:          uint64(bridgeStartHeight),
 		symbolRetriever:            symbolRetriever,
 		oracle:                     oracle,
+		stats:                      NewStats(),
 	}
 
 	for _, option := range options {

@@ -255,6 +255,7 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Int64(flagBridgeStartHeight),
 				symbolRetriever,
 				o,
+				orchestrator.NewStats(),
 			)
 
 			g, errCtx := errgroup.WithContext(ctx)
