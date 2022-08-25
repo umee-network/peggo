@@ -301,7 +301,10 @@ func (c *cosmosClient) broadcastTx(
 					return errRes, err
 				}
 
-				c.logger.Error().Err(err).Str("Tx Hash", res.TxHash).Msg("Tx error on broadcastTx")
+				c.logger.Error().Err(err).
+					Str("Tx Hash", res.TxHash).
+					Str("Raw Log", res.RawLog).
+					Msg("Tx error on broadcastTx")
 
 				t.Reset(defaultBroadcastStatusPoll)
 				continue
