@@ -10,10 +10,10 @@ import (
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 
-	ummedpforacle "github.com/umee-network/umee/price-feeder/oracle"
-	umeedpfprovider "github.com/umee-network/umee/price-feeder/oracle/provider"
-	umeedpftypes "github.com/umee-network/umee/price-feeder/oracle/types"
-	ummedpfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
+	ummepforacle "github.com/umee-network/umee/price-feeder/oracle"
+	umeepfprovider "github.com/umee-network/umee/price-feeder/oracle/provider"
+	umeepftypes "github.com/umee-network/umee/price-feeder/oracle/types"
+	ummepfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
 )
 
 const (
@@ -29,34 +29,34 @@ const (
 // for a given set of currency pairs and determining the correct exchange rates.
 type Oracle struct {
 	logger zerolog.Logger
-	closer *ummedpfsync.Closer
+	closer *ummepfsync.Closer
 
 	mtx                   sync.RWMutex
-	providers             map[umeedpfprovider.Name]*Provider // providerName => Provider
-	prices                map[string]sdk.Dec                 // baseSymbol => price ex.: UMEE, ETH => sdk.Dec
-	subscribedBaseSymbols map[string]struct{}                // baseSymbol => nothing
+	providers             map[umeepfprovider.Name]*Provider // providerName => Provider
+	prices                map[string]sdk.Dec                // baseSymbol => price ex.: UMEE, ETH => sdk.Dec
+	subscribedBaseSymbols map[string]struct{}               // baseSymbol => nothing
 	// this field could be calculated each time by looping providers.subscribedPairs
 	// but the time to process is not worth the amount of memory
-	providerSubscribedPairs map[umeedpfprovider.Name][]umeedpftypes.CurrencyPair // providerName => []CurrencyPair
+	providerSubscribedPairs map[umeepfprovider.Name][]umeepftypes.CurrencyPair // providerName => []CurrencyPair
 }
 
 // Provider wraps the umee provider interface.
 type Provider struct {
-	umeedpfprovider.Provider
-	availablePairs  map[string]struct{}                  // Symbol => nothing
-	subscribedPairs map[string]umeedpftypes.CurrencyPair // Symbol => currencyPair
+	umeepfprovider.Provider
+	availablePairs  map[string]struct{}                 // Symbol => nothing
+	subscribedPairs map[string]umeepftypes.CurrencyPair // Symbol => currencyPair
 }
 
-func New(ctx context.Context, logger zerolog.Logger, providersName []umeedpfprovider.Name) (*Oracle, error) {
-	providers := map[umeedpfprovider.Name]*Provider{}
+func New(ctx context.Context, logger zerolog.Logger, providersName []umeepfprovider.Name) (*Oracle, error) {
+	providers := map[umeepfprovider.Name]*Provider{}
 
 	for _, providerName := range providersName {
-		provider, err := ummedpforacle.NewProvider(
+		provider, err := ummepforacle.NewProvider(
 			ctx,
 			providerName,
 			logger,
-			umeedpfprovider.Endpoint{},
-			umeedpftypes.CurrencyPair{},
+			umeepfprovider.Endpoint{},
+			umeepftypes.CurrencyPair{},
 		)
 		if err != nil {
 			return nil, err
@@ -65,21 +65,21 @@ func New(ctx context.Context, logger zerolog.Logger, providersName []umeedpfprov
 		providers[providerName] = &Provider{
 			Provider:        provider,
 			availablePairs:  map[string]struct{}{},
-			subscribedPairs: map[string]umeedpftypes.CurrencyPair{},
+			subscribedPairs: map[string]umeepftypes.CurrencyPair{},
 		}
 	}
 
 	o := &Oracle{
 		logger:                  logger.With().Str("module", "oracle").Logger(),
-		closer:                  ummedpfsync.NewCloser(),
+		closer:                  ummepfsync.NewCloser(),
 		providers:               providers,
 		subscribedBaseSymbols:   map[string]struct{}{},
-		providerSubscribedPairs: map[umeedpfprovider.Name][]umeedpftypes.CurrencyPair{},
+		providerSubscribedPairs: map[umeepfprovider.Name][]umeepftypes.CurrencyPair{},
 	}
 	o.loadAvailablePairs()
 	o.mtx.Lock()
 	defer o.mtx.Unlock()
-	if err := o.subscribeProviders([]umeedpftypes.CurrencyPair{
+	if err := o.subscribeProviders([]umeepftypes.CurrencyPair{
 		{Base: symbolUSDT, Quote: symbolUSD},
 		{Base: symbolDAI, Quote: symbolUSD},
 	}); err != nil {
@@ -150,9 +150,9 @@ func (o *Oracle) SubscribeSymbols(baseSymbols ...string) error {
 	return nil
 }
 
-func (o *Oracle) subscribeProviders(currencyPairs []umeedpftypes.CurrencyPair) error {
+func (o *Oracle) subscribeProviders(currencyPairs []umeepftypes.CurrencyPair) error {
 	for providerName, provider := range o.providers {
-		var pairsToSubscribe []umeedpftypes.CurrencyPair
+		var pairsToSubscribe []umeepftypes.CurrencyPair
 
 		for _, currencyPair := range currencyPairs {
 			symbol := currencyPair.String()
@@ -254,8 +254,8 @@ func (o *Oracle) loadAvailablePairs() {
 func (o *Oracle) setPrices() error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
-	providerPrices := make(umeedpfprovider.AggregatedProviderPrices)
-	providerCandles := make(umeedpfprovider.AggregatedProviderCandles)
+	providerPrices := make(umeepfprovider.AggregatedProviderPrices)
+	providerCandles := make(umeepfprovider.AggregatedProviderCandles)
 
 	for providerName, provider := range o.providers {
 		providerName := providerName
@@ -281,7 +281,7 @@ func (o *Oracle) setPrices() error {
 			// e.g.: {ProviderKraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
 			for _, pair := range subscribedPrices {
-				ummedpforacle.SetProviderTickerPricesAndCandles(
+				ummepforacle.SetProviderTickerPricesAndCandles(
 					providerName,
 					providerPrices,
 					providerCandles,
@@ -300,7 +300,7 @@ func (o *Oracle) setPrices() error {
 		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
-	computedPrices, err := ummedpforacle.GetComputedPrices(
+	computedPrices, err := ummepforacle.GetComputedPrices(
 		o.logger,
 		providerCandles,
 		providerPrices,
