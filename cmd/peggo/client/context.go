@@ -8,7 +8,8 @@ import (
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/pkg/errors"
-	umeeparams "github.com/umee-network/umee/v2/app/params"
+
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 // NewClientContext creates a new Cosmos Client context, where chainID
@@ -18,7 +19,6 @@ func NewClientContext(
 	chainID,
 	fromSpec string,
 	kb keyring.Keyring,
-	encodingConfig umeeparams.EncodingConfig,
 ) (client.Context, error) {
 	var keyInfo *keyring.Record
 
@@ -39,6 +39,8 @@ func NewClientContext(
 			}
 		}
 	}
+
+	encodingConfig := umeeapp.MakeEncodingConfig()
 
 	clientCtx := client.Context{
 		ChainID:           chainID,
