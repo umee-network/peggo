@@ -397,7 +397,7 @@ func (r *passReader) Read(p []byte) (n int, err error) {
 func keyringForPrivKey(
 	name string,
 	privKey sdkcryptotypes.PrivKey,
-	encodingConfig umeeparams.EncodingConfig,
+	cdc codec.Codec,
 ) (keyring.Keyring, error) {
 	tmpPhrase, err := randPhrase(64)
 	if err != nil {

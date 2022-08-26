@@ -346,7 +346,6 @@ func validateRelayValsetsMode(mode string) (relayer.ValsetRelayMode, error) {
 
 func stringsToProviderName(providersName []string) []umeedpfprovider.Name {
 	names := make([]umeedpfprovider.Name, len(providersName))
-
 	for i, name := range providersName {
 		names[i] = umeedpfprovider.Name(name)
 	}
