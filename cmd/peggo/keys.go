@@ -11,6 +11,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
@@ -29,7 +30,6 @@ import (
 	"golang.org/x/term"
 
 	umeeapp "github.com/umee-network/umee/v2/app"
-	umeeparams "github.com/umee-network/umee/v2/app/params"
 )
 
 const defaultKeyringKeyName = "validator"
@@ -88,7 +88,7 @@ func initCosmosKeyring(konfig *koanf.Koanf) (sdk.AccAddress, keyring.Keyring, er
 		}
 
 		// wrap a PK into a Keyring
-		kb, err := keyringForPrivKey(keyName, cosmosAccPk, encodingConfig)
+		kb, err := keyringForPrivKey(keyName, cosmosAccPk, encodingConfig.Codec)
 		return addressFromPk, kb, err
 
 	case len(cosmosFrom) > 0:
@@ -406,7 +406,7 @@ func keyringForPrivKey(
 
 	armored := sdkcrypto.EncryptArmorPrivKey(privKey, tmpPhrase, privKey.Type())
 
-	kb := keyring.NewInMemory(encodingConfig.Codec)
+	kb := keyring.NewInMemory(cdc)
 	if err := kb.ImportPrivKey(name, armored, tmpPhrase); err != nil {
 		err = errors.Wrap(err, "failed to import privkey")
 		return nil, err
