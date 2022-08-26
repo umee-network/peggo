@@ -21,7 +21,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.0
-	github.com/tendermint/tendermint v0.34.21
+	github.com/tendermint/tendermint v0.34.20
 	github.com/umee-network/umee/price-feeder v0.0.0-20220825153408-0ce3e20c310c
 	github.com/umee-network/umee/v2 v2.0.0-20220825153408-0ce3e20c310c
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
@@ -87,7 +87,6 @@ require (
 	github.com/cosmos/ibc-go/v3 v3.1.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
-	github.com/creachadair/taskgroup v0.3.2 // indirect
 	github.com/daixiang0/gci v0.6.2 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
