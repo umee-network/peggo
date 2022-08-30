@@ -2,6 +2,7 @@
 package peggo
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -9,6 +10,8 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
+
+	umeeapp "github.com/umee-network/umee/v2/app"
 )
 
 const (
@@ -61,7 +64,11 @@ func cosmosFlagSet() *pflag.FlagSet {
 	fs.String(flagCosmosChainID, "", "The chain ID of the cosmos network")
 	fs.String(flagCosmosGRPC, "tcp://localhost:9090", "The gRPC endpoint of a cosmos node")
 	fs.String(flagTendermintRPC, "http://localhost:26657", "The Tendermint RPC endpoint of a Cosmos node")
-	fs.String(flagCosmosGasPrices, "", "The gas prices to use for Cosmos transaction fees")
+	fs.String(
+		flagCosmosGasPrices,
+		fmt.Sprintf("0.001%s", umeeapp.BondDenom),
+		"The gas prices to use for Cosmos transaction fees",
+	)
 
 	return fs
 }
