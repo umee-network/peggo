@@ -81,7 +81,9 @@ func (p *gravityOrchestrator) Start(ctx context.Context) error {
 	}
 
 	if p.ethMergePause {
-		p.logger.Warn().Msg("Batch confirm, messages from Eth, relays and batch requesting are disabled. This is OK if we are during the ETH merge pause period.")
+		p.logger.Warn().
+			Msg("Batch confirm, messages from Eth, relays and batch requesting are disabled.\n" +
+				"This is OK if we are during the ETH merge pause period.")
 	}
 
 	return pg.Wait()
