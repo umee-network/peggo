@@ -32,7 +32,6 @@ type gravityOrchestrator struct {
 	gravityBroadcastClient     sidechain.GravityBroadcastClient
 	gravityContract            gravity.Contract
 	ethProvider                provider.EVMProvider
-	ethFrom                    ethcmn.Address
 	ethSignerFn                keystore.SignerFn
 	ethPersonalSignFn          keystore.PersonalSignFn
 	relayer                    relayer.GravityRelayer
@@ -44,8 +43,10 @@ type gravityOrchestrator struct {
 	symbolRetriever            relayer.SymbolRetriever
 	oracle                     relayer.Oracle
 
-	mtx             sync.Mutex
 	erc20DenomCache map[string]string
+	mtx             sync.Mutex
+
+	ethFrom ethcmn.Address
 
 	ethMergePause bool
 }
