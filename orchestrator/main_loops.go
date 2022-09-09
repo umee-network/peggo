@@ -57,24 +57,31 @@ var estimatedGasCosts = []int64{
 func (p *gravityOrchestrator) Start(ctx context.Context) error {
 	var pg loops.ParanoidGroup
 
-	if p.ethMergePause {
-		p.logger.Warn().Msg("Eth claims are disabled. This is OK if we are during the ETH merge pause period.")
+	if !p.ethMergePause {
 		pg.Go(func() error {
 			return p.EthOracleMainLoop(ctx)
 		})
 	}
-	pg.Go(func() error {
-		return p.BatchRequesterLoop(ctx)
-	})
+
+	if !p.ethMergePause {
+		pg.Go(func() error {
+			return p.BatchRequesterLoop(ctx)
+		})
+
+	}
+
 	pg.Go(func() error {
 		return p.EthSignerMainLoop(ctx)
 	})
 
-	if p.ethMergePause {
-		p.logger.Warn().Msg("Relaying to ETH is disabled. This is OK if we are during the ETH merge pause period.")
+	if !p.ethMergePause {
 		pg.Go(func() error {
 			return p.RelayerMainLoop(ctx)
 		})
+	}
+
+	if p.ethMergePause {
+		p.logger.Warn().Msg("Batch confirm, messages from Eth, relays and batch requesting are disabled. This is OK if we are during the ETH merge pause period.")
 	}
 
 	return pg.Wait()
@@ -254,8 +261,7 @@ func (p *gravityOrchestrator) EthSignerMainLoop(ctx context.Context) (err error)
 			}
 		}
 
-		if p.ethMergePause {
-			p.logger.Warn().Msg("Batch confirms are disabled. This is OK if we are during the ETH merge pause period.")
+		if !p.ethMergePause {
 			var oldestUnsignedTransactionBatch []types.OutgoingTxBatch
 			if err := retry.Do(func() error {
 				// sign the last unsigned batch, TODO check if we already have signed this
