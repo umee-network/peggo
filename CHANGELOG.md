@@ -45,7 +45,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-[#356](https://github.com/umee-network/peggo/pull/356) Add `eth-merge-pause` flag to support sending valset confirms during merge event.
+- [#356](https://github.com/umee-network/peggo/pull/356) Add `eth-merge-pause` flag to support sending valset confirms during merge event.
 
 ## [v0.2.7](https://github.com/umee-network/peggo/releases/tag/v0.2.7) - 2022-03-31
 
