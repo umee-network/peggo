@@ -32,7 +32,6 @@ type gravityOrchestrator struct {
 	gravityBroadcastClient     sidechain.GravityBroadcastClient
 	gravityContract            gravity.Contract
 	ethProvider                provider.EVMProvider
-	ethFrom                    ethcmn.Address
 	ethSignerFn                keystore.SignerFn
 	ethPersonalSignFn          keystore.PersonalSignFn
 	relayer                    relayer.GravityRelayer
@@ -44,8 +43,12 @@ type gravityOrchestrator struct {
 	symbolRetriever            relayer.SymbolRetriever
 	oracle                     relayer.Oracle
 
-	mtx             sync.Mutex
 	erc20DenomCache map[string]string
+	mtx             sync.Mutex
+
+	ethFrom ethcmn.Address
+
+	ethMergePause bool
 }
 
 func NewGravityOrchestrator(
@@ -64,6 +67,7 @@ func NewGravityOrchestrator(
 	bridgeStartHeight int64,
 	symbolRetriever relayer.SymbolRetriever,
 	oracle relayer.Oracle,
+	ethMergePause bool, // TODO: remove this after merge is completed
 	options ...func(GravityOrchestrator),
 ) GravityOrchestrator {
 
@@ -84,6 +88,7 @@ func NewGravityOrchestrator(
 		bridgeStartHeight:          uint64(bridgeStartHeight),
 		symbolRetriever:            symbolRetriever,
 		oracle:                     oracle,
+		ethMergePause:              ethMergePause,
 	}
 
 	for _, option := range options {
