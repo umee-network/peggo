@@ -239,7 +239,7 @@ fi # data dir check
 # Start the instances
 echo "Starting nodes..."
 
-$NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level $LOG_LEVEL > $hdir.n0.log 2>&1 &
+$NODE_BIN $home0 start --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level $LOG_LEVEL > $hdir.n0.log 2>&1 &
 $NODE_BIN $home1 start --grpc.address="0.0.0.0:9091" --grpc-web.enable=false --log_level $LOG_LEVEL > $hdir.n1.log 2>&1 &
 $NODE_BIN $home2 start --grpc.address="0.0.0.0:9092" --grpc-web.enable=false --log_level $LOG_LEVEL > $hdir.n2.log 2>&1 &
 
@@ -254,12 +254,3 @@ echo "  * tail -f $hdir.n0.log"
 echo "  * tail -f $hdir.n1.log"
 echo "  * tail -f $hdir.n2.log"
 echo
-echo "Env for easy access:"
-echo "export H1='--home $n0dir'"
-echo "export H2='--home $n1dir'"
-echo "export H3='--home $n2dir'"
-echo
-echo "Command Line Access:"
-echo "  * $NODE_BIN --home $n0dir status"
-echo "  * $NODE_BIN --home $n1dir status"
-echo "  * $NODE_BIN --home $n2dir status"
