@@ -45,10 +45,22 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-[#275](https://github.com/umee-network/peggo/pull/275) Add diagrams of main loops.
-[#297](https://github.com/umee-network/peggo/pull/297) Update dependabot reviewers.
-[#334](https://github.com/umee-network/peggo/pull/334) Update to go 1.18.
+[#343](https://github.com/umee-network/peggo/pull/343) Upgrade to cosmos-sdk v0.46.1.
 [#341](https://github.com/umee-network/peggo/pull/341) Fix linter.
+[#334](https://github.com/umee-network/peggo/pull/334) Update to go 1.18.
+[#326](https://github.com/umee-network/peggo/pull/326) Refactory of eth `getCurrentBlock`.
+[#311](https://github.com/umee-network/peggo/pull/311) Add valset update at each 2000 eth blocks.
+
+### Bug Fixes
+
+## [v0.4.0](https://github.com/umee-network/peggo/releases/tag/v0.4.0) - 2022-07-14
+
+### Improvements
+
+[#308](https://github.com/umee-network/peggo/pull/308) Change stablecoin from UST to DAI.
+[#299](https://github.com/umee-network/peggo/pull/299) Fix lint warnings.
+[#297](https://github.com/umee-network/peggo/pull/297) Update dependabot reviewers.
+[#275](https://github.com/umee-network/peggo/pull/275) Add diagrams of main loops.
 
 ### Bug Fixes
 
