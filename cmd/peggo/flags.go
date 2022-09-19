@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	umeeparams "github.com/umee-network/umee/v3/app/params"
 )
 
 const (
@@ -65,7 +65,7 @@ func cosmosFlagSet() *pflag.FlagSet {
 	fs.String(flagTendermintRPC, "http://localhost:26657", "The Tendermint RPC endpoint of a Cosmos node")
 	fs.String(
 		flagCosmosGasPrices,
-		fmt.Sprintf("0.001%s", umeeapp.BondDenom),
+		fmt.Sprintf("0.05%s", umeeparams.BondDenom),
 		"The gas prices to use for Cosmos transaction fees",
 	)
 
