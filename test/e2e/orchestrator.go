@@ -11,7 +11,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	umeeapp "github.com/umee-network/umee/v2/app"
+	umeeapp "github.com/umee-network/umee/v3/app"
 )
 
 type orchestrator struct {

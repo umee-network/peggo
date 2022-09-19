@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
+	umeeapp "github.com/umee-network/umee/v3/app"
 )
 
 const (
