@@ -29,7 +29,7 @@ import (
 	tmconfig "github.com/tendermint/tendermint/config"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	"github.com/umee-network/umee/v3/app"
+	umeeparams "github.com/umee-network/umee/v3/app/params"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 )
 
@@ -45,7 +45,7 @@ const (
 
 var (
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
-	stakeAmountCoin = sdk.NewCoin(app.BondDenom, stakeAmount)
+	stakeAmountCoin = sdk.NewCoin(umeeparams.BondDenom, stakeAmount)
 )
 
 type IntegrationTestSuite struct {
@@ -222,8 +222,8 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
 	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
-		BaseDenom:            app.BondDenom,
-		SymbolDenom:          app.DisplayDenom,
+		BaseDenom:            umeeparams.BondDenom,
+		SymbolDenom:          umeeparams.DisplayDenom,
 		Exponent:             6,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.100000000000000000"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.050000000000000000"),
