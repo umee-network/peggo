@@ -36,7 +36,7 @@ import (
 const (
 	photonDenom    = "photon"
 	initBalanceStr = "110000000000uumee,100000000000photon"
-	minGasPrice    = "0.00001"
+	minGasPrice    = "0.05"
 	gaiaChainID    = "test-gaia-chain"
 
 	ethChainID uint = 15
@@ -357,7 +357,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 }
 
 func (s *IntegrationTestSuite) getMinGasPrice() string {
-	return fmt.Sprintf("%s%s", minGasPrice, photonDenom)
+	return fmt.Sprintf("%s%s", minGasPrice, umeeparams.BondDenom)
 }
 
 func (s *IntegrationTestSuite) runGanacheContainer() {
@@ -690,7 +690,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--tendermint-rpc",
 					fmt.Sprintf("http://%s:26657", s.valResources[i].Container.Name[1:]),
 					"--cosmos-gas-prices",
-					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
+					fmt.Sprintf("%s%s", minGasPrice, umeeparams.BondDenom),
 					"--cosmos-from",
 					s.chain.orchestrators[i].keyInfo.Name,
 					"--oracle-providers=mock",
