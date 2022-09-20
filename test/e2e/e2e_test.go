@@ -16,7 +16,7 @@ func (s *IntegrationTestSuite) TestPhotonTokenTransfers() {
 	// send 100 photon tokens from Umee to Ethereum
 	s.Run("send_photon_tokens_to_eth", func() {
 		ethRecipient := s.chain.orchestrators[1].ethereumKey.address
-		s.sendFromUmeeToEth(0, ethRecipient, "100photon", "10photon", "3photon")
+		s.sendFromUmeeToEth(0, ethRecipient, "100photon", "10uumee", "3photon")
 
 		umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		fromAddr, err := s.chain.validators[0].keyInfo.GetAddress()
@@ -90,7 +90,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 	// send 300 umee tokens from Umee to Ethereum
 	s.Run("send_uumee_tokens_to_eth", func() {
 		ethRecipient := s.chain.orchestrators[1].ethereumKey.address
-		s.sendFromUmeeToEth(0, ethRecipient, "300uumee", "10photon", "7uumee")
+		s.sendFromUmeeToEth(0, ethRecipient, "300uumee", "10uumee", "7uumee")
 
 		endpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		fromAddr, err := s.chain.validators[0].keyInfo.GetAddress()
