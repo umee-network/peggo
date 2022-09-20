@@ -29,7 +29,7 @@ import (
 	"github.com/umee-network/peggo/orchestrator/ethereum/keystore"
 	"golang.org/x/term"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
+	umeeapp "github.com/umee-network/umee/v3/app"
 )
 
 const defaultKeyringKeyName = "validator"

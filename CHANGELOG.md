@@ -45,6 +45,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
+[#362](https://github.com/umee-network/peggo/pull/362) Update umeed to v3.
 [#343](https://github.com/umee-network/peggo/pull/343) Upgrade to cosmos-sdk v0.46.1.
 [#341](https://github.com/umee-network/peggo/pull/341) Fix linter.
 [#334](https://github.com/umee-network/peggo/pull/334) Update to go 1.18.
