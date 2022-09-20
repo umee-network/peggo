@@ -1,9 +1,8 @@
 run:
   tests: false
   skip-dirs:
-    - test
-    - diagrams
-  go: '1.19'
+    - test/e2e
+    - tests/simulation
 
   govet:
     # Enable analyzers by name (in addition to default).
@@ -14,37 +13,39 @@ run:
 
 linters:
   enable:
+    # - dupl
+    # - nestif
+    # - rowserrcheck -- enable when it will support generics
+    # - whitespace
+    # - wsl
+    - asciicheck
     - bodyclose
-    - deadcode
     - depguard
     - dogsled
     - errcheck
+    - exportloopref
     - goconst
     - gocritic
     - gofmt
     - goimports
-    - revive
     - gosec
     - gosimple
     - govet
+    - grouper
     - ineffassign
     - lll
     - misspell
     - nakedret
+    - nolintlint
     - prealloc
-    - exportloopref
+    - revive
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
-    - nolintlint
-    - asciicheck
-    # - whitespace
-    # - wsl
+    - usestdlibvars
 
 issues:
   exclude-rules:
@@ -68,7 +69,5 @@ linters-settings:
     locale: US
   nolintlint:
     allow-unused: false
-    # Disable to ensure that nolint directives don't have a leading space. Default is true.
     allow-leading-space: true
     require-explanation: false
-    require-specific: false
