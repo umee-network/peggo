@@ -68,11 +68,21 @@ jobs:
             **/**.go
             go.mod
             go.sum
-      - name: Build Docker Image
-        run: |
-          make docker-build-debug
+
+      # In this step, this action saves a list of existing images,
+      # the cache is created without them in the post run.
+      # It also restores the cache if it exists.
+      - name: cache docker layer
+        uses: satackey/action-docker-layer-caching@v0.0.11
         if: env.GIT_DIFF
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+
+      - name: Build Docker Image
+        if: env.GIT_DIFF
+        run: |
+          DOCKER_BUILDKIT=1 make docker-build-debug
       - name: Test E2E
+        if: env.GIT_DIFF
         run: |
           make test-e2e
-        if: env.GIT_DIFF
