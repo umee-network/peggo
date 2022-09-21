@@ -61,4 +61,4 @@ pull_request_rules:
     actions:
       backport:
         branches:
-          - release/v1.0.x
+          - release/v1.x.x
