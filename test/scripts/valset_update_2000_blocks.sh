@@ -1,9 +1,9 @@
-#!/bin/bash -eu
+#!/bin/bash -eux
 
 CWD="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 ETH_RPC=${ETH_RPC:-"http://127.0.0.1:8545"}
 UMMED_BUILD_PATH=$CWD/../umeed-builds
-UMEED_BIN=${UMEED_BIN:-$UMMED_BUILD_PATH/umeed-main}
+UMEED_BIN=${UMEED_BIN:-$UMMED_BUILD_PATH/umeed-rc4}
 PEGGO_BUILD_PATH=$CWD/../../build
 PEGGO_BIN=${PEGGO_BIN:-$PEGGO_BUILD_PATH/peggo}
 CHAIN_ID="${CHAIN_ID:-888}"
@@ -18,7 +18,7 @@ n1dir="$hdir/n1"
 n2dir="$hdir/n2"
 
 umeeBasename=$(basename $UMEED_BIN)
-ganache="ganache-cli"
+ganache="ganache"
 
 # Common flags
 kbt="--keyring-backend test"
@@ -71,18 +71,21 @@ PEGGO_ETH_PK=$val0PrivateKey $PEGGO_BIN orchestrator $bridgeAddr \
   $defaultFlags \
   --cosmos-grpc="tcp://0.0.0.0:9090" \
   --tendermint-rpc="http://0.0.0.0:26657" \
+  --oracle-providers="osmosis,huobi,okx,coinbase,binance,bitget,mexc" \
   --cosmos-keyring-dir=$n0dir > $peggoLogPath/n0.peggo.log 2>&1 &
 
-PEGGO_ETH_PK=$val1PrivateKey $PEGGO_BIN orchestrator $bridgeAddr \
+# PEGGO_ETH_PK=$val1PrivateKey $PEGGO_BIN orchestrator $bridgeAddr \
   $defaultFlags \
   --cosmos-grpc="tcp://0.0.0.0:9091" \
   --tendermint-rpc="http://0.0.0.0:26667" \
+  --oracle-providers="kraken,osmosis,huobi,okx,coinbase,binance,bitget,mexc" \
   --cosmos-keyring-dir=$n1dir > $peggoLogPath/n1.peggo.log 2>&1 &
 
 PEGGO_ETH_PK=$val2PrivateKey $PEGGO_BIN orchestrator $bridgeAddr \
   $defaultFlags \
   --cosmos-grpc="tcp://0.0.0.0:9092" \
   --tendermint-rpc="http://0.0.0.0:26677" \
+  --oracle-providers="kraken,osmosis,huobi,okx,coinbase,binance,bitget,mexc" \
   --cosmos-keyring-dir=$n2dir > $peggoLogPath/n2.peggo.log 2>&1 &
 
 echo Wait for a few seconds to get the current valset

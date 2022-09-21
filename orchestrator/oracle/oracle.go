@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
@@ -14,6 +15,7 @@ import (
 	pfprovider "github.com/umee-network/umee/price-feeder/oracle/provider"
 	pftypes "github.com/umee-network/umee/price-feeder/oracle/types"
 	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
+	umeeparams "github.com/umee-network/umee/v3/app/params"
 )
 
 const (
@@ -273,7 +275,8 @@ func (o *Oracle) setPrices() error {
 
 			if tickerErr != nil && candleErr != nil {
 				// only generates error if ticker and candle generate errors
-				return fmt.Errorf("ticker error: %+v\ncandle error: %+v", tickerErr, candleErr)
+				o.logger.Debug().Msgf("provider: %s ticker error: %+v\ncandle error: %+v", providerName, tickerErr, candleErr)
+				return nil
 			}
 
 			// flatten and collect prices based on the base currency per provider
@@ -300,12 +303,17 @@ func (o *Oracle) setPrices() error {
 		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
+	deviationTreshold := sdk.NewDecFromIntWithPrec(sdkmath.NewInt(15), 1)
+
 	computedPrices, err := pforacle.GetComputedPrices(
 		o.logger,
 		providerCandles,
 		providerPrices,
 		o.providerSubscribedPairs,
-		make(map[string]sdk.Dec, 0), // uses default deviation
+		map[string]sdk.Dec{
+			SymbolETH:            deviationTreshold,
+			umeeparams.BondDenom: deviationTreshold,
+		}, // uses default deviation for other bases
 	)
 	if err != nil {
 		return err
