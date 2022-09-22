@@ -24,7 +24,7 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/tendermint/tendermint v0.34.21
 	github.com/umee-network/umee/price-feeder v1.0.1-0.20220919160536-0c0db8c7c112
-	github.com/umee-network/umee/v3 v3.0.0-rc1
+	github.com/umee-network/umee/v3 v3.0.0
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	golang.org/x/term v0.0.0-20220722155259-a9ba230a4035
 	google.golang.org/grpc v1.49.0
