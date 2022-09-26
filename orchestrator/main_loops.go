@@ -504,7 +504,7 @@ func getEthBlockDelay(chainID uint64) uint64 {
 	// Mainline Ethereum, Ethereum classic, or the Ropsten, Kotti, Mordor testnets
 	// all POW Chains
 	case 1, 3, 6, 7:
-		return 13
+		return 96
 
 	// Dev, our own Gravity Ethereum testnet, and Hardhat respectively
 	// all single signer chains with no chance of any reorgs
@@ -519,6 +519,6 @@ func getEthBlockDelay(chainID uint64) uint64 {
 
 	// assume the safe option (POW) where we don't know
 	default:
-		return 13
+		return 96
 	}
 }
