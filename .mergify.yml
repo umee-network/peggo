@@ -57,7 +57,7 @@ pull_request_rules:
   - name: Backport patches to release/v1.0.x branch
     conditions:
       - base=main
-      - label=S:backport/v1.0.x
+      - label=S:backport/v1.x.x
     actions:
       backport:
         branches:
