@@ -47,13 +47,13 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-[#367] Set ETH block delay to 96 blocks
+- [#367] Set ETH block delay to 96 blocks
 
 ## [v1.0.1](https://github.com/umee-network/peggo/releases/tag/v1.0.1) - 2022-09-21
 
 ### Improvements
 
-[#365] Reduce oracle noise msgs
+- [#365] Reduce oracle noise msgs
 
 ## [v1.0.0](https://github.com/umee-network/peggo/releases/tag/v1.0.0) - 2022-09-14
 
