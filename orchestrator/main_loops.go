@@ -501,10 +501,13 @@ func (p *gravityOrchestrator) ERC20ToDenom(ctx context.Context, tokenAddr ethcmn
 // mechanism to prevent relaying an event that is not yet considered final.
 func getEthBlockDelay(chainID uint64) uint64 {
 	switch chainID {
-	// Mainline Ethereum, Ethereum classic, or the Ropsten, Kotti, Mordor testnets
-	// all POW Chains
-	case 1, 3, 6, 7:
+	// Mainline Ethereum
+	case 1:
 		return 96
+
+	// Ethereum classic, or the Ropsten, Kotti, Mordor testnets  all POW Chains
+	case 3, 6, 7:
+		return 13
 
 	// Dev, our own Gravity Ethereum testnet, and Hardhat respectively
 	// all single signer chains with no chance of any reorgs
