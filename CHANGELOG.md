@@ -47,8 +47,19 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
+<<<<<<< HEAD
 - [#367] Set ETH block delay to 96 blocks
 
+=======
+- [#376] Add `eth-merge-pause` flag
+
+## [v1.1.0](https://github.com/umee-network/peggo/releases/tag/v1.1.0) - 2022-09-26
+
+### Improvements
+
+- [#367] Set ETH block delay to 96 blocks
+
+>>>>>>> 8b19cf8 (feat: Add eth merge pause flag (to main) (#376))
 ## [v1.0.1](https://github.com/umee-network/peggo/releases/tag/v1.0.1) - 2022-09-21
 
 ### Improvements

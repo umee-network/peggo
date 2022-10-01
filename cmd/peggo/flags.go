@@ -55,6 +55,7 @@ const (
 	flagRelayerLoopMultiplier   = "relayer-loop-multiplier"
 	flagRequesterLoopMultiplier = "requester-loop-multiplier"
 	flagBridgeStartHeight       = "bridge-start-height"
+	flagEthMergePause           = "eth-merge-pause" // TODO: remove this after merge is completed
 )
 
 func cosmosFlagSet() *pflag.FlagSet {
