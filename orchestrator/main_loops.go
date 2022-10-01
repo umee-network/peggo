@@ -272,54 +272,52 @@ func (p *gravityOrchestrator) EthSignerMainLoop(ctx context.Context) (err error)
 			}
 		}
 
-		// Do not sent batch confirms while the Eth merge adapting period is active
-		// otherwise the message will fail causing Peggo to crash.
-		if !p.ethMergePause {
-			var oldestUnsignedTransactionBatch []types.OutgoingTxBatch
-			if err := retry.Do(func() error {
-				// sign the last unsigned batch, TODO check if we already have signed this
-				txBatch, err := p.cosmosQueryClient.LastPendingBatchRequestByAddr(
-					ctx,
-					&types.QueryLastPendingBatchRequestByAddrRequest{
-						Address: p.gravityBroadcastClient.AccFromAddress().String(),
-					},
-				)
+		//Try to send batch confirms. If this fails, it means there are pending batches
+		// that we'll need to sign before the next upgrade.
+		var oldestUnsignedTransactionBatch []types.OutgoingTxBatch
+		if err := retry.Do(func() error {
+			// sign the last unsigned batch, TODO check if we already have signed this
+			txBatch, err := p.cosmosQueryClient.LastPendingBatchRequestByAddr(
+				ctx,
+				&types.QueryLastPendingBatchRequestByAddrRequest{
+					Address: p.gravityBroadcastClient.AccFromAddress().String(),
+				},
+			)
 
-				if err != nil {
-					return err
-				}
-
-				if txBatch == nil || txBatch.Batch == nil {
-					logger.Debug().Msg("no TransactionBatch waiting to be signed")
-					return nil
-				}
-
-				oldestUnsignedTransactionBatch = txBatch.Batch
-				return nil
-			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-				logger.Err(err).
-					Uint("retry", n).
-					Msg("failed to get unsigned TransactionBatch for signing; retrying...")
-			})); err != nil {
-				logger.Err(err).Msg("got error, loop exits")
+			if err != nil {
 				return err
 			}
 
-			for _, batch := range oldestUnsignedTransactionBatch {
-				batch := batch
-				logger.Info().
-					Uint64("batch_nonce", batch.BatchNonce).
-					Msg("sending TransactionBatch confirm for BatchNonce")
-				if err := retry.Do(func() error {
-					return p.gravityBroadcastClient.SendBatchConfirm(ctx, p.ethFrom, gravityID, batch)
-				}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
-					logger.Err(err).
-						Uint("retry", n).
-						Msg("failed to sign and send TransactionBatch confirmation to Cosmos; retrying...")
-				})); err != nil {
-					logger.Err(err).Msg("got error, loop exits")
-					return err
-				}
+			if txBatch == nil || txBatch.Batch == nil {
+				logger.Debug().Msg("no TransactionBatch waiting to be signed")
+				return nil
+			}
+
+			oldestUnsignedTransactionBatch = txBatch.Batch
+			return nil
+		}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
+			logger.Err(err).
+				Uint("retry", n).
+				Msg("failed to get unsigned TransactionBatch for signing; retrying...")
+		})); err != nil {
+			logger.Err(err).Msg("got error, loop exits")
+			return err
+		}
+
+		for _, batch := range oldestUnsignedTransactionBatch {
+			batch := batch
+			logger.Info().
+				Uint64("batch_nonce", batch.BatchNonce).
+				Msg("sending TransactionBatch confirm for BatchNonce")
+			if err := retry.Do(func() error {
+				return p.gravityBroadcastClient.SendBatchConfirm(ctx, p.ethFrom, gravityID, batch)
+			}, retry.Context(ctx), retry.OnRetry(func(n uint, err error) {
+				logger.Err(err).
+					Uint("retry", n).
+					Msg("failed to sign and send TransactionBatch confirmation to Cosmos; retrying...")
+			})); err != nil {
+				logger.Err(err).Msg("got error, loop exits")
+				return err
 			}
 		}
 
