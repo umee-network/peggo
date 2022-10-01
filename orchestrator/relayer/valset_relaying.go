@@ -3,8 +3,8 @@ package relayer
 import (
 	"context"
 
-	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/pkg/errors"
+	"github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 )
 
 // RelayValsets checks the last validator set on Ethereum, if it's lower than our latest validator
@@ -66,10 +66,15 @@ func (s *gravityRelayer) RelayValsets(ctx context.Context, currentValset types.V
 
 	// We might not need to relay this valset update unless the user explicitly specified it.
 	if s.valsetRelayMode == ValsetRelayModeMinimum && latestValidValset.Nonce == latestValsets.Valsets[0].Nonce {
+<<<<<<< HEAD
 		if !s.IsLastestValsetUpdateOutdated(ctx) {
 			s.logger.Debug().Msg("not relaying because nonces match and valset is not outdated")
 			return nil
 		}
+=======
+		s.logger.Debug().Msg("not relaying because nonces match")
+		return nil
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 	}
 
 	s.logger.Info().
@@ -94,7 +99,11 @@ func (s *gravityRelayer) RelayValsets(ctx context.Context, currentValset types.V
 
 	estimatedGasCost, gasPrice, err := s.gravityContract.EstimateGas(ctx, s.gravityContract.Address(), txData)
 	if err != nil {
+<<<<<<< HEAD
 		s.logger.Err(err).Msg("failed to estimate gas cost of ValsetUpdate")
+=======
+		s.logger.Err(err).Msg("failed to estimate gas cost")
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 		return nil
 	}
 

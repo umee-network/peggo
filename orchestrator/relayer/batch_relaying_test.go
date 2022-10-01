@@ -20,7 +20,11 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 
+<<<<<<< HEAD
 	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+=======
+	"github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 	"github.com/umee-network/peggo/mocks"
 	gravityMocks "github.com/umee-network/peggo/mocks/gravity"
 	"github.com/umee-network/peggo/orchestrator/coingecko"

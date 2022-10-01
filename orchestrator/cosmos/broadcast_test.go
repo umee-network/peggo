@@ -10,11 +10,14 @@ import (
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 
-	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/golang/mock/gomock"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
+<<<<<<< HEAD
+=======
+	"github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 
 	"github.com/umee-network/peggo/mocks"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"

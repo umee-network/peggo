@@ -11,11 +11,14 @@ import (
 	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
 	"github.com/umee-network/peggo/orchestrator/ethereum/provider"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
 )
 
+<<<<<<< HEAD
 const ethBlocksValsetOutdated = uint64(2000)
 
+=======
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 // ValsetRelayMode defines an enumerated validator set relay mode.
 type ValsetRelayMode int64
 
@@ -107,6 +110,7 @@ func NewGravityRelayer(
 func (s *gravityRelayer) GetProfitMultiplier() float64 {
 	return s.profitMultiplier
 }
+<<<<<<< HEAD
 
 // UpdateLatestValsetEthBlockNumber only updates the last valset eth block number
 // if the number is bigger than the one already stored in memory
@@ -140,3 +144,5 @@ func (s *gravityRelayer) IsLastestValsetUpdateOutdated(ctx context.Context) bool
 
 	return (currentBlock - s.latestValsetEthBlockNumber) > ethBlocksValsetOutdated
 }
+=======
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0

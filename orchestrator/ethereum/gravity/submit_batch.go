@@ -4,9 +4,12 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
+<<<<<<< HEAD
+=======
+	"github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )

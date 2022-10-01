@@ -7,12 +7,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
+<<<<<<< HEAD
+=======
+	"github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 
 	"github.com/umee-network/peggo/orchestrator/ethereum/committer"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"

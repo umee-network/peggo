@@ -5,9 +5,12 @@ import (
 	"math/big"
 	"sort"
 
-	"github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/shopspring/decimal"
+<<<<<<< HEAD
+=======
+	"github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 	"github.com/umee-network/peggo/orchestrator/oracle"
 )
 
@@ -221,7 +224,11 @@ func (s *gravityRelayer) IsBatchProfitable(
 	}
 
 	// First we get the cost of the transaction in USD
+<<<<<<< HEAD
 	usdEthPrice, err := s.oracle.GetPrice(oracle.SymbolETH)
+=======
+	usdEthPrice, err := s.oracle.GetPrice(oracle.BaseSymbolETH)
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 	if err != nil {
 		s.logger.Err(err).Msg("failed to get ETH price")
 		return false

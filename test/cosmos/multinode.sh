@@ -171,7 +171,11 @@ if [[ ! -d "$hdir" ]]; then
 	echo "Create gentxs and collect them in n0"
 	$NODE_BIN $home0 gentx-gravity $VAL0_KEY 1000$SCALE_FACTOR$STAKE_DENOM $VAL0_ETH_ADDRESS $($NODE_BIN $home0 keys show $VAL0_KEY -a $kbt) $kbt $cid
 	$NODE_BIN $home1 gentx-gravity $VAL1_KEY 1000$SCALE_FACTOR$STAKE_DENOM $VAL1_ETH_ADDRESS $($NODE_BIN $home1 keys show $VAL1_KEY -a $kbt) $kbt $cid
+<<<<<<< HEAD
 	$NODE_BIN $home2 gentx-gravity $VAL2_KEY 1000$SCALE_FACTOR$STAKE_DENOM $VAL2_ETH_ADDRESS $($NODE_BIN $home2 keys show $VAL2_KEY -a $kbt) $kbt $cid
+=======
+	$NODE_BIN $home2 gentx-gravity $VAL2_KEY 1000$SCALE_FACTOR$STAKE_DENOM $VAL2_ETH_ADDRESS $($NODE_BIN $home2 keys show $VAL2_KEY -a $kbt) $kbt $cid 
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 
 	cp $n1cfgDir/gentx/*.json $n0cfgDir/gentx/
 	cp $n2cfgDir/gentx/*.json $n0cfgDir/gentx/

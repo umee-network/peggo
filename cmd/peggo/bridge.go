@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"time"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -21,6 +20,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
+<<<<<<< HEAD
+=======
+	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 	"google.golang.org/grpc"
 
 	"github.com/umee-network/peggo/cmd/peggo/client"
@@ -75,6 +78,14 @@ func deployGravityCmd() *cobra.Command {
 				return err
 			}
 
+<<<<<<< HEAD
+=======
+			logger, err := getLogger(cmd)
+			if err != nil {
+				return err
+			}
+
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			tmRPCEndpoint, err := parseURL(logger, konfig, flagTendermintRPC)
 			if err != nil {
 				return err

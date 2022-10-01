@@ -5,9 +5,12 @@ import (
 	"sync"
 	"time"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/rs/zerolog"
+<<<<<<< HEAD
+=======
+	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 
 	sidechain "github.com/umee-network/peggo/orchestrator/cosmos"
 	gravity "github.com/umee-network/peggo/orchestrator/ethereum/gravity"
@@ -32,7 +35,6 @@ type gravityOrchestrator struct {
 	gravityBroadcastClient     sidechain.GravityBroadcastClient
 	gravityContract            gravity.Contract
 	ethProvider                provider.EVMProvider
-	ethFrom                    ethcmn.Address
 	ethSignerFn                keystore.SignerFn
 	ethPersonalSignFn          keystore.PersonalSignFn
 	relayer                    relayer.GravityRelayer
@@ -44,8 +46,12 @@ type gravityOrchestrator struct {
 	symbolRetriever            relayer.SymbolRetriever
 	oracle                     relayer.Oracle
 
-	mtx             sync.Mutex
 	erc20DenomCache map[string]string
+	mtx             sync.Mutex
+
+	ethFrom ethcmn.Address
+
+	ethMergePause bool
 }
 
 func NewGravityOrchestrator(
@@ -64,6 +70,10 @@ func NewGravityOrchestrator(
 	bridgeStartHeight int64,
 	symbolRetriever relayer.SymbolRetriever,
 	oracle relayer.Oracle,
+<<<<<<< HEAD
+=======
+	ethMergePause bool, // TODO: remove this after merge is completed
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 	options ...func(GravityOrchestrator),
 ) GravityOrchestrator {
 
@@ -84,6 +94,10 @@ func NewGravityOrchestrator(
 		bridgeStartHeight:          uint64(bridgeStartHeight),
 		symbolRetriever:            symbolRetriever,
 		oracle:                     oracle,
+<<<<<<< HEAD
+=======
+		ethMergePause:              ethMergePause,
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 	}
 
 	for _, option := range options {

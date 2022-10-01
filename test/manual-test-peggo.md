@@ -22,7 +22,11 @@ $~ CHAIN_ID=888
 
 <!--
 ```fish
+<<<<<<< HEAD
 set ETHRPC https://goerli-infura.brave.com/f7106c838853428280fa0c585acc9485
+=======
+$~ set ETHRPC https://goerli-infura.brave.com/f7106c838853428280fa0c585acc9485
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 set MYETH 0xfac5EC50BdfbB803f5cFc9BF0A0C2f52aDE5b6dd
 set MYETHPK 06e48d48a55cc6843acb2c3c23431480ec42fca02683f4d8d3d471372e5317ee
 set MYETH2 0x02fa1b44e2EF8436e6f35D5F56607769c658c225
@@ -30,9 +34,14 @@ set MYETH2PK 4faf826f3d3a5fa60103392446a72dea01145c6158c6dd29f6faab9ec9917a1b
 set MYETH3 0xd8f468c1B719cc2d50eB1E3A55cFcb60e23758CD
 set MYETH3PK 11f746395f0dd459eff05d1bc557b81c3f7ebb1338a8cc9d36966d0bb2dcea21
 set CHAIN_ID 888
+<<<<<<< HEAD
 set BRIDGEADDR 0x86C4B780936D59b475291EE69D10A0260cD46F11
 set ERC20_UMEE_TX_HASH 0xee1c5539df361e1fca437d6de9f8590efebbae156daa9769645626a36dba3b1c
 set TOKEN_ADDRESS 0xdcbb485f280284ec571e11eb09490677a5bdd569
+=======
+set BRIDGEADDR 0x61be4C0D3631f684CFfeD7FCf7087FFD4b4b127C
+set ERC20_UMEE_TX_HASH 0x412e6f389d5b59dba62951d7f162bb7328d712aa1f49515a0e2e9a29162c3e26
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 ```
 -->
 
@@ -54,7 +63,11 @@ $~ bash $UMEE_PEGGO_PATH/test/cosmos/multinode.sh umeed
 set the `BRIDGEADDR` env variable with the contract address of the bridge smartcontract
 
 ```shell
+<<<<<<< HEAD
 $~ BRIDGEADDR=0xaB3BB333676fBF3c88554A455633aC9168cDD0Af
+=======
+$~ BRIDGEADDR=0x32FDBf26a106d57f99d7B2caBa67eD1a115D8d0c
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 ```
 
 - Or you can deploy a new bridge
@@ -69,7 +82,11 @@ __Expected Result__
 - Set the `BRIDGEADDR` variable
 
 ```shell
+<<<<<<< HEAD
 $~ BRIDGEADDR=0x86C4B780936D59b475291EE69D10A0260cD46F11
+=======
+$~ BRIDGEADDR=0x61be4C0D3631f684CFfeD7FCf7087FFD4b4b127C
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 ```
 
 - Wait until the gravity bridge is confirmed in ethereum (14 blocks)
@@ -87,10 +104,16 @@ $~ PEGGO_ETH_PK=$MYETHPK peggo orchestrator $BRIDGEADDR \
   --cosmos-chain-id=$CHAIN_ID \
   --cosmos-grpc="tcp://0.0.0.0:9090" \
   --tendermint-rpc="http://0.0.0.0:26657" \
+<<<<<<< HEAD
   --oracle-providers="mock" \
   --cosmos-keyring=test \
   --cosmos-keyring-dir=$UMEE_PEGGO_PATH/test/cosmos/data/$CHAIN_ID/n0/ \
   --cosmos-from=val --log-level debug --log-format text --profit-multiplier=0
+=======
+  --cosmos-keyring=test \
+  --cosmos-keyring-dir=$UMEE_PEGGO_PATH/test/cosmos/data/$CHAIN_ID/n0/ \
+  --cosmos-from=val  --log-level debug --log-format text --profit-multiplier=0
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 ```
 
 ```shell
@@ -101,7 +124,10 @@ $~ PEGGO_ETH_PK=$MYETH2PK peggo orchestrator $BRIDGEADDR \
   --cosmos-chain-id=$CHAIN_ID \
   --cosmos-grpc="tcp://0.0.0.0:9091" \
   --tendermint-rpc="http://0.0.0.0:26667" \
+<<<<<<< HEAD
   --oracle-providers="mock" \
+=======
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
   --cosmos-keyring=test \
   --cosmos-keyring-dir=$UMEE_PEGGO_PATH/test/cosmos/data/$CHAIN_ID/n1/ \
   --cosmos-from=val  --log-level debug --log-format text --profit-multiplier=0
@@ -115,7 +141,10 @@ $~ PEGGO_ETH_PK=$MYETH3PK peggo orchestrator $BRIDGEADDR \
   --cosmos-chain-id=$CHAIN_ID \
   --cosmos-grpc="tcp://0.0.0.0:9092" \
   --tendermint-rpc="http://0.0.0.0:26677" \
+<<<<<<< HEAD
   --oracle-providers="mock" \
+=======
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
   --cosmos-keyring=test \
   --cosmos-keyring-dir=$UMEE_PEGGO_PATH/test/cosmos/data/$CHAIN_ID/n2/ \
   --cosmos-from=val  --log-level debug --log-format text --profit-multiplier=0
@@ -136,6 +165,7 @@ __Expected Result__
 - Set transaction hash in `ERC20_UMEE_TX_HASH`
 
 ```shell
+<<<<<<< HEAD
 $~ ERC20_UMEE_TX_HASH="0xf185d0f54f42ed0f303400db5e6d1d83637acce12971f7fc48b3e33b8e11ad0b"
 ```
 
@@ -144,6 +174,10 @@ $~ ERC20_UMEE_TX_HASH="0xf185d0f54f42ed0f303400db5e6d1d83637acce12971f7fc48b3e33
 set ERC20_UMEE_TX_HASH 0xf185d0f54f42ed0f303400db5e6d1d83637acce12971f7fc48b3e33b8e11ad0b
 ```
 -->
+=======
+$~ ERC20_UMEE_TX_HASH="0xd1940e0501545e2d0935b36719ace1df28f88f333a60026ee43c56f97386cadc"
+```
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 
 - You can get the contract address of the deployed umee contract
 
@@ -175,13 +209,20 @@ $~ umeed tx gravity send-to-eth $MYETH 10000uumee 1uumee \
   --from val \
   --chain-id $CHAIN_ID \
   --keyring-backend=test \
+<<<<<<< HEAD
   --fees 1uumee \
+=======
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
   --home=$UMEE_PEGGO_PATH/test/cosmos/data/$CHAIN_ID/n0/
 ```
 
 ### Send transaction from eth to umee
 
 ```shell $~ PEGGO_ETH_PK=$MYETHPK peggo bridge send-to-cosmos \
+<<<<<<< HEAD
   $BRIDGEADDR $TOKEN_ADDRESS umee1pprgkthxc2yhr5gvuk2tcjjchfhq6n96xg427t 1 \
+=======
+  $BRIDGEADDR $TOKEN_ADDRESS umee1y6xz2ggfc0pcsmyjlekh0j9pxh6hk87ymc9due 1 \
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
   --eth-rpc $ETHRPC
 ```

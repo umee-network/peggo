@@ -15,9 +15,15 @@ RUN apk add --no-cache $PACKAGES
 RUN make install
 
 # Fetch umeed binary
+<<<<<<< HEAD
 FROM base-builder AS umeed-builder
 ARG UMEE_VERSION=v3.0.0-beta1
 ENV PACKAGES curl eudev-dev
+=======
+FROM golang:1.17-alpine AS umeed-builder
+ARG UMEE_VERSION=v1.0.3
+ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 RUN apk add --no-cache $PACKAGES
 WORKDIR /downloads/
 RUN git clone https://github.com/umee-network/umee.git

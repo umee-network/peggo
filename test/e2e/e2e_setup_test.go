@@ -13,7 +13,6 @@ import (
 	"testing"
 	"time"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -29,8 +28,14 @@ import (
 	tmconfig "github.com/tendermint/tendermint/config"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
+<<<<<<< HEAD
 	umeeparams "github.com/umee-network/umee/v3/app/params"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
+=======
+	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
+
+	"github.com/umee-network/umee/app"
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 )
 
 const (
@@ -672,10 +677,14 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 				Name:       s.chain.orchestrators[i].instanceName(),
 				NetworkID:  s.dkrNet.Network.ID,
 				Repository: "umeenet/peggo",
+<<<<<<< HEAD
 				Env: []string{
 					"PEGGO_ETH_PK=" + orch.ethereumKey.privateKey,
 					"PEGGO_COSMOS_PK=" + hexutil.Encode(s.chain.orchestrators[i].privateKey.Bytes()),
 				},
+=======
+				Env:        []string{"PEGGO_ETH_PK=" + orch.ethereumKey.privateKey},
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 				// NOTE: container names are prefixed with '/'
 				Entrypoint: []string{
 					"peggo",
@@ -695,11 +704,21 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					s.chain.orchestrators[i].keyInfo.Name,
 					"--oracle-providers=mock",
 					"--relay-batches=true",
+<<<<<<< HEAD
 					"--valset-relay-mode=minimum",
+=======
+					"--valset-relay-mode=all",
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 					"--profit-multiplier=0.0",
 					"--relayer-loop-multiplier=1.0",
 					"--log-level=debug",
 					"--requester-loop-multiplier=1.0",
+<<<<<<< HEAD
+=======
+					"--cosmos-pk",
+					hexutil.Encode(s.chain.orchestrators[i].privateKey.Bytes()),
+					"--log-level=debug",
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 				},
 			},
 			noRestart,

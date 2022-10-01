@@ -9,17 +9,24 @@ import (
 	"syscall"
 	"time"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
+<<<<<<< HEAD
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
 	umeepfprovider "github.com/umee-network/umee/price-feeder/oracle/provider"
+=======
+	gravitytypes "github.com/umee-network/Gravity-Bridge/module/x/gravity/types"
+	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
+
+	umeedpfconfig "github.com/umee-network/umee/price-feeder/config"
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 
 	"github.com/umee-network/peggo/cmd/peggo/client"
 	"github.com/umee-network/peggo/orchestrator"
@@ -60,7 +67,12 @@ func getOrchestratorCmd() *cobra.Command {
 				return fmt.Errorf("failed to initialize Cosmos keyring: %w", err)
 			}
 
+<<<<<<< HEAD
 			clientCtx, err := client.NewClientContext(konfig.String(flagCosmosChainID), orchAddress.String(), cosmosKeyring)
+=======
+			cosmosChainID := konfig.String(flagCosmosChainID)
+			clientCtx, err := client.NewClientContext(cosmosChainID, orchAddress.String(), cosmosKeyring)
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			if err != nil {
 				return err
 			}
@@ -188,22 +200,43 @@ func getOrchestratorCmd() *cobra.Command {
 			// Here we cast the float64 to a Duration (int64); as we are dealing with ms, we'll lose as much as 1ms.
 			relayerLoopDuration := time.Duration(ethBlockTimeF64*relayerLoopMultiplier) * time.Millisecond
 
+<<<<<<< HEAD
+=======
+			relayValsets := konfig.Bool(flagRelayValsets)
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			valsetRelayMode, err := validateRelayValsetsMode(konfig.String(flagValsetRelayMode))
 			if err != nil {
 				return err
 			}
 
+<<<<<<< HEAD
+=======
+			// If relayValsets is true then the user didn't specify a value for 'valset-relay-mode',
+			// so we'll default to "minimum".
+			if relayValsets && valsetRelayMode == relayer.ValsetRelayModeNone {
+				valsetRelayMode = relayer.ValsetRelayModeMinimum
+			}
+
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			ctx, cancel = context.WithCancel(context.Background())
 			// listen for and trap any OS signal to gracefully shutdown and exit
 			trapSignal(cancel)
 
 			providers := konfig.Strings(flagOracleProviders)
+<<<<<<< HEAD
 			o, err := oracle.New(ctx, logger, stringsToProviderName(providers))
+=======
+			o, err := oracle.New(ctx, logger, providers)
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			if err != nil {
 				return err
 			}
 
+<<<<<<< HEAD
 			if err := o.SubscribeSymbols(oracle.SymbolETH); err != nil {
+=======
+			if err := o.SubscribeSymbols(oracle.BaseSymbolETH); err != nil {
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 				return err
 			}
 
@@ -252,6 +285,10 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Int64(flagBridgeStartHeight),
 				symbolRetriever,
 				o,
+<<<<<<< HEAD
+=======
+				konfig.Bool(flagEthMergePause),
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			)
 
 			g, errCtx := errgroup.WithContext(ctx)
@@ -272,6 +309,7 @@ func getOrchestratorCmd() *cobra.Command {
 		},
 	}
 
+<<<<<<< HEAD
 	cmd.Flags().String(flagValsetRelayMode, relayer.ValsetRelayModeNone.String(), "Set an (optional) relaying mode for valset updates to Ethereum. Possible values: none, minimum, all") //nolint: lll
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 2000, "Number of Ethereum blocks to process per orchestrator loop")
@@ -296,6 +334,16 @@ func getOrchestratorCmd() *cobra.Command {
 
 	cmd.Flags().StringSlice(flagOracleProviders, defaultProviders,
 		fmt.Sprintf("Specify the providers to use in the oracle, options \"%s\"", strings.Join(allProviders, ",")))
+=======
+	cmd.Flags().Bool(flagRelayValsets, false, "Relay validator set updates to Ethereum")
+	cmd.Flags().String(flagValsetRelayMode, relayer.ValsetRelayModeNone.String(), "Set an (optional) relaying mode for valset updates to Ethereum. Possible values: none, minimum, all")
+	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
+	cmd.Flags().Int64(flagEthBlocksPerLoop, 2000, "Number of Ethereum blocks to process per orchestrator loop")
+	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
+	cmd.Flags().StringSlice(flagOracleProviders, []string{umeedpfconfig.ProviderBinance, umeedpfconfig.ProviderHuobi},
+		fmt.Sprintf("Specify the providers to use in the oracle, options \"%s\"", strings.Join([]string{umeedpfconfig.ProviderBinance, umeedpfconfig.ProviderHuobi,
+			umeedpfconfig.ProviderKraken, umeedpfconfig.ProviderGate, umeedpfconfig.ProviderOkx, umeedpfconfig.ProviderOsmosis}, ",")))
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 	cmd.Flags().Duration(flagEthPendingTXWait, 20*time.Minute, "Time for a pending tx to be considered stale")
 	cmd.Flags().String(flagEthAlchemyWS, "", "Specify the Alchemy websocket endpoint")
 	cmd.Flags().Float64(flagProfitMultiplier, 1.0, "Multiplier to apply to relayer profit")
@@ -308,6 +356,7 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().AddFlagSet(cosmosKeyringFlagSet())
 	cmd.Flags().AddFlagSet(ethereumKeyOptsFlagSet())
 	cmd.Flags().AddFlagSet(ethereumOptsFlagSet())
+	_ = cmd.Flags().MarkDeprecated(flagRelayValsets, "use --valset-relay-mode instead")
 
 	return cmd
 }
@@ -356,6 +405,7 @@ func validateRelayValsetsMode(mode string) (relayer.ValsetRelayMode, error) {
 		return relayer.ValsetRelayModeNone, fmt.Errorf("invalid relay valsets mode: %s", mode)
 	}
 }
+<<<<<<< HEAD
 
 func stringsToProviderName(providersName []string) []umeepfprovider.Name {
 	names := make([]umeepfprovider.Name, len(providersName))
@@ -365,3 +415,5 @@ func stringsToProviderName(providersName []string) []umeepfprovider.Name {
 
 	return names
 }
+=======
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0

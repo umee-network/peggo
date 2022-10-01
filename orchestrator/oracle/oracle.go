@@ -3,14 +3,22 @@ package oracle
 import (
 	"context"
 	"fmt"
+<<<<<<< HEAD
 	"sync"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+=======
+	"strings"
+	"sync"
+	"time"
+
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 
+<<<<<<< HEAD
 	pforacle "github.com/umee-network/umee/price-feeder/oracle"
 	pfprovider "github.com/umee-network/umee/price-feeder/oracle/provider"
 	pftypes "github.com/umee-network/umee/price-feeder/oracle/types"
@@ -25,12 +33,32 @@ const (
 	availablePairsReload = 24 * time.Hour
 	// SymbolETH refers to the ethereum symbol.
 	SymbolETH = "ETH"
+=======
+	ummedpforacle "github.com/umee-network/umee/price-feeder/oracle"
+	umeedpfprovider "github.com/umee-network/umee/price-feeder/oracle/provider"
+	umeedpftypes "github.com/umee-network/umee/price-feeder/oracle/types"
+	ummedpfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
+)
+
+// We define tickerTimeout as the minimum timeout between each oracle loop.
+const (
+	tickerTimeout        = 1000 * time.Millisecond
+	availablePairsReload = 24 * time.Hour
+	BaseSymbolETH        = "ETH"
+)
+
+var (
+	// deviationThreshold defines how many 𝜎 a provider can be away from the mean
+	// without being considered faulty.
+	deviationThreshold = sdk.MustNewDecFromStr("2")
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 )
 
 // Oracle implements the core component responsible for fetching exchange rates
 // for a given set of currency pairs and determining the correct exchange rates.
 type Oracle struct {
 	logger zerolog.Logger
+<<<<<<< HEAD
 	closer *pfsync.Closer
 
 	mtx                   sync.RWMutex
@@ -40,10 +68,19 @@ type Oracle struct {
 	// this field could be calculated each time by looping providers.subscribedPairs
 	// but the time to process is not worth the amount of memory
 	providerSubscribedPairs map[pfprovider.Name][]pftypes.CurrencyPair // providerName => []CurrencyPair
+=======
+	closer *ummedpfsync.Closer
+
+	mtx                   sync.RWMutex
+	providers             map[string]*Provider // providerName => Provider
+	prices                map[string]sdk.Dec   // baseSymbol => price ex.: UMEE, ETH => sdk.Dec
+	subscribedBaseSymbols map[string]struct{}  // baseSymbol => nothing
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 }
 
 // Provider wraps the umee provider interface.
 type Provider struct {
+<<<<<<< HEAD
 	pfprovider.Provider
 	availablePairs  map[string]struct{}             // Symbol => nothing
 	subscribedPairs map[string]pftypes.CurrencyPair // Symbol => currencyPair
@@ -60,6 +97,18 @@ func New(ctx context.Context, logger zerolog.Logger, providersName []pfprovider.
 			pfprovider.Endpoint{},
 			pftypes.CurrencyPair{},
 		)
+=======
+	umeedpfprovider.Provider
+	availablePairs  map[string]struct{}                  // Symbol => nothing
+	subscribedPairs map[string]umeedpftypes.CurrencyPair // Symbol => currencyPair
+}
+
+func New(ctx context.Context, logger zerolog.Logger, providersName []string) (*Oracle, error) {
+	providers := map[string]*Provider{}
+
+	for _, providerName := range providersName {
+		provider, err := ummedpforacle.NewProvider(ctx, providerName, logger, umeedpftypes.CurrencyPair{})
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 		if err != nil {
 			return nil, err
 		}
@@ -67,6 +116,7 @@ func New(ctx context.Context, logger zerolog.Logger, providersName []pfprovider.
 		providers[providerName] = &Provider{
 			Provider:        provider,
 			availablePairs:  map[string]struct{}{},
+<<<<<<< HEAD
 			subscribedPairs: map[string]pftypes.CurrencyPair{},
 		}
 	}
@@ -90,6 +140,22 @@ func New(ctx context.Context, logger zerolog.Logger, providersName []pfprovider.
 	go o.start(ctx)
 
 	return o, nil
+=======
+			subscribedPairs: map[string]umeedpftypes.CurrencyPair{},
+		}
+	}
+
+	oracle := &Oracle{
+		logger:                logger.With().Str("module", "oracle").Logger(),
+		closer:                ummedpfsync.NewCloser(),
+		providers:             providers,
+		subscribedBaseSymbols: map[string]struct{}{},
+	}
+	oracle.loadAvailablePairs()
+	go oracle.start(ctx)
+
+	return oracle, nil
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 }
 
 // GetPrices returns the price for the provided base symbols.
@@ -152,9 +218,15 @@ func (o *Oracle) SubscribeSymbols(baseSymbols ...string) error {
 	return nil
 }
 
+<<<<<<< HEAD
 func (o *Oracle) subscribeProviders(currencyPairs []pftypes.CurrencyPair) error {
 	for providerName, provider := range o.providers {
 		var pairsToSubscribe []pftypes.CurrencyPair
+=======
+func (o *Oracle) subscribeProviders(currencyPairs []umeedpftypes.CurrencyPair) error {
+	for providerName, provider := range o.providers {
+		var pairsToSubscribe []umeedpftypes.CurrencyPair
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 
 		for _, currencyPair := range currencyPairs {
 			symbol := currencyPair.String()
@@ -167,7 +239,11 @@ func (o *Oracle) subscribeProviders(currencyPairs []pftypes.CurrencyPair) error 
 
 			_, availablePair := provider.availablePairs[symbol]
 			if !availablePair {
+<<<<<<< HEAD
 				o.logger.Debug().Str("provider_name", string(providerName)).Str("symbol", symbol).Msg("symbol is not available")
+=======
+				o.logger.Debug().Str("provider_name", providerName).Str("symbol", symbol).Msg("symbol is not available")
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 				continue
 			}
 
@@ -175,26 +251,43 @@ func (o *Oracle) subscribeProviders(currencyPairs []pftypes.CurrencyPair) error 
 		}
 
 		if len(pairsToSubscribe) == 0 {
+<<<<<<< HEAD
 			o.logger.Debug().Str("provider_name", string(providerName)).
+=======
+			o.logger.Debug().Str("provider_name", providerName).
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 				Msgf("No pairs to subscribe, received pairs to try: %+v", currencyPairs)
 			continue
 		}
 
 		if err := provider.SubscribeCurrencyPairs(pairsToSubscribe...); err != nil {
+<<<<<<< HEAD
 			o.logger.Err(err).Str("provider_name", string(providerName)).Msg("subscribing to new currency pairs")
+=======
+			o.logger.Err(err).Str("provider_name", providerName).Msg("subscribing to new currency pairs")
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			return err
 		}
 
 		for _, pair := range pairsToSubscribe {
 			provider.subscribedPairs[pair.String()] = pair
+<<<<<<< HEAD
 			o.providerSubscribedPairs[providerName] = append(o.providerSubscribedPairs[providerName], pair)
 
 			o.logger.Debug().Str("provider_name", string(providerName)).
+=======
+
+			o.logger.Debug().Str("provider_name", providerName).
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 				Str("pair_symbol", pair.String()).
 				Msg("Subscribed new pair")
 		}
 
+<<<<<<< HEAD
 		o.logger.Info().Str("provider_name", string(providerName)).
+=======
+		o.logger.Info().Str("provider_name", providerName).
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			Int("currency_pairs_length", len(pairsToSubscribe)).
 			Msgf("Subscribed pairs %+v", pairsToSubscribe)
 	}
@@ -234,10 +327,14 @@ func (o *Oracle) loadAvailablePairs() {
 	for providerName, provider := range o.providers {
 		availablePairs, err := provider.GetAvailablePairs()
 		if err != nil {
+<<<<<<< HEAD
 			o.logger.Debug().Err(err).Str(
 				"provider_name",
 				string(providerName),
 			).Msg("Error getting available pairs for provider")
+=======
+			o.logger.Debug().Err(err).Str("provider_name", providerName).Msg("Error getting available pairs for provider")
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			continue
 		}
 		if len(availablePairs) == 0 {
@@ -256,13 +353,22 @@ func (o *Oracle) loadAvailablePairs() {
 func (o *Oracle) setPrices() error {
 	g := new(errgroup.Group)
 	mtx := new(sync.Mutex)
+<<<<<<< HEAD
 	providerPrices := make(pfprovider.AggregatedProviderPrices)
 	providerCandles := make(pfprovider.AggregatedProviderCandles)
+=======
+	providerPrices := make(umeedpfprovider.AggregatedProviderPrices)
+	providerCandles := make(umeedpfprovider.AggregatedProviderCandles)
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 
 	for providerName, provider := range o.providers {
 		providerName := providerName
 		provider := provider
+<<<<<<< HEAD
 		subscribedPrices := o.providerSubscribedPairs[providerName]
+=======
+		subscribedPrices := umeedpftypes.MapPairsToSlice(provider.subscribedPairs)
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 
 		g.Go(func() error {
 			var (
@@ -275,8 +381,12 @@ func (o *Oracle) setPrices() error {
 
 			if tickerErr != nil && candleErr != nil {
 				// only generates error if ticker and candle generate errors
+<<<<<<< HEAD
 				o.logger.Debug().Msgf("provider: %s ticker error: %+v\ncandle error: %+v", providerName, tickerErr, candleErr)
 				return nil
+=======
+				return fmt.Errorf("ticker error: %+v\ncandle error: %+v", tickerErr, candleErr)
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			}
 
 			// flatten and collect prices based on the base currency per provider
@@ -284,6 +394,7 @@ func (o *Oracle) setPrices() error {
 			// e.g.: {ProviderKraken: {"ATOM": <price, volume>, ...}}
 			mtx.Lock()
 			for _, pair := range subscribedPrices {
+<<<<<<< HEAD
 				pforacle.SetProviderTickerPricesAndCandles(
 					providerName,
 					providerPrices,
@@ -292,6 +403,24 @@ func (o *Oracle) setPrices() error {
 					candles,
 					pair,
 				)
+=======
+				if _, ok := providerPrices[providerName]; !ok {
+					providerPrices[providerName] = make(map[string]umeedpfprovider.TickerPrice)
+				}
+				if _, ok := providerCandles[providerName]; !ok {
+					providerCandles[providerName] = make(map[string][]umeedpfprovider.CandlePrice)
+				}
+
+				tp, pricesOk := prices[pair.String()]
+				if pricesOk {
+					providerPrices[providerName][pair.Base] = tp
+				}
+
+				cp, candlesOk := candles[pair.String()]
+				if candlesOk {
+					providerCandles[providerName][pair.Base] = cp
+				}
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 			}
 
 			mtx.Unlock()
@@ -303,6 +432,7 @@ func (o *Oracle) setPrices() error {
 		o.logger.Debug().Err(err).Msg("failed to get ticker prices from provider")
 	}
 
+<<<<<<< HEAD
 	deviationTreshold := sdk.NewDecFromIntWithPrec(sdkmath.NewInt(15), 1)
 
 	computedPrices, err := pforacle.GetComputedPrices(
@@ -315,14 +445,181 @@ func (o *Oracle) setPrices() error {
 			umeeparams.BondDenom: deviationTreshold,
 		}, // uses default deviation for other bases
 	)
+=======
+	filteredCandles, err := o.filterCandleDeviations(providerCandles)
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 	if err != nil {
 		return err
 	}
 
+<<<<<<< HEAD
 	o.prices = computedPrices
 	return nil
 }
 
+=======
+	// attempt to use candles for TVWAP calculations
+	tvwapPrices, err := ummedpforacle.ComputeTVWAP(filteredCandles)
+	if err != nil {
+		return err
+	}
+
+	// If TVWAP candles are not available or were filtered out due to staleness,
+	// use most recent prices & VWAP instead.
+	if len(tvwapPrices) == 0 {
+		filteredProviderPrices, err := o.filterTickerDeviations(providerPrices)
+		if err != nil {
+			return err
+		}
+
+		vwapPrices, err := ummedpforacle.ComputeVWAP(filteredProviderPrices)
+		if err != nil {
+			return err
+		}
+
+		// warn the user of any missing prices
+		reportedPrices := make(map[string]struct{})
+		for _, providers := range filteredProviderPrices {
+			for base := range providers {
+				if _, ok := reportedPrices[base]; !ok {
+					reportedPrices[base] = struct{}{}
+				}
+			}
+		}
+
+		o.prices = vwapPrices
+	} else {
+		// warn the user of any missing candles
+		reportedCandles := make(map[string]struct{})
+		for _, providers := range filteredCandles {
+			for base := range providers {
+				if _, ok := reportedCandles[base]; !ok {
+					reportedCandles[base] = struct{}{}
+				}
+			}
+		}
+
+		o.prices = tvwapPrices
+	}
+
+	return nil
+}
+
+// filterCandleDeviations finds the standard deviations of the tvwaps of
+// all assets, and filters out any providers that are not within 2𝜎 of the mean.
+// code originally from https://github.com/umee-network/umee/blob/2a69b56ae1c6098cb2d23ef8384f5acf28f76d35/price-feeder/oracle/oracle.go#L458-L459
+func (o *Oracle) filterCandleDeviations(
+	candles umeedpfprovider.AggregatedProviderCandles,
+) (umeedpfprovider.AggregatedProviderCandles, error) {
+	var (
+		filteredCandles = make(umeedpfprovider.AggregatedProviderCandles)
+		tvwaps          = make(map[string]map[string]sdk.Dec)
+	)
+
+	for providerName, priceCandles := range candles {
+		candlePrices := make(umeedpfprovider.AggregatedProviderCandles)
+
+		for base, cp := range priceCandles {
+			if _, ok := candlePrices[providerName]; !ok {
+				candlePrices[providerName] = make(map[string][]umeedpfprovider.CandlePrice)
+			}
+
+			candlePrices[providerName][base] = cp
+		}
+
+		tvwap, err := ummedpforacle.ComputeTVWAP(candlePrices)
+		if err != nil {
+			return nil, err
+		}
+
+		for base, asset := range tvwap {
+			if _, ok := tvwaps[providerName]; !ok {
+				tvwaps[providerName] = make(map[string]sdk.Dec)
+			}
+
+			tvwaps[providerName][base] = asset
+		}
+	}
+
+	deviations, means, err := ummedpforacle.StandardDeviation(tvwaps)
+	if err != nil {
+		return nil, err
+	}
+
+	// accept any tvwaps that are within 2𝜎, or for which we couldn't get 𝜎
+	for providerName, priceMap := range tvwaps {
+		for base, price := range priceMap {
+			if _, ok := deviations[base]; !ok ||
+				(price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
+					price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
+				if _, ok := filteredCandles[providerName]; !ok {
+					filteredCandles[providerName] = make(map[string][]umeedpfprovider.CandlePrice)
+				}
+
+				filteredCandles[providerName][base] = candles[providerName][base]
+			} else {
+				o.logger.Warn().
+					Str("base", base).
+					Str("provider", providerName).
+					Str("price", price.String()).
+					Msg("provider deviating from other candles")
+			}
+		}
+	}
+
+	return filteredCandles, nil
+}
+
+// filterTickerDeviations finds the standard deviations of the prices of
+// all assets, and filters out any providers that are not within 2𝜎 of the mean.
+// code originally from https://github.com/umee-network/umee/blob/2a69b56ae1c6098cb2d23ef8384f5acf28f76d35/price-feeder/oracle/oracle.go#L409-L410
+func (o *Oracle) filterTickerDeviations(
+	prices umeedpfprovider.AggregatedProviderPrices,
+) (umeedpfprovider.AggregatedProviderPrices, error) {
+	var (
+		filteredPrices = make(umeedpfprovider.AggregatedProviderPrices)
+		priceMap       = make(map[string]map[string]sdk.Dec)
+	)
+
+	for providerName, priceTickers := range prices {
+		if _, ok := priceMap[providerName]; !ok {
+			priceMap[providerName] = make(map[string]sdk.Dec)
+		}
+		for base, tp := range priceTickers {
+			priceMap[providerName][base] = tp.Price
+		}
+	}
+
+	deviations, means, err := ummedpforacle.StandardDeviation(priceMap)
+	if err != nil {
+		return nil, err
+	}
+
+	// accept any prices that are within 2𝜎, or for which we couldn't get 𝜎
+	for providerName, priceTickers := range prices {
+		for base, tp := range priceTickers {
+			if _, ok := deviations[base]; !ok ||
+				(tp.Price.GTE(means[base].Sub(deviations[base].Mul(deviationThreshold))) &&
+					tp.Price.LTE(means[base].Add(deviations[base].Mul(deviationThreshold)))) {
+				if _, ok := filteredPrices[providerName]; !ok {
+					filteredPrices[providerName] = make(map[string]umeedpfprovider.TickerPrice)
+				}
+
+				filteredPrices[providerName][base] = tp
+			} else {
+				o.logger.Warn().
+					Str("base", base).
+					Str("provider", providerName).
+					Str("price", tp.Price.String()).
+					Msg("provider deviating from other prices")
+			}
+		}
+	}
+
+	return filteredPrices, nil
+}
+
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
 func (o *Oracle) tick() error {
 	if err := o.setPrices(); err != nil {
 		return err
@@ -330,3 +627,22 @@ func (o *Oracle) tick() error {
 
 	return nil
 }
+<<<<<<< HEAD
+=======
+
+// GetStablecoinsCurrencyPair return the currency pair of that symbol quoted by some
+// stablecoins.
+func GetStablecoinsCurrencyPair(baseSymbol string) []umeedpftypes.CurrencyPair {
+	quotes := []string{"USD", "USDT", "UST"}
+	currencyPairs := make([]umeedpftypes.CurrencyPair, len(quotes))
+
+	for i, quote := range quotes {
+		currencyPairs[i] = umeedpftypes.CurrencyPair{
+			Base:  strings.ToUpper(baseSymbol),
+			Quote: quote,
+		}
+	}
+
+	return currencyPairs
+}
+>>>>>>> dbba311d3ef1e6ec73aa7b4d5366620ef63ad4e0
