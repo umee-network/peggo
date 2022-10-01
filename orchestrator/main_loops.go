@@ -64,12 +64,14 @@ func (p *gravityOrchestrator) Start(ctx context.Context) error {
 		return p.EthOracleMainLoop(ctx)
 	})
 
-	pg.Go(func() error {
-		// looks at the BatchFees on Cosmos and uses the query endpoint BatchFees
-		// to iterate over each token to see if it is profitable, if it is
-		// it will send an request batch for that denom
-		return p.BatchRequesterLoop(ctx)
-	})
+	if !p.ethMergePause {
+		pg.Go(func() error {
+			// looks at the BatchFees on Cosmos and uses the query endpoint BatchFees
+			// to iterate over each token to see if it is profitable, if it is
+			// it will send an request batch for that denom
+			return p.BatchRequesterLoop(ctx)
+		})
+	}
 
 	pg.Go(func() error {
 		// Gets the last pending valset to send an MsgValsetConfirm that sends
@@ -81,6 +83,8 @@ func (p *gravityOrchestrator) Start(ctx context.Context) error {
 		return p.EthSignerMainLoop(ctx)
 	})
 
+	// Let this function run as is. If we see errors caused by this loop, then
+	// we might need to enable batch confirms.
 	pg.Go(func() error {
 		// Gets the latest valset available and updating it on the ethereum
 		// smartcontract if needed. Also gets all the pending transaction
@@ -268,6 +272,8 @@ func (p *gravityOrchestrator) EthSignerMainLoop(ctx context.Context) (err error)
 			}
 		}
 
+		// Try to send batch confirms. If this fails, it means there are pending batches
+		// that we'll need to sign before the next upgrade.
 		var oldestUnsignedTransactionBatch []types.OutgoingTxBatch
 		if err := retry.Do(func() error {
 			// sign the last unsigned batch, TODO check if we already have signed this

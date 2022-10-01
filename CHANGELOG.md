@@ -43,6 +43,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v1.2.0](https://github.com/umee-network/peggo/releases/tag/v1.2.0) - 2022-10-01
+
+### Improvements
+
+- [#376] Add `eth-merge-pause` flag
+
 ## [v1.1.0](https://github.com/umee-network/peggo/releases/tag/v1.1.0) - 2022-09-26
 
 ### Improvements
