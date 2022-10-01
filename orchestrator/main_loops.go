@@ -272,7 +272,7 @@ func (p *gravityOrchestrator) EthSignerMainLoop(ctx context.Context) (err error)
 			}
 		}
 
-		//Try to send batch confirms. If this fails, it means there are pending batches
+		// Try to send batch confirms. If this fails, it means there are pending batches
 		// that we'll need to sign before the next upgrade.
 		var oldestUnsignedTransactionBatch []types.OutgoingTxBatch
 		if err := retry.Do(func() error {
