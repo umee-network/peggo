@@ -45,24 +45,39 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-[#367] Set ETH block delay to 96 blocks
-[#362](https://github.com/umee-network/peggo/pull/362) Update umeed to v3.
-[#343](https://github.com/umee-network/peggo/pull/343) Upgrade to cosmos-sdk v0.46.1.
-[#341](https://github.com/umee-network/peggo/pull/341) Fix linter.
-[#334](https://github.com/umee-network/peggo/pull/334) Update to go 1.18.
-[#326](https://github.com/umee-network/peggo/pull/326) Refactory of eth `getCurrentBlock`.
-[#311](https://github.com/umee-network/peggo/pull/311) Add valset update at each 2000 eth blocks.
+- [#376] Add `eth-merge-pause` flag
 
-### Bug Fixes
+## [v1.1.0](https://github.com/umee-network/peggo/releases/tag/v1.1.0) - 2022-09-26
+
+### Improvements
+
+- [#367] Set ETH block delay to 96 blocks
+
+## [v1.0.1](https://github.com/umee-network/peggo/releases/tag/v1.0.1) - 2022-09-21
+
+### Improvements
+
+- [#365] Reduce oracle noise msgs
+
+## [v1.0.0](https://github.com/umee-network/peggo/releases/tag/v1.0.0) - 2022-09-14
+
+### Improvements
+
+- [#362](https://github.com/umee-network/peggo/pull/362) Update umeed to v3.
+- [#343](https://github.com/umee-network/peggo/pull/343) Upgrade to cosmos-sdk v0.46.1.
+- [#341](https://github.com/umee-network/peggo/pull/341) Fix linter.
+- [#334](https://github.com/umee-network/peggo/pull/334) Update to go 1.18.
+- [#326](https://github.com/umee-network/peggo/pull/326) Refactory of eth `getCurrentBlock`.
+- [#311](https://github.com/umee-network/peggo/pull/311) Add valset update at each 2000 eth blocks.
 
 ## [v0.4.0](https://github.com/umee-network/peggo/releases/tag/v0.4.0) - 2022-07-14
 
 ### Improvements
 
-[#308](https://github.com/umee-network/peggo/pull/308) Change stablecoin from UST to DAI.
-[#299](https://github.com/umee-network/peggo/pull/299) Fix lint warnings.
-[#297](https://github.com/umee-network/peggo/pull/297) Update dependabot reviewers.
-[#275](https://github.com/umee-network/peggo/pull/275) Add diagrams of main loops.
+- [#308](https://github.com/umee-network/peggo/pull/308) Change stablecoin from UST to DAI.
+- [#299](https://github.com/umee-network/peggo/pull/299) Fix lint warnings.
+- [#297](https://github.com/umee-network/peggo/pull/297) Update dependabot reviewers.
+- [#275](https://github.com/umee-network/peggo/pull/275) Add diagrams of main loops.
 
 ### Bug Fixes
 

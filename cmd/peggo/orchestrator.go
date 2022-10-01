@@ -252,6 +252,7 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Int64(flagBridgeStartHeight),
 				symbolRetriever,
 				o,
+				konfig.Bool(flagEthMergePause),
 			)
 
 			g, errCtx := errgroup.WithContext(ctx)
@@ -276,6 +277,7 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 2000, "Number of Ethereum blocks to process per orchestrator loop")
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
+	cmd.Flags().Bool(flagEthMergePause, false, "Pause some messages related to the adaptation of the Gravity Bridge to the merge") //nolint: lll
 
 	defaultProviders := []string{
 		umeepfprovider.ProviderOsmosis.String(),
