@@ -21,9 +21,9 @@ const (
 	//
 	// Ref: https://github.com/umee-network/peggo/issues/55
 
-	// Run every approximately 16 Ethereum blocks to allow time to receive new blocks.
+	// Run every approximately 5 Ethereum blocks to allow time to receive new blocks.
 	// If we run this faster we wouldn't be getting new blocks, which is not efficient.
-	ethOracleLoopMultiplier = 16
+	ethOracleLoopMultiplier = 5
 
 	// Run every approximately 3 Cosmos blocks; so we sign batches and valset updates ASAP but not run these requests
 	// too often that we make too many requests to Cosmos.
