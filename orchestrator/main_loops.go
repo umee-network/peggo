@@ -21,9 +21,9 @@ const (
 	//
 	// Ref: https://github.com/umee-network/peggo/issues/55
 
-	// Run every approximately 5 Ethereum blocks to allow time to receive new blocks.
+	// Run every approximately 16 Ethereum blocks to allow time to receive new blocks.
 	// If we run this faster we wouldn't be getting new blocks, which is not efficient.
-	ethOracleLoopMultiplier = 5
+	ethOracleLoopMultiplier = 16
 
 	// Run every approximately 3 Cosmos blocks; so we sign batches and valset updates ASAP but not run these requests
 	// too often that we make too many requests to Cosmos.
@@ -57,12 +57,14 @@ var estimatedGasCosts = []int64{
 func (p *gravityOrchestrator) Start(ctx context.Context) error {
 	var pg loops.ParanoidGroup
 
-	pg.Go(func() error {
-		// scan all the events emitted by ethereum gravity contract
-		// from the last block (we get the last block from cosmos)
-		// broadcast all the eth events to cosmos as "claims"
-		return p.EthOracleMainLoop(ctx)
-	})
+	if !p.ethMergePause {
+		pg.Go(func() error {
+			// scan all the events emitted by ethereum gravity contract
+			// from the last block (we get the last block from cosmos)
+			// broadcast all the eth events to cosmos as "claims"
+			return p.EthOracleMainLoop(ctx)
+		})
+	}
 
 	if !p.ethMergePause {
 		pg.Go(func() error {
@@ -83,17 +85,17 @@ func (p *gravityOrchestrator) Start(ctx context.Context) error {
 		return p.EthSignerMainLoop(ctx)
 	})
 
-	// Let this function run as is. If we see errors caused by this loop, then
-	// we might need to enable batch confirms.
-	pg.Go(func() error {
-		// Gets the latest valset available and updating it on the ethereum
-		// smartcontract if needed. Also gets all the pending transaction
-		// batches and it's signatures from cosmos and send it to the
-		// ethereum if that batch of token is profitable, wasn't sent yet
-		// by another node (checking the nonce) and it is not currently
-		// in the eth node node mempool.
-		return p.RelayerMainLoop(ctx)
-	})
+	if !p.ethMergePause {
+		pg.Go(func() error {
+			// Gets the latest valset available and updating it on the ethereum
+			// smartcontract if needed. Also gets all the pending transaction
+			// batches and it's signatures from cosmos and send it to the
+			// ethereum if that batch of token is profitable, wasn't sent yet
+			// by another node (checking the nonce) and it is not currently
+			// in the eth node node mempool.
+			return p.RelayerMainLoop(ctx)
+		})
+	}
 
 	return pg.Wait()
 }
