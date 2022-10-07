@@ -202,13 +202,6 @@ func (p *gravityOrchestrator) CheckForEvents(
 	valsetUpdates := filterValsetUpdateEventsByNonce(valsetUpdatedEvents, lastEventResp.EventNonce)
 	deployedERC20Updates := filterERC20DeployedEventsByNonce(erc20DeployedEvents, lastEventResp.EventNonce)
 
-	// Don't send anything other than valsetUpdates
-	if p.ethMergePause {
-		deposits = []*wrappers.GravitySendToCosmosEvent{}
-		withdraws = []*wrappers.GravityTransactionBatchExecutedEvent{}
-		deployedERC20Updates = []*wrappers.GravityERC20DeployedEvent{}
-	}
-
 	if len(deposits) > 0 || len(withdraws) > 0 || len(valsetUpdates) > 0 || len(deployedERC20Updates) > 0 {
 
 		if err := p.gravityBroadcastClient.SendEthereumClaims(
