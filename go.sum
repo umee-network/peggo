@@ -1377,8 +1377,8 @@ github.com/umee-network/cosmos-sdk v0.46.1-umee h1:htt48oCN/i0An5z8AS8ttXU3Dk7fi
 github.com/umee-network/cosmos-sdk v0.46.1-umee/go.mod h1:2+o8Qw8qnE02V+lQVZDJFQ8tri/hsiA5GmWaPERqVa0=
 github.com/umee-network/umee/price-feeder v1.0.1-0.20220919160536-0c0db8c7c112 h1:djYVbmSzcYaO+pVwZW0aljmbuTPW0RcI/w/JP48y/v4=
 github.com/umee-network/umee/price-feeder v1.0.1-0.20220919160536-0c0db8c7c112/go.mod h1:gN6k2Y54HswN8qhSsqT3KIrNwIAp7nZrngRmYeXKUxg=
-github.com/umee-network/umee/v3 v3.0.0-rc1 h1:PfIRqzcwplMT/+xrIeTaXqqeXkT+xpk4r5yS2gSSMew=
-github.com/umee-network/umee/v3 v3.0.0-rc1/go.mod h1:Ynig8YxdUZGguEWVKQmSeI5B/cUGsE2S2JmR0PSs7KI=
+github.com/umee-network/umee/v3 v3.0.2 h1:gDSSA6feZmzjv9E4YobjXLdt5gNGPFEsoBhvcIy3nno=
+github.com/umee-network/umee/v3 v3.0.2/go.mod h1:kZmi5jZ3kn5/9jb28BZ8jiaIv6KzOLnZlgeJlFXo/b4=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.22.1 h1:+mkCCcOFKPnCmVYVcURKps1Xe+3zP90gSYGNfRkjoIY=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
