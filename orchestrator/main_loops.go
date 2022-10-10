@@ -57,19 +57,23 @@ var estimatedGasCosts = []int64{
 func (p *gravityOrchestrator) Start(ctx context.Context) error {
 	var pg loops.ParanoidGroup
 
-	pg.Go(func() error {
-		// scan all the events emitted by ethereum gravity contract
-		// from the last block (we get the last block from cosmos)
-		// broadcast all the eth events to cosmos as "claims"
-		return p.EthOracleMainLoop(ctx)
-	})
+	if !p.ethMergePause {
+		pg.Go(func() error {
+			// scan all the events emitted by ethereum gravity contract
+			// from the last block (we get the last block from cosmos)
+			// broadcast all the eth events to cosmos as "claims"
+			return p.EthOracleMainLoop(ctx)
+		})
+	}
 
-	pg.Go(func() error {
-		// looks at the BatchFees on Cosmos and uses the query endpoint BatchFees
-		// to iterate over each token to see if it is profitable, if it is
-		// it will send an request batch for that denom
-		return p.BatchRequesterLoop(ctx)
-	})
+	if !p.ethMergePause {
+		pg.Go(func() error {
+			// looks at the BatchFees on Cosmos and uses the query endpoint BatchFees
+			// to iterate over each token to see if it is profitable, if it is
+			// it will send an request batch for that denom
+			return p.BatchRequesterLoop(ctx)
+		})
+	}
 
 	pg.Go(func() error {
 		// Gets the last pending valset to send an MsgValsetConfirm that sends
@@ -81,15 +85,17 @@ func (p *gravityOrchestrator) Start(ctx context.Context) error {
 		return p.EthSignerMainLoop(ctx)
 	})
 
-	pg.Go(func() error {
-		// Gets the latest valset available and updating it on the ethereum
-		// smartcontract if needed. Also gets all the pending transaction
-		// batches and it's signatures from cosmos and send it to the
-		// ethereum if that batch of token is profitable, wasn't sent yet
-		// by another node (checking the nonce) and it is not currently
-		// in the eth node node mempool.
-		return p.RelayerMainLoop(ctx)
-	})
+	if !p.ethMergePause {
+		pg.Go(func() error {
+			// Gets the latest valset available and updating it on the ethereum
+			// smartcontract if needed. Also gets all the pending transaction
+			// batches and it's signatures from cosmos and send it to the
+			// ethereum if that batch of token is profitable, wasn't sent yet
+			// by another node (checking the nonce) and it is not currently
+			// in the eth node node mempool.
+			return p.RelayerMainLoop(ctx)
+		})
+	}
 
 	return pg.Wait()
 }
@@ -268,6 +274,8 @@ func (p *gravityOrchestrator) EthSignerMainLoop(ctx context.Context) (err error)
 			}
 		}
 
+		// Try to send batch confirms. If this fails, it means there are pending batches
+		// that we'll need to sign before the next upgrade.
 		var oldestUnsignedTransactionBatch []types.OutgoingTxBatch
 		if err := retry.Do(func() error {
 			// sign the last unsigned batch, TODO check if we already have signed this
@@ -501,9 +509,12 @@ func (p *gravityOrchestrator) ERC20ToDenom(ctx context.Context, tokenAddr ethcmn
 // mechanism to prevent relaying an event that is not yet considered final.
 func getEthBlockDelay(chainID uint64) uint64 {
 	switch chainID {
-	// Mainline Ethereum, Ethereum classic, or the Ropsten, Kotti, Mordor testnets
-	// all POW Chains
-	case 1, 3, 6, 7:
+	// Mainline Ethereum
+	case 1:
+		return 96
+
+	// Ethereum classic, or the Ropsten, Kotti, Mordor testnets  all POW Chains
+	case 3, 6, 7:
 		return 13
 
 	// Dev, our own Gravity Ethereum testnet, and Hardhat respectively
@@ -519,6 +530,6 @@ func getEthBlockDelay(chainID uint64) uint64 {
 
 	// assume the safe option (POW) where we don't know
 	default:
-		return 13
+		return 96
 	}
 }
