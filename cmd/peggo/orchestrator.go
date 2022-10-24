@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"cloud.google.com/go/logging"
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
@@ -31,6 +32,10 @@ import (
 	"github.com/umee-network/peggo/orchestrator/oracle"
 	"github.com/umee-network/peggo/orchestrator/relayer"
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
+)
+
+const (
+	LogGCPProjectName = "umee-testnet-alpha"
 )
 
 func getOrchestratorCmd() *cobra.Command {
@@ -225,6 +230,9 @@ func getOrchestratorCmd() *cobra.Command {
 				Str("relayer_ethereum_addr", ethKeyFromAddress.String()).
 				Logger()
 
+			// at this point we already setup price-feeder logs, so we don't need them on gcloud
+			logger = handleGCPLogging(ctx, logger)
+
 			// Run the requester loop every approximately 60 Cosmos blocks (around 5m by default) to allow time to
 			// receive new transactions. Running this faster will cause a lot of small batches and lots of messages
 			// going around the network. We need to keep in mind that this call is going to be made by all the
@@ -325,6 +333,47 @@ func trapSignal(cancel context.CancelFunc) {
 		fmt.Fprintf(os.Stderr, "Caught signal (%s); shutting down...\n", sig)
 		cancel()
 	}()
+}
+
+func handleGCPLogging(ctx context.Context, logger zerolog.Logger) zerolog.Logger {
+	client, err := logging.NewClient(ctx, LogGCPProjectName)
+	if err != nil {
+		logger.Err(err).Msg(
+			`seting up gcp logging you probably need to set up ~/.config/gcloud/application_default_credentials.json
+			 or GOOGLE_APPLICATION_CREDENTIALS`,
+		)
+		return logger
+	}
+	gcpLogger := client.Logger("peggo-out")
+
+	return logger.Hook(zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, message string) {
+		if level < zerolog.ErrorLevel {
+			return
+		}
+		gcpLogger.Log(logging.Entry{
+			Severity: zerologLevelToServerity(level),
+			Payload:  message,
+		})
+	}))
+}
+
+func zerologLevelToServerity(level zerolog.Level) logging.Severity {
+	switch level {
+	case zerolog.InfoLevel:
+		return logging.Info
+	case zerolog.WarnLevel:
+		return logging.Warning
+	case zerolog.ErrorLevel:
+		return logging.Error
+	case zerolog.FatalLevel:
+		return logging.Critical
+	case zerolog.PanicLevel:
+		return logging.Emergency
+	case zerolog.TraceLevel:
+		return logging.Alert
+	default:
+		return logging.Debug
+	}
 }
 
 func startOrchestrator(ctx context.Context, logger zerolog.Logger, orch orchestrator.GravityOrchestrator) error {
