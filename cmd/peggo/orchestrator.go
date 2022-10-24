@@ -14,6 +14,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
+	"github.com/knadh/koanf"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
@@ -231,7 +232,7 @@ func getOrchestratorCmd() *cobra.Command {
 				Logger()
 
 			// at this point we already setup price-feeder logs, so we don't need them on gcloud
-			logger = handleGCPLogging(ctx, cmd, logger)
+			logger = handleGCPLogging(ctx, konfig, logger)
 
 			// Run the requester loop every approximately 60 Cosmos blocks (around 5m by default) to allow time to
 			// receive new transactions. Running this faster will cause a lot of small batches and lots of messages
@@ -281,6 +282,12 @@ func getOrchestratorCmd() *cobra.Command {
 		},
 	}
 
+	// GCP logging flags
+	cmd.Flags().String(flagGcpLogProjectName, LogGCPProjectName, "Set an the Google Cloud Project for logging")
+	cmd.Flags().String(flagGcpLogMoniker, "", "Specify your moniker to be identified in logs")
+	cmd.Flags().String(flagGcpLogLevel, zerolog.ErrorLevel.String(), "Specify the log level to send to Google Cloud")
+
+	// Orch flags
 	cmd.Flags().String(flagValsetRelayMode, relayer.ValsetRelayModeNone.String(), "Set an (optional) relaying mode for valset updates to Ethereum. Possible values: none, minimum, all") //nolint: lll
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 2000, "Number of Ethereum blocks to process per orchestrator loop")
@@ -335,9 +342,10 @@ func trapSignal(cancel context.CancelFunc) {
 	}()
 }
 
-func handleGCPLogging(ctx context.Context, cmd *cobra.Command, logger zerolog.Logger) zerolog.Logger {
-	var logGCPProjectName string
-	cmd.Flags().String(logGCPProjectName, flagGcpLogProjectName, "Set an the Google Cloud Project for logging")
+// handle the orchestrator logs and send it to google cloud if possible, otherwise just returns the
+// logger sent by parameter
+func handleGCPLogging(ctx context.Context, konfig *koanf.Koanf, logger zerolog.Logger) zerolog.Logger {
+	logGCPProjectName := konfig.String(flagGcpLogProjectName)
 
 	client, err := logging.NewClient(ctx, logGCPProjectName)
 	if err != nil {
@@ -347,15 +355,25 @@ func handleGCPLogging(ctx context.Context, cmd *cobra.Command, logger zerolog.Lo
 		)
 		return logger
 	}
-	gcpLogger := client.Logger("peggo-out")
 
+	moniker := konfig.String(flagGcpLogMoniker)
+	zeroLogLevel, err := zerolog.ParseLevel(konfig.String(flagGcpLogLevel))
+	if err != nil {
+		logger.Err(err).Msg(`parsing log level`)
+		return logger
+	}
+
+	gcpLogger := client.Logger("peggo-out")
 	return logger.Hook(zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, message string) {
-		if level < zerolog.ErrorLevel {
+		if level < zeroLogLevel {
 			return
 		}
 		gcpLogger.Log(logging.Entry{
 			Severity: zerologLevelToServerity(level),
 			Payload:  message,
+			Labels: map[string]string{
+				"moniker": moniker,
+			},
 		})
 	}))
 }
