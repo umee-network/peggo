@@ -56,6 +56,7 @@ const (
 	flagRequesterLoopMultiplier = "requester-loop-multiplier"
 	flagBridgeStartHeight       = "bridge-start-height"
 	flagEthMergePause           = "eth-merge-pause" // TODO: remove this after merge is completed
+	flagGcpLogProjectName       = "gcp-log-project-name"
 )
 
 func cosmosFlagSet() *pflag.FlagSet {

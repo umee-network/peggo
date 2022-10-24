@@ -231,7 +231,7 @@ func getOrchestratorCmd() *cobra.Command {
 				Logger()
 
 			// at this point we already setup price-feeder logs, so we don't need them on gcloud
-			logger = handleGCPLogging(ctx, logger)
+			logger = handleGCPLogging(ctx, cmd, logger)
 
 			// Run the requester loop every approximately 60 Cosmos blocks (around 5m by default) to allow time to
 			// receive new transactions. Running this faster will cause a lot of small batches and lots of messages
@@ -335,12 +335,15 @@ func trapSignal(cancel context.CancelFunc) {
 	}()
 }
 
-func handleGCPLogging(ctx context.Context, logger zerolog.Logger) zerolog.Logger {
-	client, err := logging.NewClient(ctx, LogGCPProjectName)
+func handleGCPLogging(ctx context.Context, cmd *cobra.Command, logger zerolog.Logger) zerolog.Logger {
+	var logGCPProjectName string
+	cmd.Flags().String(logGCPProjectName, flagGcpLogProjectName, "Set an the Google Cloud Project for logging")
+
+	client, err := logging.NewClient(ctx, logGCPProjectName)
 	if err != nil {
 		logger.Err(err).Msg(
 			`seting up gcp logging you probably need to set up ~/.config/gcloud/application_default_credentials.json
-			 or GOOGLE_APPLICATION_CREDENTIALS`,
+			 or set env variable GOOGLE_APPLICATION_CREDENTIALS`,
 		)
 		return logger
 	}
