@@ -3,6 +3,7 @@ module github.com/umee-network/peggo
 go 1.18
 
 require (
+	cloud.google.com/go/logging v1.5.0
 	cosmossdk.io/math v1.0.0-beta.3
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.5.3
 	github.com/avast/retry-go v3.0.0+incompatible
@@ -36,7 +37,6 @@ require (
 	cloud.google.com/go v0.102.1 // indirect
 	cloud.google.com/go/compute v1.7.0 // indirect
 	cloud.google.com/go/iam v0.3.0 // indirect
-	cloud.google.com/go/logging v1.5.0 // indirect
 	cloud.google.com/go/storage v1.22.1 // indirect
 	cosmossdk.io/errors v1.0.0-beta.7 // indirect
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
@@ -310,7 +310,7 @@ require (
 	golang.org/x/exp/typeparams v0.0.0-20220827204233-334a2380cb91 // indirect
 	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/net v0.1.0 // indirect
-	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5 // indirect
+	golang.org/x/oauth2 v0.0.0-20220608161450-d0670ef3b1eb // indirect
 	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/tools v0.2.0 // indirect
