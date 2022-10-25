@@ -35,10 +35,6 @@ import (
 	wrappers "github.com/umee-network/peggo/solwrappers/Gravity.sol"
 )
 
-const (
-	LogGCPProjectName = "umee-testnet-alpha"
-)
-
 func getOrchestratorCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "orchestrator [gravity-addr]",
@@ -283,9 +279,9 @@ func getOrchestratorCmd() *cobra.Command {
 	}
 
 	// GCP logging flags
-	cmd.Flags().String(flagGcpLogProjectName, LogGCPProjectName, "Set an the Google Cloud Project for logging")
+	cmd.Flags().String(flagGcpLogProjectName, "", "Set an the Google Cloud Project for logging")
 	cmd.Flags().String(flagGcpLogMoniker, "", "Specify your moniker to be identified in logs")
-	cmd.Flags().String(flagGcpLogLevel, zerolog.ErrorLevel.String(), "Specify the log level to send to Google Cloud")
+	cmd.Flags().String(flagGcpLogLevel, zerolog.InfoLevel.String(), "Specify the log level to send to Google Cloud")
 
 	// Orch flags
 	cmd.Flags().String(flagValsetRelayMode, relayer.ValsetRelayModeNone.String(), "Set an (optional) relaying mode for valset updates to Ethereum. Possible values: none, minimum, all") //nolint: lll
@@ -347,6 +343,10 @@ func trapSignal(cancel context.CancelFunc) {
 func handleGCPLogging(ctx context.Context, konfig *koanf.Koanf, logger zerolog.Logger) zerolog.Logger {
 	logGCPProjectName := konfig.String(flagGcpLogProjectName)
 
+	if logGCPProjectName == "" {
+		return logger
+	}
+
 	client, err := logging.NewClient(ctx, logGCPProjectName)
 	if err != nil {
 		logger.Err(err).Msg(
@@ -362,6 +362,8 @@ func handleGCPLogging(ctx context.Context, konfig *koanf.Koanf, logger zerolog.L
 		logger.Err(err).Msg(`parsing log level`)
 		return logger
 	}
+
+	logger.Info().Msg("GCP logs set up is OK")
 
 	gcpLogger := client.Logger("peggo-out")
 	return logger.Hook(zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, message string) {
