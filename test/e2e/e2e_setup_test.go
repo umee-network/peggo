@@ -29,14 +29,14 @@ import (
 	tmconfig "github.com/tendermint/tendermint/config"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	"github.com/umee-network/umee/v2/app"
-	leveragetypes "github.com/umee-network/umee/v2/x/leverage/types"
+	umeeparams "github.com/umee-network/umee/v3/app/params"
+	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 )
 
 const (
 	photonDenom    = "photon"
 	initBalanceStr = "110000000000uumee,100000000000photon"
-	minGasPrice    = "0.00001"
+	minGasPrice    = "0.05"
 	gaiaChainID    = "test-gaia-chain"
 
 	ethChainID uint = 15
@@ -45,7 +45,7 @@ const (
 
 var (
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
-	stakeAmountCoin = sdk.NewCoin(app.BondDenom, stakeAmount)
+	stakeAmountCoin = sdk.NewCoin(umeeparams.BondDenom, stakeAmount)
 )
 
 type IntegrationTestSuite struct {
@@ -222,8 +222,8 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
 	leverageGenState.Registry = append(leverageGenState.Registry, leveragetypes.Token{
-		BaseDenom:            app.BondDenom,
-		SymbolDenom:          app.DisplayDenom,
+		BaseDenom:            umeeparams.BondDenom,
+		SymbolDenom:          umeeparams.DisplayDenom,
 		Exponent:             6,
 		ReserveFactor:        sdk.MustNewDecFromStr("0.100000000000000000"),
 		CollateralWeight:     sdk.MustNewDecFromStr("0.050000000000000000"),
@@ -357,7 +357,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 }
 
 func (s *IntegrationTestSuite) getMinGasPrice() string {
-	return fmt.Sprintf("%s%s", minGasPrice, photonDenom)
+	return fmt.Sprintf("%s%s", minGasPrice, umeeparams.BondDenom)
 }
 
 func (s *IntegrationTestSuite) runGanacheContainer() {
@@ -690,7 +690,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--tendermint-rpc",
 					fmt.Sprintf("http://%s:26657", s.valResources[i].Container.Name[1:]),
 					"--cosmos-gas-prices",
-					fmt.Sprintf("%s%s", minGasPrice, photonDenom),
+					fmt.Sprintf("%s%s", minGasPrice, umeeparams.BondDenom),
 					"--cosmos-from",
 					s.chain.orchestrators[i].keyInfo.Name,
 					"--oracle-providers=mock",

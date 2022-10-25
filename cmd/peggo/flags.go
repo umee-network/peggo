@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/spf13/pflag"
 
-	umeeapp "github.com/umee-network/umee/v2/app"
+	umeeparams "github.com/umee-network/umee/v3/app/params"
 )
 
 const (
@@ -55,6 +55,7 @@ const (
 	flagRelayerLoopMultiplier   = "relayer-loop-multiplier"
 	flagRequesterLoopMultiplier = "requester-loop-multiplier"
 	flagBridgeStartHeight       = "bridge-start-height"
+	flagEthMergePause           = "eth-merge-pause" // TODO: remove this after merge is completed
 )
 
 func cosmosFlagSet() *pflag.FlagSet {
@@ -65,7 +66,7 @@ func cosmosFlagSet() *pflag.FlagSet {
 	fs.String(flagTendermintRPC, "http://localhost:26657", "The Tendermint RPC endpoint of a Cosmos node")
 	fs.String(
 		flagCosmosGasPrices,
-		fmt.Sprintf("0.001%s", umeeapp.BondDenom),
+		fmt.Sprintf("0.05%s", umeeparams.BondDenom),
 		"The gas prices to use for Cosmos transaction fees",
 	)
 

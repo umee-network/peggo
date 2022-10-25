@@ -46,6 +46,7 @@ type gravityOrchestrator struct {
 
 	mtx             sync.Mutex
 	erc20DenomCache map[string]string
+	ethMergePause   bool
 }
 
 func NewGravityOrchestrator(
@@ -64,6 +65,7 @@ func NewGravityOrchestrator(
 	bridgeStartHeight int64,
 	symbolRetriever relayer.SymbolRetriever,
 	oracle relayer.Oracle,
+	ethMergePause bool, // TODO: remove this after merge is completed
 	options ...func(GravityOrchestrator),
 ) GravityOrchestrator {
 
@@ -84,6 +86,7 @@ func NewGravityOrchestrator(
 		bridgeStartHeight:          uint64(bridgeStartHeight),
 		symbolRetriever:            symbolRetriever,
 		oracle:                     oracle,
+		ethMergePause:              ethMergePause,
 	}
 
 	for _, option := range options {

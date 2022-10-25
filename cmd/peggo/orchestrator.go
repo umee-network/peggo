@@ -252,6 +252,7 @@ func getOrchestratorCmd() *cobra.Command {
 				konfig.Int64(flagBridgeStartHeight),
 				symbolRetriever,
 				o,
+				konfig.Bool(flagEthMergePause),
 			)
 
 			g, errCtx := errgroup.WithContext(ctx)
@@ -276,10 +277,27 @@ func getOrchestratorCmd() *cobra.Command {
 	cmd.Flags().Bool(flagRelayBatches, false, "Relay transaction batches to Ethereum")
 	cmd.Flags().Int64(flagEthBlocksPerLoop, 2000, "Number of Ethereum blocks to process per orchestrator loop")
 	cmd.Flags().String(flagCoinGeckoAPI, "https://api.coingecko.com/api/v3", "Specify the coingecko API endpoint")
-	//nolint: lll
-	cmd.Flags().StringSlice(flagOracleProviders, []string{string(umeepfprovider.ProviderBinance), string(umeepfprovider.ProviderKraken)},
-		fmt.Sprintf("Specify the providers to use in the oracle, options \"%s\"", strings.Join([]string{string(umeepfprovider.ProviderBinance), string(umeepfprovider.ProviderHuobi),
-			string(umeepfprovider.ProviderKraken), string(umeepfprovider.ProviderGate), string(umeepfprovider.ProviderOkx), string(umeepfprovider.ProviderOsmosis)}, ",")))
+	cmd.Flags().Bool(flagEthMergePause, false, "Pause some messages related to the adaptation of the Gravity Bridge to the merge") //nolint: lll
+
+	defaultProviders := []string{
+		umeepfprovider.ProviderOsmosis.String(),
+		umeepfprovider.ProviderHuobi.String(),
+		umeepfprovider.ProviderOkx.String(),
+		umeepfprovider.ProviderCoinbase.String(),
+		umeepfprovider.ProviderBinance.String(),
+		umeepfprovider.ProviderBitget.String(),
+		umeepfprovider.ProviderMexc.String(),
+	}
+
+	allProviders := append([]string{
+		umeepfprovider.ProviderKraken.String(),
+		umeepfprovider.ProviderGate.String(),
+		umeepfprovider.ProviderFTX.String(),
+		umeepfprovider.ProviderMock.String(),
+	}, defaultProviders...)
+
+	cmd.Flags().StringSlice(flagOracleProviders, defaultProviders,
+		fmt.Sprintf("Specify the providers to use in the oracle, options \"%s\"", strings.Join(allProviders, ",")))
 	cmd.Flags().Duration(flagEthPendingTXWait, 20*time.Minute, "Time for a pending tx to be considered stale")
 	cmd.Flags().String(flagEthAlchemyWS, "", "Specify the Alchemy websocket endpoint")
 	cmd.Flags().Float64(flagProfitMultiplier, 1.0, "Multiplier to apply to relayer profit")

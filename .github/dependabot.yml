@@ -15,7 +15,6 @@ updates:
     reviewers:
       - facundomedica
       - RafilxTenfen
-      - brianosaurus
     labels:
       - "A:Automerge"
       - "T:Dependencies"
