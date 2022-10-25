@@ -70,6 +70,28 @@ $ peggo orchestrator {gravityAddress} \
   --cosmos-from=...
 ```
 
+#### Run the orchestrartor and pipe the logs to GCP
+
+- You need to set the [auth client on gcp](https://cloud.google.com/docs/authentication/application-default-credentials)
+- also remember to add the proper variables
+
+```shell
+export PEGGO_ETH_PK={ethereum private key}
+$ peggo orchestrator {gravityAddress} \
+  --eth-rpc=$ETH_RPC \
+  --relay-batches=true \
+  --valset-relay-mode=minimum \
+  --cosmos-chain-id=... \
+  --cosmos-grpc="tcp://..." \
+  --tendermint-rpc="http://..." \
+  --cosmos-keyring=... \
+  --cosmos-keyring-dir=... \
+  --cosmos-from=... \
+  --gcp-log-level="error" \
+  --gcp-log-moniker="YOUR-MONIKER-NAME" \
+  --gcp-log-project-name="gcp-project-name"
+```
+
 ### Send a transfer from Umee to Ethereum
 
 This is done using the command `umeed tx gravity send-to-eth`, use the `--help`
