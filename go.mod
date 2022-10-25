@@ -13,22 +13,22 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.50.1
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/knadh/koanf v1.4.3
+	github.com/knadh/koanf v1.4.4
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/osmosis-labs/bech32-ibc v0.3.0-rc2
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.28.0
 	github.com/shopspring/decimal v1.3.1
-	github.com/spf13/cobra v1.6.0
+	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.13.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/tendermint/tendermint v0.34.21
 	github.com/umee-network/umee/price-feeder v1.0.1-0.20220919160536-0c0db8c7c112
 	github.com/umee-network/umee/v3 v3.0.0-rc1
 	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde
 	golang.org/x/term v0.1.0
-	google.golang.org/grpc v1.50.0
+	google.golang.org/grpc v1.50.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -274,7 +274,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.1.1 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/tdakkota/asciicheck v0.1.1 // indirect
