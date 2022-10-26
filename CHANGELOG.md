@@ -47,7 +47,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-- [#397](https://github.com/umee-network/peggo/pull/397) Add missing changelogs
 - [#394](https://github.com/umee-network/peggo/pull/394) Add hook for send logs to Google Cloud
 - [#385](https://github.com/umee-network/peggo/pull/385) Create docker images when new tag is released
 
