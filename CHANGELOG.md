@@ -45,19 +45,32 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-- [#376] Add `eth-merge-pause` flag
+- [#394](https://github.com/umee-network/peggo/pull/394) Add hook for send logs to Google Cloud
+- [#385](https://github.com/umee-network/peggo/pull/385) Create docker images when new tag is released
+
+## [v1.2.1](https://github.com/umee-network/peggo/releases/tag/v1.2.1) - 2022-10-06
+
+### Improvements
+
+- [c535a87](https://github.com/umee-network/peggo/commit/c535a87ee607d0c787a2c64d37c8b0b09d0c777b) Add missing changelogs
+
+## [v1.2.0](https://github.com/umee-network/peggo/releases/tag/v1.2.0) - 2022-10-01
+
+### Improvements
+
+- [#376](https://github.com/umee-network/peggo/pull/376) Add `eth-merge-pause` flag
 
 ## [v1.1.0](https://github.com/umee-network/peggo/releases/tag/v1.1.0) - 2022-09-26
 
 ### Improvements
 
-- [#367] Set ETH block delay to 96 blocks
+- [#367](https://github.com/umee-network/peggo/pull/367) Set ETH block delay to 96 blocks
 
 ## [v1.0.1](https://github.com/umee-network/peggo/releases/tag/v1.0.1) - 2022-09-21
 
 ### Improvements
 
-- [#365] Reduce oracle noise msgs
+- [#365](https://github.com/umee-network/peggo/pull/365) Reduce oracle noise msgs
 
 ## [v1.0.0](https://github.com/umee-network/peggo/releases/tag/v1.0.0) - 2022-09-14
 
