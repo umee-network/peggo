@@ -50,12 +50,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [#394](https://github.com/umee-network/peggo/pull/394) Add hook for send logs to Google Cloud
 - [#385](https://github.com/umee-network/peggo/pull/385) Create docker images when new tag is released
 
-## [v1.2.1](https://github.com/umee-network/peggo/releases/tag/v1.2.1) - 2022-10-06
-
-### Improvements
-
-- [c535a87](https://github.com/umee-network/peggo/commit/c535a87ee607d0c787a2c64d37c8b0b09d0c777b) Add missing changelogs
-
 ## [v1.2.0](https://github.com/umee-network/peggo/releases/tag/v1.2.0) - 2022-10-01
 
 ### Improvements
