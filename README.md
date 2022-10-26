@@ -91,6 +91,8 @@ $ peggo orchestrator {gravityAddress} \
   --gcp-log-moniker="YOUR-MONIKER-NAME" \
   --gcp-log-project-name="gcp-project-name"
 ```
+Notes:
+- `moniker` is a your name which will appear in log as a log source
 
 ### Send a transfer from Umee to Ethereum
 
