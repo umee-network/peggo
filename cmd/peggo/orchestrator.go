@@ -363,7 +363,7 @@ func handleGCPLogging(ctx context.Context, konfig *koanf.Koanf, logger zerolog.L
 		return logger
 	}
 
-	logger.Info().Msg("GCP logs set up is OK")
+	logger.Info().Msg("GCP logs set up finished")
 
 	gcpLogger := client.Logger("peggo-out")
 	return logger.Hook(zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, message string) {
