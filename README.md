@@ -73,6 +73,13 @@ $ peggo orchestrator {gravityAddress} \
 #### Run the orchestrartor and pipe the logs to GCP
 
 - You need to set the [auth client on gcp](https://cloud.google.com/docs/authentication/application-default-credentials)
+ex.:
+  - Downlaod your service account on GCP and set this env variable `GOOGLE_APPLICATION_CREDENTIALS`
+
+```shell
+$~ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service_account.json
+```
+
 - also remember to add the proper variables
 
 ```shell
@@ -91,7 +98,9 @@ $ peggo orchestrator {gravityAddress} \
   --gcp-log-moniker="YOUR-MONIKER-NAME" \
   --gcp-log-project-name="gcp-project-name"
 ```
+
 Notes:
+
 - `moniker` is a your name which will appear in log as a log source
 
 ### Send a transfer from Umee to Ethereum
