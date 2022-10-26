@@ -43,20 +43,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-<<<<<<< HEAD
 ## [v1.2.1](https://github.com/umee-network/peggo/releases/tag/v1.2.1) - 2022-10-06
 
 ### Improvements
 
 - [#381] Improve `eth-merge-pause` flag
-=======
-## [v1.3.0](https://github.com/umee-network/peggo/releases/tag/v1.3.0) - 2022-10-26
-
-### Improvements
-
-- [#394](https://github.com/umee-network/peggo/pull/394) Add hook for send logs to Google Cloud
-- [#385](https://github.com/umee-network/peggo/pull/385) Create docker images when new tag is released
->>>>>>> 3d335aa (chore: update changelog  (#397))
 
 ## [v1.2.0](https://github.com/umee-network/peggo/releases/tag/v1.2.0) - 2022-10-01
 
