@@ -43,6 +43,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v1.3.0](https://github.com/umee-network/peggo/releases/tag/v1.3.0) - 2022-10-26
+
 ### Improvements
 
 - [#397](https://github.com/umee-network/peggo/pull/397) Add missing changelogs
