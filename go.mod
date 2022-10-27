@@ -1,6 +1,6 @@
 module github.com/umee-network/peggo
 
-go 1.18
+go 1.19
 
 require (
 	cloud.google.com/go/logging v1.5.0
@@ -338,5 +338,5 @@ replace (
 	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.3-umee
 	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.8.1
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.0-rc1.0.20220831212913-42baad053f6e
+	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.0
 )
