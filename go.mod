@@ -1,6 +1,6 @@
 module github.com/umee-network/peggo
 
-go 1.18
+go 1.19
 
 require (
 	cloud.google.com/go/logging v1.5.0
