@@ -247,6 +247,72 @@ func (o *Oracle) loadAvailablePairs() {
 	}
 }
 
+// GetComputedPrices gets the candle and ticker prices and computes it.
+// It returns candles' TVWAP if possible, if not possible (not available
+// or due to some staleness) it will use the most recent ticker prices
+// and the VWAP formula instead.
+func GetComputedPrices(
+	logger zerolog.Logger,
+	providerCandles pfprovider.AggregatedProviderCandles,
+	providerPrices pfprovider.AggregatedProviderPrices,
+	providerPairs map[pfprovider.Name][]pftypes.CurrencyPair,
+	deviations map[string]sdk.Dec,
+) (prices map[string]sdk.Dec, err error) {
+	// convert any non-USD denominated candles into USD
+	convertedCandles, err := pforacle.ConvertCandlesToUSD(
+		logger,
+		providerCandles,
+		providerPairs,
+		deviations,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// filter out any erroneous candles
+	filteredCandles, err := pforacle.FilterCandleDeviations(
+		logger,
+		convertedCandles,
+		deviations,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// attempt to use candles for TVWAP calculations
+	tvwapPrices, err := pforacle.ComputeTVWAP(filteredCandles)
+	if err != nil {
+		return nil, err
+	}
+
+	// If TVWAP candles are not available or were filtered out due to staleness,
+	// use most recent prices & VWAP instead.
+	if len(tvwapPrices) == 0 {
+		convertedTickers, err := pforacle.ConvertTickersToUSD(
+			logger,
+			providerPrices,
+			providerPairs,
+			deviations,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		filteredProviderPrices, err := pforacle.FilterTickerDeviations(
+			logger,
+			convertedTickers,
+			deviations,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		return pforacle.ComputeVWAP(filteredProviderPrices), nil
+	}
+
+	return tvwapPrices, nil
+}
+
 // setPrices retrieves all the prices and candles from our set of providers as
 // determined in the config. If candles are available, uses TVWAP in order
 // to determine prices. If candles are not available, uses the most recent prices
@@ -305,7 +371,7 @@ func (o *Oracle) setPrices() error {
 
 	deviationTreshold := sdk.NewDecFromIntWithPrec(sdkmath.NewInt(15), 1)
 
-	computedPrices, err := pforacle.GetComputedPrices(
+	computedPrices, err := GetComputedPrices(
 		o.logger,
 		providerCandles,
 		providerPrices,

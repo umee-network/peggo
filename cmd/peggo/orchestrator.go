@@ -200,7 +200,7 @@ func getOrchestratorCmd() *cobra.Command {
 			trapSignal(cancel)
 
 			providers := konfig.Strings(flagOracleProviders)
-			o, err := oracle.New(ctx, logger, stringsToProviderName(providers))
+			o, err := oracle.New(ctx, logger.With().Str("module", "oracle").Logger(), stringsToProviderName(providers))
 			if err != nil {
 				return err
 			}
@@ -298,6 +298,7 @@ func getOrchestratorCmd() *cobra.Command {
 		umeepfprovider.ProviderBinance.String(),
 		umeepfprovider.ProviderBitget.String(),
 		umeepfprovider.ProviderMexc.String(),
+		umeepfprovider.ProviderCrypto.String(),
 	}
 
 	allProviders := append([]string{
