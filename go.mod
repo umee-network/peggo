@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/logging v1.5.0
-	cosmossdk.io/math v1.0.0-beta.3
+	cosmossdk.io/math v1.0.0-beta.4
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.5.3
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/cosmos/cosmos-sdk v0.46.3
