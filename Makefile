@@ -109,7 +109,7 @@ solidity-wrappers: $(SOLIDITY_DIR)/contracts/*.sol
 ###############################################################################
 
 docker-build:
-	@docker build -t umeenet/peggo .
+	@docker build -t umeenet/peggo --platform=linux/amd64 .
 
 docker-build-debug:
 	@docker build -t umeenet/peggo --build-arg IMG_TAG=debug .
