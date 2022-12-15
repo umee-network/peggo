@@ -50,7 +50,7 @@ test-unit: ARGS=-timeout=5m -tags='norace'
 test-unit: TEST_PACKAGES=$(PACKAGES_UNIT)
 test-unit-cover: ARGS=-timeout=5m -tags='norace' -coverprofile=coverage.txt -covermode=atomic
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v
+test-e2e: ARGS=-timeout=20m -v
 test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 

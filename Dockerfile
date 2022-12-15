@@ -13,7 +13,10 @@ RUN make install
 
 # Build umeed
 WORKDIR /src/umee
-RUN wget https://github.com/umee-network/umee/releases/download/v3.3.0-rc1/umeed-v3.3.0-rc1-linux-amd64 && \
+# wget https://github.com/umee-network/umee/releases/download/v3.3.0-rc1/umeed-v3.3.0-rc1-linux-amd64
+RUN https://github.com/umee-network/umee/releases/download/v3.0.3/umeed-v3.0.3-darwin-amd64.tar.gz && \
+  tar -xvf umeed-v3.0.3-darwin-amd64.tar.gz  && \
+  cd umeed-v3.0.3-darwin-amd64 && \
   chmod +x umeed* && \
   cp umeed* /usr/local/bin/umeed
 
