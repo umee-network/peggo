@@ -31,7 +31,7 @@ $ MYETH3PK=11f746395f0dd459eff05d1bc557b81c3f7ebb1338a8cc9d36966d0bb2dcea21
 $ CHAIN_ID=888
 ```
 
-or 
+or
 
 ```shell
 $ source $UMEE_PEGGO_PATH/test/.env.local
@@ -65,9 +65,9 @@ set TOKEN_ADDRESS 0xdcbb485f280284ec571e11eb09490677a5bdd569
 $ bash $UMEE_PEGGO_PATH/test/eth/run_ganache.sh
 ```
 
-or 
+or
 
-- Run the `hardhat` 
+- Run the `hardhat`
 
 ```shell
 # Install dependencies
@@ -222,7 +222,7 @@ $ umeed tx gravity send-to-eth $MYETH 10000uumee 1uumee \
 
 ### Send transaction from eth to umee
 
-```shell 
+```shell
 $ PEGGO_ETH_PK=$MYETHPK peggo bridge send-to-cosmos \
   $BRIDGEADDR $TOKEN_ADDRESS umee1pprgkthxc2yhr5gvuk2tcjjchfhq6n96xg427t 1 \
   --eth-rpc $ETHRPC
