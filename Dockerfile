@@ -24,5 +24,5 @@ FROM gcr.io/distroless/cc:$IMG_TAG
 ARG IMG_TAG
 COPY --from=builder /go/bin/peggo /usr/local/bin/
 COPY --from=builder /usr/local/bin/umeed /usr/local/bin/
-COPY --from=builder /src/umee/libwasmvm.x86_64.so /usr/local/lib/
+COPY --from=builder /src/umee/libwasmvm.x86_64.so /lib/
 EXPOSE 26656 26657 1317 9090
