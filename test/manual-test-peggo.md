@@ -4,20 +4,37 @@
 
 - You have `umeed` in your path
 - You have `jq`, `perl` and `curl`
-- You have 3 funded wallets in [goerli](https://goerli.etherscan.io/)
-  - [Faucet](https://goerli-faucet.mudit.blog/) (sometimes it does not work)
+- You can choose any eth test networks like [goerli](https://goerli.etherscan.io/) , [ganache](https://github.com/trufflesuite/ganache) or [hardhat](https://hardhat.org)
+  - [Install ganache](https://github.com/trufflesuite/ganache/tree/v7.5.0#command-line-use)
+  ```shell
+  $ npm install ganache --global
+  ```
+
+  - [Install hardhat](https://hardhat.org/hardhat-runner/docs/getting-started#installation)
+  ```shell
+  $ npm install --save-dev hardhat
+  ```
+- You have 3 funded wallets in [goerli](https://goerli.etherscan.io/), [ganache](https://github.com/trufflesuite/ganache) or [hardhat](https://hardhat.org)
+  - [Faucet](https://goerli-faucet.mudit.blog/) (sometimes it does not work) for goreli
+
 - You should set the following enviroment variables
 
 ```shell
-$~ UMEE_PEGGO_PATH=${peggo_root_path_in_your_local_enviroment}
-$~ ETHRPC=https://goerli-infura.brave.com/f7106c838853428280fa0c585acc9485
-$~ MYETH=0xfac5EC50BdfbB803f5cFc9BF0A0C2f52aDE5b6dd
-$~ MYETHPK=06e48d48a55cc6843acb2c3c23431480ec42fca02683f4d8d3d471372e5317ee
-$~ MYETH2=0x02fa1b44e2EF8436e6f35D5F56607769c658c225
-$~ MYETH2PK=4faf826f3d3a5fa60103392446a72dea01145c6158c6dd29f6faab9ec9917a1b
-$~ MYETH3=0xd8f468c1B719cc2d50eB1E3A55cFcb60e23758CD
-$~ MYETH3PK=11f746395f0dd459eff05d1bc557b81c3f7ebb1338a8cc9d36966d0bb2dcea21
-$~ CHAIN_ID=888
+$ UMEE_PEGGO_PATH=${peggo_root_path_in_your_local_enviroment}
+$ ETHRPC=https://goerli-infura.brave.com/f7106c838853428280fa0c585acc9485
+$ MYETH=0xfac5EC50BdfbB803f5cFc9BF0A0C2f52aDE5b6dd
+$ MYETHPK=06e48d48a55cc6843acb2c3c23431480ec42fca02683f4d8d3d471372e5317ee
+$ MYETH2=0x02fa1b44e2EF8436e6f35D5F56607769c658c225
+$ MYETH2PK=4faf826f3d3a5fa60103392446a72dea01145c6158c6dd29f6faab9ec9917a1b
+$ MYETH3=0xd8f468c1B719cc2d50eB1E3A55cFcb60e23758CD
+$ MYETH3PK=11f746395f0dd459eff05d1bc557b81c3f7ebb1338a8cc9d36966d0bb2dcea21
+$ CHAIN_ID=888
+```
+
+or 
+
+```shell
+$ source $UMEE_PEGGO_PATH/test/.env.local
 ```
 
 <!--
@@ -40,12 +57,30 @@ set TOKEN_ADDRESS 0xdcbb485f280284ec571e11eb09490677a5bdd569
 
 - To test the peggo bridge manually execute the next steps
 
+### If you want run local eth networks (Ganache or Hardhat)
+
+- Run the `ganache`
+
+```shell
+$ bash $UMEE_PEGGO_PATH/test/eth/run_ganache.sh
+```
+
+or 
+
+- Run the `hardhat` 
+
+```shell
+# Install dependencies
+$ cd $UMEE_PEGGO_PATH/test/eth && npm install 
+# Run the hardhat 
+$ npx hardhat node
+```
 ### Start umee chain multinode
 
 - Run the `multinode.sh`
 
 ```shell
-$~ bash $UMEE_PEGGO_PATH/test/cosmos/multinode.sh umeed
+$ bash $UMEE_PEGGO_PATH/test/cosmos/multinode.sh umeed
 ```
 
 ### Deploy a new Gravity bridge smartcontract
@@ -54,13 +89,13 @@ $~ bash $UMEE_PEGGO_PATH/test/cosmos/multinode.sh umeed
 set the `BRIDGEADDR` env variable with the contract address of the bridge smartcontract
 
 ```shell
-$~ BRIDGEADDR=0xaB3BB333676fBF3c88554A455633aC9168cDD0Af
+$ BRIDGEADDR=0xaB3BB333676fBF3c88554A455633aC9168cDD0Af
 ```
 
 - Or you can deploy a new bridge
 
 ```shell
-$~ PEGGO_ETH_PK=$MYETHPK peggo bridge deploy-gravity --eth-rpc $ETHRPC
+$ PEGGO_ETH_PK=$MYETHPK peggo bridge deploy-gravity --eth-rpc $ETHRPC
 ```
 
 __Expected Result__
@@ -69,7 +104,9 @@ __Expected Result__
 - Set the `BRIDGEADDR` variable
 
 ```shell
-$~ BRIDGEADDR=0x86C4B780936D59b475291EE69D10A0260cD46F11
+# Check the `Address` in response 
+# Ex BRIDGEADDR=0x86C4B780936D59b475291EE69D10A0260cD46F11
+$ BRIDGEADDR={Adderss}
 ```
 
 - Wait until the gravity bridge is confirmed in ethereum (14 blocks)
@@ -80,7 +117,7 @@ $~ BRIDGEADDR=0x86C4B780936D59b475291EE69D10A0260cD46F11
 the following commands one in each shell
 
 ```shell
-$~ PEGGO_ETH_PK=$MYETHPK peggo orchestrator $BRIDGEADDR \
+$ PEGGO_ETH_PK=$MYETHPK peggo orchestrator $BRIDGEADDR \
   --eth-rpc=$ETHRPC \
   --relay-batches=true \
   --valset-relay-mode="all" \
@@ -94,7 +131,7 @@ $~ PEGGO_ETH_PK=$MYETHPK peggo orchestrator $BRIDGEADDR \
 ```
 
 ```shell
-$~ PEGGO_ETH_PK=$MYETH2PK peggo orchestrator $BRIDGEADDR \
+$ PEGGO_ETH_PK=$MYETH2PK peggo orchestrator $BRIDGEADDR \
   --eth-rpc=$ETHRPC \
   --relay-batches=true \
   --valset-relay-mode="all" \
@@ -108,7 +145,7 @@ $~ PEGGO_ETH_PK=$MYETH2PK peggo orchestrator $BRIDGEADDR \
 ```
 
 ```shell
-$~ PEGGO_ETH_PK=$MYETH3PK peggo orchestrator $BRIDGEADDR \
+$ PEGGO_ETH_PK=$MYETH3PK peggo orchestrator $BRIDGEADDR \
   --eth-rpc=$ETHRPC \
   --relay-batches=true \
   --valset-relay-mode="all" \
@@ -127,7 +164,10 @@ $~ PEGGO_ETH_PK=$MYETH3PK peggo orchestrator $BRIDGEADDR \
 token in eth
 
 ```shell
-$~ PEGGO_ETH_PK=$MYETHPK peggo bridge deploy-erc20 $BRIDGEADDR uumee --eth-rpc $ETHRPC
+$ PEGGO_ETH_PK=$MYETHPK peggo bridge deploy-erc20 $BRIDGEADDR uumee --eth-rpc $ETHRPC
+
+or 
+$ PEGGO_ETH_PK=$MYETHPK peggo bridge deploy-erc20-raw $BRIDGEADDR uumee Umee UMEE 6 --eth-rpc $ETHRPC
 ```
 
 __Expected Result__
@@ -136,7 +176,8 @@ __Expected Result__
 - Set transaction hash in `ERC20_UMEE_TX_HASH`
 
 ```shell
-$~ ERC20_UMEE_TX_HASH="0xf185d0f54f42ed0f303400db5e6d1d83637acce12971f7fc48b3e33b8e11ad0b"
+# Ex: ERC20_UMEE_TX_HASH="0xf185d0f54f42ed0f303400db5e6d1d83637acce12971f7fc48b3e33b8e11ad0b"
+$ ERC20_UMEE_TX_HASH={Tx_Hash}
 ```
 
 <!--
@@ -148,7 +189,7 @@ set ERC20_UMEE_TX_HASH 0xf185d0f54f42ed0f303400db5e6d1d83637acce12971f7fc48b3e33
 - You can get the contract address of the deployed umee contract
 
 ```shell
-$~ curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt",
+$ curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt",
 "params":["'$ERC20_UMEE_TX_HASH'"],"id":1}' $ETHRPC | jq -r '.result.logs[0].address'
 ```
 
@@ -156,13 +197,13 @@ $~ curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt",
 address of the deployed umee contract
 
 ```shell
-$~ TOKEN_ADDRESS=`curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt",
+$ TOKEN_ADDRESS=`curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt",
 "params":["'$ERC20_UMEE_TX_HASH'"],"id":1}' $ETHRPC | jq -r '.result.logs[0].address'`
 ```
 
 <!--
 ```fish
-$~ set TOKEN_ADDRESS (curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt", "params":["'$ERC20_UMEE_TX_HASH'"],"id":1}' $ETHRPC | jq -r '.result.logs[0].address')
+$ set TOKEN_ADDRESS (curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt", "params":["'$ERC20_UMEE_TX_HASH'"],"id":1}' $ETHRPC | jq -r '.result.logs[0].address')
 ```
  -->
 
@@ -171,7 +212,7 @@ $~ set TOKEN_ADDRESS (curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getTra
 ### Send transaction from umee to eth
 
 ```shell
-$~ umeed tx gravity send-to-eth $MYETH 10000uumee 1uumee \
+$ umeed tx gravity send-to-eth $MYETH 10000uumee 1uumee \
   --from val \
   --chain-id $CHAIN_ID \
   --keyring-backend=test \
@@ -181,7 +222,8 @@ $~ umeed tx gravity send-to-eth $MYETH 10000uumee 1uumee \
 
 ### Send transaction from eth to umee
 
-```shell $~ PEGGO_ETH_PK=$MYETHPK peggo bridge send-to-cosmos \
+```shell 
+$ PEGGO_ETH_PK=$MYETHPK peggo bridge send-to-cosmos \
   $BRIDGEADDR $TOKEN_ADDRESS umee1pprgkthxc2yhr5gvuk2tcjjchfhq6n96xg427t 1 \
   --eth-rpc $ETHRPC
 ```
