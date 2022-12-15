@@ -33,7 +33,7 @@ build: go.sum
 
 install: go.sum
 	@echo "--> Installing..."
-	CGO_ENABLED=0 go install -mod=readonly $(BUILD_FLAGS) ./...
+	go install -mod=readonly $(BUILD_FLAGS) ./...
 
 .PHONY: build install
 
