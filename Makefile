@@ -21,12 +21,15 @@ endif
 ldflags = -X github.com/umee-network/peggo/cmd/peggo.Version=$(VERSION) \
 		  -X github.com/umee-network/peggo/cmd/peggo.Commit=$(COMMIT) \
 		  -X github.com/umee-network/peggo/cmd/peggo.SDKVersion=$(SDK_VERSION)
+ldflags += $(LDFLAGS)
+ldflags := $(strip $(ldflags))
 
-BUILD_FLAGS := -ldflags '$(ldflags)'
+build_tags += $(BUILD_TAGS)
+BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 build: go.sum
 	@echo "--> Building..."
-	CGO_ENABLED=0 go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
+	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
 
 install: go.sum
 	@echo "--> Installing..."

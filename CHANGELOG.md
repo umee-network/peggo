@@ -45,6 +45,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
+- - [#328f55c](https://github.com/umee-network/peggo/commit/328f55c5944101527df13d43e791c47155ddd8d7) Cosmos SDK to v0.46.7.
 - [#399](https://github.com/umee-network/peggo/pull/399) Update price-feeder to v101 and umee to v3.1.0.
 
 ## [v1.3.0](https://github.com/umee-network/peggo/releases/tag/v1.3.0) - 2022-10-26
@@ -180,7 +181,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bug Fixes
 
 - [#134] Fix logs, CLI help and a panic when a non-function call transaction was
- received during the TX pending check.
+  received during the TX pending check.
 
 ## [v0.2.0](https://github.com/umee-network/peggo/releases/tag/v0.2.0) - 2022-01-17
 

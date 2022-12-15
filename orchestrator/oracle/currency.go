@@ -3,7 +3,7 @@ package oracle
 import (
 	"strings"
 
-	umeepftypes "github.com/umee-network/umee/price-feeder/oracle/types"
+	umeepftypes "github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 const (
