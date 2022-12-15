@@ -1,7 +1,7 @@
 ARG IMG_TAG=latest
 
 # Fetch base packages
-FROM golang:1.18-alpine AS base-builder
+FROM golang:1.19-alpine AS base-builder
 ENV PACKAGES make git libc-dev gcc linux-headers
 RUN apk add --no-cache $PACKAGES
 

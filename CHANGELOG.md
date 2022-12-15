@@ -46,6 +46,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [#412](https://github.com/umee-network/peggo/pull/412) Update price-feeder to v2.0.1 and removed FTX and Binance from default providers.
+  - update go to 1.19
 - [#328f55c](https://github.com/umee-network/peggo/commit/328f55c5944101527df13d43e791c47155ddd8d7) Cosmos SDK to v0.46.7.
 - [#399](https://github.com/umee-network/peggo/pull/399) Update price-feeder to v101 and umee to v3.1.0.
 
