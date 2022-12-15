@@ -21,16 +21,19 @@ endif
 ldflags = -X github.com/umee-network/peggo/cmd/peggo.Version=$(VERSION) \
 		  -X github.com/umee-network/peggo/cmd/peggo.Commit=$(COMMIT) \
 		  -X github.com/umee-network/peggo/cmd/peggo.SDKVersion=$(SDK_VERSION)
+ldflags += $(LDFLAGS)
+ldflags := $(strip $(ldflags))
 
-BUILD_FLAGS := -ldflags '$(ldflags)'
+build_tags += $(BUILD_TAGS)
+BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 build: go.sum
 	@echo "--> Building..."
-	CGO_ENABLED=0 go build -mod=readonly -o $(BUILD_DIR)/ $(BUILD_FLAGS) ./...
+	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
 
 install: go.sum
 	@echo "--> Installing..."
-	CGO_ENABLED=0 go install -mod=readonly $(BUILD_FLAGS) ./...
+	go install -mod=readonly $(BUILD_FLAGS) ./...
 
 .PHONY: build install
 
@@ -47,7 +50,7 @@ test-unit: ARGS=-timeout=5m -tags='norace'
 test-unit: TEST_PACKAGES=$(PACKAGES_UNIT)
 test-unit-cover: ARGS=-timeout=5m -tags='norace' -coverprofile=coverage.txt -covermode=atomic
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v
+test-e2e: ARGS=-timeout=20m -v
 test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 
@@ -106,7 +109,7 @@ solidity-wrappers: $(SOLIDITY_DIR)/contracts/*.sol
 ###############################################################################
 
 docker-build:
-	@docker build -t umeenet/peggo .
+	@docker build -t umeenet/peggo --platform=linux/amd64 .
 
 docker-build-debug:
 	@docker build -t umeenet/peggo --build-arg IMG_TAG=debug .

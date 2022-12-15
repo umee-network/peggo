@@ -21,7 +21,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
-	umeepfprovider "github.com/umee-network/umee/price-feeder/oracle/provider"
+	umeepfprovider "github.com/umee-network/umee/price-feeder/v2/oracle/provider"
 
 	"github.com/umee-network/peggo/cmd/peggo/client"
 	"github.com/umee-network/peggo/orchestrator"
@@ -295,7 +295,6 @@ func getOrchestratorCmd() *cobra.Command {
 		umeepfprovider.ProviderHuobi.String(),
 		umeepfprovider.ProviderOkx.String(),
 		umeepfprovider.ProviderCoinbase.String(),
-		umeepfprovider.ProviderBinance.String(),
 		umeepfprovider.ProviderBitget.String(),
 		umeepfprovider.ProviderMexc.String(),
 		umeepfprovider.ProviderCrypto.String(),
@@ -304,8 +303,8 @@ func getOrchestratorCmd() *cobra.Command {
 	allProviders := append([]string{
 		umeepfprovider.ProviderKraken.String(),
 		umeepfprovider.ProviderGate.String(),
-		umeepfprovider.ProviderFTX.String(),
 		umeepfprovider.ProviderMock.String(),
+		umeepfprovider.ProviderBinance.String(),
 	}, defaultProviders...)
 
 	cmd.Flags().StringSlice(flagOracleProviders, defaultProviders,

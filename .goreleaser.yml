@@ -2,11 +2,11 @@
 project_name: peggo
 
 env:
-  - GO111MODULE=on
+  - CGO_ENABLED=1
 
 before:
   hooks:
-    - go mod tidy -compat=1.18
+    - go mod download
 
 builds:
   - main: ./
@@ -15,17 +15,12 @@ builds:
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
       - -trimpath
-    env:
-      - CGO_ENABLED=0
     ldflags:
       - -s -w -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X github.com/umee-network/peggo/cmd/peggo.Version={{ .Version }} -X github.com/umee-network/peggo/cmd/peggo.Commit=$(COMMIT)={{ .Commit }}
     goos:
-      - darwin
       - linux
     goarch:
       - amd64
-      - arm
-      - arm64
 
 archives:
   - format: tar.gz
@@ -35,8 +30,8 @@ archives:
         format: zip
     name_template: "{{ .Binary }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     files:
-      - LICENSE
       - README.md
+      - LICENSE
 
 release:
   github:
@@ -52,4 +47,4 @@ snapshot:
   name_template: SNAPSHOT-{{ .Commit }}
 
 changelog:
-  skip: true
+  skip: false

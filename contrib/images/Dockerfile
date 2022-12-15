@@ -1,3 +1,5 @@
+## image for e2e tests
+
 # Fetch base packages
 FROM golang:1.19-alpine AS builder
 ENV PACKAGES make git libc-dev gcc linux-headers
