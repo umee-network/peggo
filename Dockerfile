@@ -23,5 +23,5 @@ FROM gcr.io/distroless/cc:$IMG_TAG
 ARG IMG_TAG
 COPY --from=builder /go/bin/peggo /usr/local/bin/
 COPY --from=builder /usr/local/bin/umeed /usr/local/bin/
-RUN wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
+RUN wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.x86_64.so -O /usr/local/lib/libwasmvm.x86_64.so
 EXPOSE 26656 26657 1317 9090
