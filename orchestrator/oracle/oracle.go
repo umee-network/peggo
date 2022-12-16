@@ -11,10 +11,10 @@ import (
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 
-	pforacle "github.com/umee-network/umee/price-feeder/oracle"
-	pfprovider "github.com/umee-network/umee/price-feeder/oracle/provider"
-	pftypes "github.com/umee-network/umee/price-feeder/oracle/types"
-	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
+	pforacle "github.com/umee-network/umee/price-feeder/v2/oracle"
+	pfprovider "github.com/umee-network/umee/price-feeder/v2/oracle/provider"
+	pftypes "github.com/umee-network/umee/price-feeder/v2/oracle/types"
+	pfsync "github.com/umee-network/umee/price-feeder/v2/pkg/sync"
 	umeeparams "github.com/umee-network/umee/v3/app/params"
 )
 

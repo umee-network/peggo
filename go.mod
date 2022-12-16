@@ -24,7 +24,7 @@ require (
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
 	github.com/tendermint/tendermint v0.34.24
-	github.com/umee-network/umee/price-feeder v1.0.1-0.20221027015322-96357449c737
+	github.com/umee-network/umee/price-feeder/v2 v2.0.2
 	github.com/umee-network/umee/v3 v3.3.0-rc1
 	golang.org/x/sync v0.1.0
 	golang.org/x/term v0.2.0
