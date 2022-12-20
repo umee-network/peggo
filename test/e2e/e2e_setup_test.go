@@ -514,7 +514,7 @@ func (s *IntegrationTestSuite) runValidators() {
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/.umee", val.configDir()),
 			},
-			Repository: "umeenet/peggo",
+			Repository: "umeenet/peggo-e2e",
 			Entrypoint: []string{
 				"umeed",
 				"start",
@@ -578,7 +578,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 		&dockertest.RunOptions{
 			Name:       "gravity-contract-deployer",
 			NetworkID:  s.dkrNet.Network.ID,
-			Repository: "umeenet/peggo",
+			Repository: "umeenet/peggo-e2e",
 			// NOTE: container names are prefixed with '/'
 			Env: []string{"PEGGO_ETH_PK=" + ethMinerPK},
 			Entrypoint: []string{
@@ -671,7 +671,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 			&dockertest.RunOptions{
 				Name:       s.chain.orchestrators[i].instanceName(),
 				NetworkID:  s.dkrNet.Network.ID,
-				Repository: "umeenet/peggo",
+				Repository: "umeenet/peggo-e2e",
 				Env: []string{
 					"PEGGO_ETH_PK=" + orch.ethereumKey.privateKey,
 					"PEGGO_COSMOS_PK=" + hexutil.Encode(s.chain.orchestrators[i].privateKey.Bytes()),
