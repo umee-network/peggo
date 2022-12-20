@@ -34,7 +34,8 @@ $ CHAIN_ID=888
 or
 
 ```shell
-$ source $UMEE_PEGGO_PATH/test/.env.local
+# test/env.local file contains env variables for testing the peggo
+$ source $UMEE_PEGGO_PATH/test/env.local
 ```
 
 <!--
