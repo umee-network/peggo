@@ -1,4 +1,4 @@
-## image for e2e tests
+## image for docker Peggo release
 
 # Fetch base packages
 FROM golang:1.19-bullseye AS builder
