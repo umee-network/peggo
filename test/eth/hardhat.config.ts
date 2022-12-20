@@ -19,32 +19,39 @@ function GetChainId(): number {
 
 const balance = "100000000000000000000000000"
 
+const privateKeys = [
+  // val0 0xfac5EC50BdfbB803f5cFc9BF0A0C2f52aDE5b6dd
+  "0x06e48d48a55cc6843acb2c3c23431480ec42fca02683f4d8d3d471372e5317ee",
+  // val1 0x02fa1b44e2EF8436e6f35D5F56607769c658c225
+  "0x4faf826f3d3a5fa60103392446a72dea01145c6158c6dd29f6faab9ec9917a1b",
+  // val2 0xd8f468c1B719cc2d50eB1E3A55cFcb60e23758CD
+  "0x11f746395f0dd459eff05d1bc557b81c3f7ebb1338a8cc9d36966d0bb2dcea21",
+]
+
+
 const peggoAccounts: HardhatNetworkAccountUserConfig[] = [
   {
-    // val0 0xC6Fe5D33615a1C52c08018c47E8Bc53646A0E101
-    privateKey: "0x88cbead91aee890d27bf06e003ade3d4e952427e88f88d31d61d3ef5e5d54305",
+    privateKey: privateKeys[0],
     balance: balance,
   },
   {
-    // val1 0x963EBDf2e1f8DB8707D05FC75bfeFFBa1B5BaC17
-    privateKey: "0x741de4f8988ea941d3ff0287911ca4074e62b7d45c991a51186455366f10b544",
+    privateKey: privateKeys[1],
     balance: balance,
   },
   {
-    // val2 0x6880D7bfE96D49501141375ED835C24cf70E2bD7
-    privateKey: "0x39a4c898dda351d54875d5ebb3e1c451189116faa556c3c04adc860dd1000608",
-    balance: balance,
-  },
-  {
-    // user 0x727AEE334987c52fA7b567b2662BDbb68614e48C
-    privateKey: "0x6c212553111b370a8ffdc682954495b7b90a73cedab7106323646a4f2c4e668f",
+    privateKey: privateKeys[2],
     balance: balance,
   },
 ]
 
+
 const peggoTestNetwork: HardhatNetworkUserConfig = {
   chainId: GetChainId(),
   accounts: peggoAccounts,
+  mining: {
+    // It will produce empty blocks every 3 seconds 
+    interval: 3000
+  }
 }
 
 const config: HardhatUserConfig = {
@@ -61,18 +68,11 @@ const config: HardhatUserConfig = {
     ganache: {
       chainId: GetChainId(),
       url: "http://127.0.0.1:8545",
-      accounts: [
-        "0x88cbead91aee890d27bf06e003ade3d4e952427e88f88d31d61d3ef5e5d54305",
-        "0x741de4f8988ea941d3ff0287911ca4074e62b7d45c991a51186455366f10b544",
-        "0x39a4c898dda351d54875d5ebb3e1c451189116faa556c3c04adc860dd1000608",
-        "0x6c212553111b370a8ffdc682954495b7b90a73cedab7106323646a4f2c4e668f",
-      ]
+      accounts: privateKeys
     },
     goerli: {
       url: env.ETHRPC,
-      accounts: [
-        "0x88cbead91aee890d27bf06e003ade3d4e952427e88f88d31d61d3ef5e5d54305"
-      ]
+      accounts: privateKeys
     }
   },
   etherscan: {
