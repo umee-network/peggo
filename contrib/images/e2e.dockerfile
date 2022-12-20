@@ -1,6 +1,5 @@
 ## image for e2e tests
-
-ARG IMG_TAG=latest
+## docker build -t peggo-e2e -f ./contrib/images/e2e.dockerfile .
 
 # Fetch base packages
 FROM golang:1.19-bullseye AS builder
@@ -19,8 +18,9 @@ RUN wget https://github.com/umee-network/umee/releases/download/v3.3.0-rc3/umeed
   wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.x86_64.so
 
 # Add to a distroless container
-FROM gcr.io/distroless/cc:$IMG_TAG
-ARG IMG_TAG
+# FROM gcr.io/distroless/cc:debug
+FROM ubuntu:rolling
+ARG IMG_TAG=latest
 COPY --from=builder /go/bin/peggo /usr/local/bin/
 COPY --from=builder /src/umee/umeed /usr/local/bin/
 COPY --from=builder /src/umee/libwasmvm.x86_64.so /lib/
