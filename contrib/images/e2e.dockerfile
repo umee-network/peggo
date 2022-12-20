@@ -10,14 +10,14 @@ COPY . .
 RUN go mod download
 RUN make install
 
-# Build umeed
+# download umeed
 WORKDIR /src/umee
 RUN wget https://github.com/umee-network/umee/releases/download/v3.3.0-rc3/umeed-v3.3.0-rc3-linux-amd64 && \
   chmod +x umeed-v* && \
   cp umeed-v* umeed && \
   wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.x86_64.so
 
-# Add to a distroless container
+# Prepare final image
 # FROM gcr.io/distroless/cc:debug
 FROM ubuntu:rolling
 ARG IMG_TAG=latest
