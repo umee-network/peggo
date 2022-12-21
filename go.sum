@@ -296,8 +296,8 @@ github.com/cosmos/gorocksdb v1.2.0 h1:d0l3jJG8M4hBouIZq0mDUHZ+zjOx044J3nGRskwTb4
 github.com/cosmos/gorocksdb v1.2.0/go.mod h1:aaKvKItm514hKfNJpUJXnnOWeBnk2GL4+Qw9NHizILw=
 github.com/cosmos/iavl v0.19.4 h1:t82sN+Y0WeqxDLJRSpNd8YFX5URIrT+p8n6oJbJ2Dok=
 github.com/cosmos/iavl v0.19.4/go.mod h1:X9PKD3J0iFxdmgNLa7b2LYWdsGd90ToV5cAONApkEPw=
-github.com/cosmos/ibc-go/v5 v5.1.0 h1:m1NHXFkwwvNeJegZqtyox1WLinh+PMy4ivU/Cs9KjeA=
-github.com/cosmos/ibc-go/v5 v5.1.0/go.mod h1:H6sV0/CkNRDtvSrhbsIgiog1WnSwhguGfg8x34MOVEk=
+github.com/cosmos/ibc-go/v5 v5.2.0 h1:LxwttRQqdUJpQ3/Gc3XPg5lkRo3pcbzx65dxFIY6ONE=
+github.com/cosmos/ibc-go/v5 v5.2.0/go.mod h1:MhDUMDVSboK5JW2pEWHNcw0wJHaHqKV/vwwP7awGhzI=
 github.com/cosmos/interchain-accounts v0.3.2 h1:7S5rSndahpjkzUvG00kKZrTZsEuVHuVC9a7p0qDVcF8=
 github.com/cosmos/ledger-cosmos-go v0.12.1 h1:sMBxza5p/rNK/06nBSNmsI/WDqI0pVJFVNihy1Y984w=
 github.com/cosmos/ledger-cosmos-go v0.12.1/go.mod h1:dhO6kj+Y+AHIOgAe4L9HL/6NDdyyth4q238I9yFpD2g=
@@ -1369,8 +1369,8 @@ github.com/umee-network/cosmos-sdk v0.46.7-umee h1:6/JO17fjm1kxiFVjfblbNIRbilZcH
 github.com/umee-network/cosmos-sdk v0.46.7-umee/go.mod h1:fqKqz39U5IlEFb4nbQ72951myztsDzFKKDtffYJ63nk=
 github.com/umee-network/umee/price-feeder/v2 v2.0.2 h1:pSCH5NAQVnTy1T+DBX2zXr9TtG8mP7VDHoygAvqMNK4=
 github.com/umee-network/umee/price-feeder/v2 v2.0.2/go.mod h1:cpN8tgH0aby8FaEAVH5UgFjhKtgLBogHFTH8oXgIjkQ=
-github.com/umee-network/umee/v3 v3.3.0-rc1 h1:Wm1x42b3N0iY8THCNOyrA78CvImnW8CW7hyfLbcipvg=
-github.com/umee-network/umee/v3 v3.3.0-rc1/go.mod h1:AMWNhC28k/OPvTLf8IWTCS0eSJJ4A72AWFwt8UB2eaQ=
+github.com/umee-network/umee/v3 v3.3.0-rc3 h1:t89bqlCV9RHVp7J9IrjFQB4WJvxuZ4/gjyeBwygA1FM=
+github.com/umee-network/umee/v3 v3.3.0-rc3/go.mod h1:Kku5Eg5ux34RSLzGW7ZUuvQ0rAdLFztFStoBmWoBmX4=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.22.1 h1:+mkCCcOFKPnCmVYVcURKps1Xe+3zP90gSYGNfRkjoIY=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=

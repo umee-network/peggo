@@ -25,7 +25,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/tendermint/tendermint v0.34.24
 	github.com/umee-network/umee/price-feeder/v2 v2.0.2
-	github.com/umee-network/umee/v3 v3.3.0-rc1
+	github.com/umee-network/umee/v3 v3.3.0-rc3
 	golang.org/x/sync v0.1.0
 	golang.org/x/term v0.3.0
 	google.golang.org/grpc v1.51.0
@@ -92,7 +92,7 @@ require (
 	github.com/cosmos/gogoproto v1.4.2 // indirect
 	github.com/cosmos/gorocksdb v1.2.0 // indirect
 	github.com/cosmos/iavl v0.19.4 // indirect
-	github.com/cosmos/ibc-go/v5 v5.1.0 // indirect
+	github.com/cosmos/ibc-go/v5 v5.2.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.12.1 // indirect
 	github.com/creachadair/taskgroup v0.3.2 // indirect
 	github.com/curioswitch/go-reassign v0.2.0 // indirect
