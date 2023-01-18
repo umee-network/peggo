@@ -8,6 +8,7 @@ RUN make install &&  \
 
 # prepare final image
 FROM ubuntu:rolling
+RUN apt-get update -y && apt-get install ca-certificates -y
 COPY --from=builder /go/bin/peggo /usr/local/bin/
 COPY --from=builder /src/peggo/libwasmvm.x86_64.so /lib/
 CMD ["peggo"]
