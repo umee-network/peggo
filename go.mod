@@ -13,7 +13,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.50.1
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/knadh/koanf v1.4.4
+	github.com/knadh/koanf v1.4.5
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/osmosis-labs/bech32-ibc v0.3.1
 	github.com/pkg/errors v0.9.1
