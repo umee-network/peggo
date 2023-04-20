@@ -68,12 +68,15 @@ $ peggo orchestrator {gravityAddress} \
   --cosmos-keyring=... \
   --cosmos-keyring-dir=... \
   --cosmos-from=...
+  --oracle-providers="osmosis,huobi,okx,coinbase"
 ```
+
+Oracle providers should contain at least 3 price sources for ETH and UMEE tokens.
 
 #### Run the orchestrartor and pipe the logs to GCP
 
 - You need to set the [auth client on gcp](https://cloud.google.com/docs/authentication/application-default-credentials)
-ex.:
+  ex.:
   - Downlaod your service account on GCP and set this env variable `GOOGLE_APPLICATION_CREDENTIALS`
 
 ```shell
@@ -164,13 +167,13 @@ coin. This enables transfers from Umee to Ethereum.
 
 #### Umee
 
- **Validator sets**: Umee informs the Gravity Bridge contract who are the current
- validators and their power. This results in an execution of the `updateValset`
- function.
+**Validator sets**: Umee informs the Gravity Bridge contract who are the current
+validators and their power. This results in an execution of the `updateValset`
+function.
 
- **Request batch**: Peggo will check for new transactions in the Outgoing TX Pool
- and if the transactions' fees are greater than the set minimum batch fee, it
- will send a message to Umee requesting a new batch.
+**Request batch**: Peggo will check for new transactions in the Outgoing TX Pool
+and if the transactions' fees are greater than the set minimum batch fee, it
+will send a message to Umee requesting a new batch.
 
- **Batches**: Peggo queries Umee for any batches ready to be relayed and relays
- them over to Ethereum using the `submitBatch` function on the Gravity Bridge contract.
+**Batches**: Peggo queries Umee for any batches ready to be relayed and relays
+them over to Ethereum using the `submitBatch` function on the Gravity Bridge contract.
